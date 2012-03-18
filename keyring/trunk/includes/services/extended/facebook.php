@@ -28,6 +28,7 @@ class Keyring_Service_Facebook extends Keyring_Service {
 	function request_token() {
 		// Redirect to FB to handle logging in and authorizing
 		wp_redirect( 'https://www.facebook.com/dialog/oauth?client_id=' . $this->app_id . '&redirect_uri=' . urlencode( $this->redirect_uri ) . '&scope=' . implode( ',', apply_filters( 'keyring_facebook_scope', array( 'offline_access', 'publish_stream' ) ) ) );
+		exit;
 	}
 	
 	function get_display( $token ) {
