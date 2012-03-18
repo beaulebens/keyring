@@ -1,16 +1,12 @@
 <?php
-/*
-Plugin Name: Keyring -- Example Service
-Description: Example service for Keyring to demonstrate how they work and how they should handle setting up an authorized connection to a remote service
-Version: 1.0
-Author: Beau Lebens
-Author URI: http://dentedreality.com.au
-*/
+/**
+ * This Service is provided as an example only. It doesn't do anything useful :)
+ */
 
 // Always extend Keyring_Service, or something else which extends it (e.g. Keyring_Service_OAuth1)
 class Keyring_Service_Example extends Keyring_Service {
 	const NAME = 'example';
-	const LABEL = 'Service Example';
+	const LABEL = 'Example Service';
 	
 	function __construct() {
 		// If you need a custom __construct(), make sure to call the parent explicitly like this

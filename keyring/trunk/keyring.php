@@ -148,10 +148,11 @@ class Keyring {
 		}
 		
 		// Output any errors if we have them, then stop, and link back to home.
-		if ( $this->has_errors() ) {
-			$this->admin_page_header( 'error' );
+		$keyring = Keyring::init();
+		if ( $keyring->has_errors() ) {
+			$keyring->admin_page_header( 'error' );
 			echo '<div id="keyring-admin-errors"><ul>';
-			foreach ( $this->errors as $error ) {
+			foreach ( $keyring->errors as $error ) {
 				echo "<li>$error</li>";
 			}
 			echo '</ul></div>';
@@ -160,9 +161,9 @@ class Keyring {
 		}
 		
 		// Output any messages as part of the UI (don't abort).
-		if ( $this->has_messages() ) {
+		if ( $keyring->has_messages() ) {
 			echo '<div id="keyring-admin-messages"><ul>';
-			foreach ( $this->messages as $message ) {
+			foreach ( $keyring->messages as $message ) {
 				echo "<li>$message</li>";
 			}
 			echo '</ul></div>';
