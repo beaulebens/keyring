@@ -1,5 +1,4 @@
 <?php
-define( 'KEYRING__DEBUG_MODE', true );
 /*
 Plugin Name: Keyring
 Plugin URI: http://dentedreality.com.au/projects/wp-keyring/
