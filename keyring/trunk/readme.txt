@@ -27,7 +27,6 @@ And specific extensions for connecting to:
 You can very easily write your own Service definitions and then use all the power of Keyring to hook into that authentication flow (tutorial/code samples coming soon).
 
 == Installation ==
-
 1. Install Keyring either via the WordPress.org plugin directory, or by uploading the files to your server
 2. Activate Keyring in Plugins > Installed Plugins
 3. Go to Tools > Keyring to start setting up Services
@@ -36,6 +35,7 @@ You can very easily write your own Service definitions and then use all the powe
 
 = How do I configure Services? =
 Most services within Keyring require some sort of API key/secret before you can connect to them.
+
 1. Go to Tools > Keyring > Add New
 2. Click 'Manage' next to one of the services
 3. Enter your API details (you will need to get those from the specific service)
