@@ -6,27 +6,16 @@ Description: Keyring helps you manage your keys. It provides a generic, very hoo
 Version: 1.0
 Author: Beau Lebens
 Author URI: http://dentedreality.com.au
-
-How this works.
-- At 'keyring_load_services', register a remote service (see keyring-service-example.php for a demo)
-- That service will be listed as available under your Keyring (Tools > Keyring > Services)
-- Click the service in that list to make a new connection
-- Your Keyring_Service needs to handle the authorization process by hooking into:
-	keyring_$name_request, and
-	keyring_$name_verify
-- Store verified tokens using a storage engine which implements Keyring_Store, as defined in KEYRING__TOKEN_STORE
-- Other plugins should use Keyring::get_all_tokens( $name ) to request tokens matching a service name, handling multiple tokens as they see fit
-- Verified tokens will be listed under Tools > Keyring > Tokens
-
 */
+
+// Define this in your wp-config (and set to true) to enable debugging
+defined( 'KEYRING__DEBUG_MODE' ) or define( 'KEYRING__DEBUG_MODE', false );
 
 // The name of a class which extends Keyring_Store to handle storage/manipulation of tokens.
 // Optionally define this in your wp-config.php or some other global config file.
 defined( 'KEYRING__TOKEN_STORE' ) or define( 'KEYRING__TOKEN_STORE', 'Keyring_SingleStore' );
 
-// Define this in your wp-config (and set to true) to enable debugging
-defined( 'KEYRING__DEBUG_MODE' ) or define( 'KEYRING__DEBUG_MODE', false );
-
+// Debug/messaging levels. Don't mess with these
 define( 'KEYRING__DEBUG_NOTICE', 1 );
 define( 'KEYRING__DEBUG_WARN',   2 );
 define( 'KEYRING__DEBUG_ERROR',  3 );
@@ -67,7 +56,7 @@ class Keyring {
 		require_once dirname( __FILE__ ) . '/store.php';
 		do_action( 'keyring_load_token_stores' );
 		if ( !defined( 'KEYRING__TOKEN_STORE' ) || !class_exists( KEYRING__TOKEN_STORE ) || !in_array( 'Keyring_Store', class_parents( KEYRING__TOKEN_STORE ) ) )
-			wp_die( sprintf( __( 'Invalid KEYRING__TOKEN_STORE specified. Please make sure KEYRING__TOKEN_STORE is set to a valid classname for handling token storage in %s', 'keyring' ), __FILE__ ) ); // @todo
+			wp_die( sprintf( __( 'Invalid KEYRING__TOKEN_STORE specified. Please make sure KEYRING__TOKEN_STORE is set to a valid classname for handling token storage in %s', 'keyring' ), __FILE__ ) );
 		
 		// Load base token and service definitions + core services
 		require_once dirname( __FILE__ ) . '/token.php';
@@ -166,7 +155,7 @@ class Keyring {
 				echo "<li>$error</li>";
 			}
 			echo '</ul></div>';
-			echo '<p class="submit"><a href="' . Keyring_Util::admin_url( $_REQUEST['service'] ) . '" class="button-primary">' . __( 'Start Again', 'keyring' ) . '</a></a>';
+			echo '<p class="submit"><a href="' . Keyring_Util::admin_url( $_REQUEST['service'] ) . '" class="button-primary">' . __( 'Start Again', 'keyring' ) . '</a></p>';
 			return;
 		}
 		
@@ -188,7 +177,7 @@ class Keyring {
 		// Handle delete request. Will default back to "tokens" later
 		if ( isset( $_REQUEST['action'] ) && 'delete' == $_REQUEST['action'] ) {
 			$this->get_token_store()->delete( $_REQUEST['service'], (int) $_REQUEST['token'] );
-			$this->message( __( 'That token has been deleted.' ) );
+			$this->message( __( 'That token has been deleted.', 'keyring' ) );
 		}
 		
 		// Set up our defaults
@@ -215,24 +204,24 @@ class Keyring {
 			if ( count( $tokens ) ) {
 				echo '<ul>';
 				foreach ( $tokens as $token ) {
-					echo '<li><strong>' . esc_html( $token->get_service()->get_label() ) . '</strong> [<a href="' . Keyring_Util::admin_url( false, array( 'action' => 'delete', 'service' => $token->get_service()->get_name(), 'token' => $token->get_uniq_id() ) ) . '" title="Delete">&times;</a>]<br />' . $token . '<br />' . print_r( $token->get_meta(), true ) . '</li>';
+					echo '<li><strong>' . esc_html( $token->get_service()->get_label() ) . '</strong> [<a href="' . Keyring_Util::admin_url( false, array( 'action' => 'delete', 'service' => $token->get_service()->get_name(), 'token' => $token->get_uniq_id() ) ) . '" title="' . __( 'Delete', 'keyring' ) . '">&times;</a>]<br />' . $token . '<br />' . print_r( $token->get_meta(), true ) . '</li>';
 				}
 				echo '</ul>';
 			} else {
-				echo '<p>' . sprintf( __( 'You haven\'t created any secure connections yet. <a href="%s">Create a connection</a>.' ), esc_url( Keyring_Util::admin_url( false, array( 'action' => 'services' ) ) ) ) . '</p>';
+				echo '<p>' . sprintf( __( 'You haven\'t created any secure connections yet. <a href="%s">Create a connection</a>.', 'keyring' ), esc_url( Keyring_Util::admin_url( false, array( 'action' => 'services' ) ) ) ) . '</p>';
 			}
 			$this->admin_page_footer();
 			break;
 		case 'services' :
 			$this->admin_page_header( 'services' );
-			echo '<p>' . __( 'Click a service to create a new authorized connection:' ) . '</p>';
+			echo '<p>' . __( 'Click a service to create a new authorized connection:', 'keyring' ) . '</p>';
 			$services = Keyring::get_registered_services();
 			if ( count( $services ) ) {
 				echo '<ul>';
 				foreach ( $services as $service ) {
 					echo '<li><a href="' . esc_url( Keyring_Util::admin_url( $service->get_name(), array( 'action' => 'request' ) ) ) . '">' . esc_html( $service->get_label() ) . '</a>';
 					if ( has_action( 'keyring_' . $service->get_name() . '_manage_ui' ) )
-						echo ' (<a href="' . esc_url( Keyring_Util::admin_url( $service->get_name(), array( 'action' => 'manage' ) ) ) . '">Manage</a>)';
+						echo ' (<a href="' . esc_url( Keyring_Util::admin_url( $service->get_name(), array( 'action' => 'manage' ) ) ) . '">' . __( 'Manage', 'keyring' ) . '</a>)';
 					echo '</li>';
 				}
 				echo '</ul>';
@@ -318,7 +307,7 @@ class Keyring_Util {
 			echo "<div class='keyring-warning'>Keyring Warning: $str</div>";
 			break;
 		case KEYRING__DEBUG_ERROR :
-			wp_die( $str );
+			wp_die( '<h1>Keyring Error:</h1>' . '<p>' . $str . '</p>' );
 			exit;
 		}
 		
@@ -350,7 +339,7 @@ class Keyring_Util {
 	static function token_select_box( $tokens, $name, $create = false ) {
 		?><select name="<?php echo esc_attr( $name ); ?>" id="<?php echo esc_attr( $name ); ?>">
 		<?php if ( $create ) : ?>
-			<option value="new"><?php _e( 'Create a new connection...' ); ?></option>
+			<option value="new"><?php _e( 'Create a new connection...', 'keyring' ); ?></option>
 		<?php endif; ?>
 		<?php foreach ( (array) $tokens as $token ) : ?>
 			<option value="<?php echo $token->get_uniq_id(); ?>"><?php echo $token->get_display(); ?></option>

@@ -59,6 +59,7 @@ class Keyring_Service_Facebook extends Keyring_Service {
 					'link' => $data->link,
 				) );
 				wp_redirect( Keyring_Util::admin_url() );
+				exit;
 			} else {
 				Keyring::error( __( 'Could not verify your Facebook profile information.' ) );
 				return;

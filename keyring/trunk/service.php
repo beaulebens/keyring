@@ -82,7 +82,7 @@ abstract class Keyring_Service {
 		screen_icon( 'ms-admin' );
 		echo '<h2>' . __( 'Keyring Service Management', 'keyring' ) . '</h2>';
 		echo '<p><a href="' . Keyring_Util::admin_url( false, array( 'action' => 'services' ) ) . '">' . __( '&larr; Back', 'keyring' ) . '</a></p>';
-		echo '<h3>' . sprintf( __( '%s API Credentials' ), esc_html( $this->get_label() ) ) . '</h3>';
+		echo '<h3>' . sprintf( __( '%s API Credentials', 'keyring' ), esc_html( $this->get_label() ) ) . '</h3>';
 		
 		// Handle actually saving credentials
 		if ( isset( $_POST['api_key'] ) && isset( $_POST['api_secret'] ) ) {
