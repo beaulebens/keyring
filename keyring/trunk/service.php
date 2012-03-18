@@ -34,14 +34,18 @@ abstract class Keyring_Service {
 	}
 	
 	static function &init( $details = array() ) {
+		static $instance = false;
+		
 		$class = get_called_class();
 		if ( 'Keyring_Service' == $class || is_subclass_of( $class, 'Keyring_Service' ) ) {
-			if ( !in_array( $class::NAME, Keyring::get_registered_services() ) ) {
-				$instance = new $class( $details );
-				Keyring::register_service( $instance );
-			} else {
-				$services = Keyring::get_registered_services();
-				$instance = $services[ $class::NAME ];
+			if ( !$instance ) {
+				if ( !in_array( $class::NAME, Keyring::get_registered_services() ) ) {
+					$instance = new $class( $details );
+					Keyring::register_service( $instance );
+				} else {
+					$services = Keyring::get_registered_services();
+					$instance = $services[ $class::NAME ];
+				}
 			}
 			return $instance;
 		}
@@ -87,6 +91,7 @@ abstract class Keyring_Service {
 			echo '<div class="updated"><p>' . __( 'Credentials saved.', 'keyring' ) . '</p></div>';
 		}
 		
+		$api_key = $api_secret = '';
 		if ( $creds = $this->get_credentials() ) {
 			$api_key = $creds['key'];
 			$api_secret = $creds['secret'];
