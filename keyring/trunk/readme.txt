@@ -1,4 +1,5 @@
 === Keyring ===
+
 Contributors: beaulebens
 Tags: authentication, security, oauth, http basic, key, token, authorization, twitter, facebook, delicious, foursquare, flickr
 Requires at least: 3.3
@@ -27,6 +28,7 @@ And specific extensions for connecting to:
 You can very easily write your own Service definitions and then use all the power of Keyring to hook into that authentication flow (tutorial/code samples coming soon).
 
 == Installation ==
+
 1. Install Keyring either via the WordPress.org plugin directory, or by uploading the files to your server
 2. Activate Keyring in Plugins > Installed Plugins
 3. Go to Tools > Keyring to start setting up Services
@@ -34,6 +36,7 @@ You can very easily write your own Service definitions and then use all the powe
 == Frequently Asked Questions ==
 
 = How do I configure Services? =
+
 Most services within Keyring require some sort of API key/secret before you can connect to them.
 
 1. Go to Tools > Keyring > Add New
@@ -43,12 +46,14 @@ Most services within Keyring require some sort of API key/secret before you can 
 5. Now you should be able to create a new connection to that service
 
 = How do I connect to 'x' service? =
+
 1. Go to Tools > Keyring > Add New
 2. Click the name of the service
 3. Follow through the authentication prompts to connect
 4. You should now be connected, and your connection details should be listed on the Keyring admin page (which you will be redirected to once authentication is complete)
 
 = Now what? =
+
 Keyring just provides a framework for handling connections to external services. You need to download another plugin which makes use of Keyring to do anything useful (e.g. an importer or content-syncing plugin).
 
 == Changelog ==
