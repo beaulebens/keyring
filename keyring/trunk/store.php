@@ -70,7 +70,7 @@ class Keyring_SingleStore extends Keyring_Store {
 		
 		if ( !$instance ) {
 			register_post_type( 'keyring_token', array(
-				'label' => 'Keyring Token',
+				'label' => __( 'Keyring Token', 'keyring' ),
 				'description' => __( 'Token or authentication details stored by Keyring', 'keyring' ),
 				'public' => false,
 			) );
@@ -129,7 +129,7 @@ class Keyring_SingleStore extends Keyring_Store {
 			);
 		} else {
 			$posts = get_posts( array(
-				'numberposts' => 999999,
+				'numberposts' => 999999, // @todo is there a better way to do this?
 				'post_type' => 'keyring_token',
 				'meta_key' => 'service',
 				'meta_value' => $service,
@@ -161,7 +161,7 @@ class Keyring_SingleStore extends Keyring_Store {
 	
 	function get_all( $args = array() ) {
 		$posts = get_posts( array(
-			'numberposts' => 999999,
+			'numberposts' => 999999, // @todo is there a better way to do this?
 			'post_type' => 'keyring_token',
 			'post_author' => get_current_user_id(),
 		) );
@@ -193,4 +193,3 @@ class Keyring_SingleStore extends Keyring_Store {
 		return count( $this->get_tokens( $service, false ) );
 	}
 }
-
