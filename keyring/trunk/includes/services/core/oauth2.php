@@ -41,6 +41,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			if ( $token = json_decode( $token ) ) {
 				$this->store_token( $token->access_token, array() );
 				wp_redirect( Keyring_Util::admin_url() );
+				exit;
 			}
 		}
 		Keyring::error(
