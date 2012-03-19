@@ -10,6 +10,8 @@ An authentication framework that handles authorization with external web service
 
 == Description ==
 
+**NOTE: This is "pre-release" software! Don't use it on production/as the foundation for anything serious yet. APIs etc are likely to change still.**
+
 Keyring provides a very hookable, completely customizable framework for connecting your WordPress to an external service. It takes care of all the heavy lifting when making authenticated requests, so all you need to do is implement cool features and not worry about these tricky bits.
 
 Out of the box, Keyring currently comes with base Service definitions for webservices which use:
