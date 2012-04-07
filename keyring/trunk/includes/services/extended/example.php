@@ -21,6 +21,10 @@ class Keyring_Service_Example extends Keyring_Service {
 		
 		// Enable "basic" UI for entering key/secret, which a lot of services require
 		// add_action( 'keyring_example_manage_ui', array( $this, 'basic_ui' ) );
+		
+		// Optionally make this a service that we can communicate with *without*
+		// requiring any sort of connection
+		$this->requires_token( false );
 	}
 	
 	/**
@@ -77,7 +81,7 @@ class Keyring_Service_Example extends Keyring_Service {
 	 * @param array $params additional parameters/headers for the request. Passed to WP_Http
 	 * @return Response body as a string, or a Keyring_Error with the full WP_Http response object as the "message"
 	 */
-	function request( $token, $url, $params = array() ) {
+	function request( $url, $params = array() ) {
 		// empty
 	}
 	

@@ -21,15 +21,16 @@ define( 'KEYRING__DEBUG_WARN',   2 );
 define( 'KEYRING__DEBUG_ERROR',  3 );
 
 // Indicates Keyring is installed/active so that other plugins can detect it
-define( 'KEYRING__AVAILABLE', true );
+define( 'KEYRING__VERSION', 1.1 );
 
 /**
  * Core Keyring class that handles UI and the general flow of requesting access tokens etc
  * to manage access to remote services.
+ * 
+ * @package Keyring
  */
 class Keyring {
 	var $registered_services = array();
-	var $custom_ui = array();
 	var $store     = false;
 	var $errors    = array();
 	var $messages  = array();
@@ -56,14 +57,23 @@ class Keyring {
 		require_once dirname( __FILE__ ) . '/store.php';
 		do_action( 'keyring_load_token_stores' );
 		if ( !defined( 'KEYRING__TOKEN_STORE' ) || !class_exists( KEYRING__TOKEN_STORE ) || !in_array( 'Keyring_Store', class_parents( KEYRING__TOKEN_STORE ) ) )
-			wp_die( sprintf( __( 'Invalid KEYRING__TOKEN_STORE specified. Please make sure KEYRING__TOKEN_STORE is set to a valid classname for handling token storage in %s', 'keyring' ), __FILE__ ) );
+			wp_die( sprintf( __( 'Invalid <code>KEYRING__TOKEN_STORE</code> specified. Please make sure <code>KEYRING__TOKEN_STORE</code> is set to a valid classname for handling token storage in <code>%s</code> (or <code>wp-config.php</code>)', 'keyring' ), __FILE__ ) );
 		
 		// Load base token and service definitions + core services
 		require_once dirname( __FILE__ ) . '/token.php';
 		require_once dirname( __FILE__ ) . '/service.php';
+
+		// Initiate Keyring
+		add_action( 'init', array( 'Keyring', 'init' ) );
 		
-		// Once plugins are all loaded, we can load Keyring Services and set up our handlers
+		// Load external Services (plugins etc should hook to this to define new ones/extensions)
 		add_action( 'init', array( 'Keyring', 'load_services' ) );
+		
+		/**
+		 * And trigger request handlers, which plugins and extended Services use to handle UI,
+		 * redirects, errors etc.
+		 * @see ::request_handlers()
+		 */
 		add_action( 'init', array( 'Keyring', 'request_handlers' ), 100 );
 	}
 		
@@ -87,19 +97,18 @@ class Keyring {
 		</style><?php
 	}
 	
+	/**
+	 * Core request handler which is the crux of everything. An action is called
+	 * here for almost everything Keyring does, so you can use it to intercept
+	 * almost everything. Based entirely on $_REQUEST[page|action|service]
+	 */
 	function request_handlers() {
 		if (
 				( isset( $_REQUEST['page'] ) && 'keyring' == $_REQUEST['page'] )
 			&&
-				isset( $_REQUEST['action'] )
+				!empty( $_REQUEST['action'] )
 			&&
-				(
-					'request' == $_REQUEST['action'] // first part of oauth etc
-				||
-					'verify' == $_REQUEST['action'] // verify token/auths by making a secure connection usually
-				||
-					'created' == $_REQUEST['action'] // new connection was created, id available in $_REQUEST['id']
-				)
+				in_array( $_REQUEST['action'], apply_filters( 'keyring_allowed_actions', array( 'request', 'verify', 'created', 'delete' ) ) )
 			&&
 				!empty( $_REQUEST['service'] )
 			&&
@@ -109,23 +118,8 @@ class Keyring {
 		}
 	}
 	
-	static function is_service( $service ) {
-		if ( is_object( $service ) && is_a( $service, 'Keyring_Service' ) )
-			return true;
-		
-		return false;
-	}
-	
 	function admin_menu() {
 		$hook = add_management_page( 'Keyring', 'Keyring', 'read', 'keyring', array( $this, 'admin_page' ), '' );
-	}
-	
-	function has_errors() {
-		return count( $this->errors );
-	}
-	
-	function has_messages() {
-		return count( $this->messages );
 	}
 	
 	function admin_page_header( $active = false ) {
@@ -176,6 +170,7 @@ class Keyring {
 	
 	function admin_page() {
 		// Handle delete request. Will default back to "tokens" later
+		// TODO nonce check before delete
 		if ( isset( $_REQUEST['action'] ) && 'delete' == $_REQUEST['action'] ) {
 			$this->get_token_store()->delete( $_REQUEST['service'], (int) $_REQUEST['token'] );
 			$this->message( __( 'That token has been deleted.', 'keyring' ) );
@@ -192,7 +187,7 @@ class Keyring {
 		
 		// Custom UI optionally hooked in to handle things in this case. Trigger that action
 		// and assume it handles everything, so bail out after that.
-		if ( $this->has_custom_ui( $service, $action ) ) {
+		if ( Keyring_Util::has_custom_ui( $service, $action ) ) {
 			do_action( "keyring_{$service}_{$action}_ui" );
 			return;
 		}
@@ -201,11 +196,11 @@ class Keyring {
 		switch ( $action ) {
 		case 'tokens' :
 			$this->admin_page_header( 'tokens' );
-			$tokens = Keyring::get_all_tokens();
+			$tokens = $this->store->get_all_tokens();
 			if ( count( $tokens ) ) {
 				echo '<ul>';
 				foreach ( $tokens as $token ) {
-					echo '<li><strong>' . esc_html( $token->get_service()->get_label() ) . '</strong> [<a href="' . Keyring_Util::admin_url( false, array( 'action' => 'delete', 'service' => $token->get_service()->get_name(), 'token' => $token->get_uniq_id() ) ) . '" title="' . __( 'Delete', 'keyring' ) . '">&times;</a>]<br />' . $token . '<br />' . print_r( $token->get_meta(), true ) . '</li>';
+					echo '<li><strong>' . esc_html( $token->get_display() ) . '</strong> (' . esc_html( $token->get_service()->get_label() ) . ') [<a href="' . Keyring_Util::admin_url( false, array( 'action' => 'delete', 'service' => $token->get_service()->get_name(), 'token' => $token->get_uniq_id() ) ) . '" title="' . __( 'Delete', 'keyring' ) . '">&times;</a>]<br /><pre>' . print_r( $token->get_meta(), true ) . '</pre></li>';
 				}
 				echo '</ul>';
 			} else {
@@ -232,22 +227,16 @@ class Keyring {
 		}
 	}
 	
-	static function has_custom_ui( $service, $action ) {
-		return has_action( "keyring_{$service}_{$action}_ui" );
-	}
-	
 	static function register_service( $service ) {
-		$keyring = Keyring::init();
-		if ( $keyring->is_service( $service ) ) {
-			$keyring->registered_services[ $service->get_name() ] = $service;
-		} else {
-			return false;
+		if ( Keyring_Util::is_service( $service ) ) {
+			Keyring::init()->registered_services[ $service->get_name() ] = $service;
+			return true;
 		}
+		return false;
 	}
 	
 	static function get_registered_services() {
-		$keyring = Keyring::init();
-		return $keyring->registered_services;
+		return Keyring::init()->registered_services;
 	}
 	
 	static function get_service_by_name( $name ) {
@@ -269,17 +258,6 @@ class Keyring {
 		return $keyring->store;
 	}
 	
-	static function get_all_tokens() {
-		$keyring = Keyring::init();
-		return $keyring->get_token_store()->get_all();
-	}
-
-	static function get_tokens( $service, $id = false ) {
-		$store = Keyring::get_token_store();
-		$token = $store->get_tokens( $service, $id );
-		return $id && isset( $token[0] ) ? $token[0] : $token;
-	}
-
 	static function message( $str ) {
 		$keyring = Keyring::init();
 		$keyring->messages[] = $str;
@@ -290,8 +268,12 @@ class Keyring {
 		$keyring->errors[] = $str;
 	}
 	
-	static function is_error( $err ) {
-		return is_a( $str, 'Keyring_Error' );
+	function has_errors() {
+		return count( $this->errors );
+	}
+	
+	function has_messages() {
+		return count( $this->messages );
 	}
 }
 
@@ -305,7 +287,7 @@ class Keyring_Util {
 		
 		switch ( $level ) {
 		case KEYRING__DEBUG_WARN :
-			echo "<div class='keyring-warning'>Keyring Warning: $str</div>";
+			echo "<div style='border:solid 1px #000; padding: 5px; background: #eee;'>Keyring Warning: $str</div>";
 			break;
 		case KEYRING__DEBUG_ERROR :
 			wp_die( '<h1>Keyring Error:</h1>' . '<p>' . $str . '</p>' );
@@ -313,6 +295,17 @@ class Keyring_Util {
 		}
 		
 		error_log( "Keyring: $str" );
+	}
+	
+	static function is_service( $service ) {
+		if ( is_object( $service ) && is_subclass_of( $service, 'Keyring_Service' ) ) // TODO need is_a() as well?
+			return true;
+		
+		return false;
+	}
+	
+	static function has_custom_ui( $service, $action ) {
+		return has_action( "keyring_{$service}_{$action}_ui" );
 	}
 	
 	/**
@@ -332,7 +325,7 @@ class Keyring_Util {
 	
 	static function connect_to( $service, $cookie ) {
 		// Redirect into Keyring's auth handler if a valid service is provided
-		setcookie( $cookie, true );
+		setcookie( $cookie, true, ( time() + apply_filters( 'keyring_connect_to_timeout', 300 ) ) ); // Stop watching after 5 minutes
 		wp_safe_redirect( Keyring_Util::admin_url( $service, array( 'action' => 'request' ) ) );
 		exit;
 	} 
@@ -343,18 +336,18 @@ class Keyring_Util {
 			<option value="new"><?php _e( 'Create a new connection...', 'keyring' ); ?></option>
 		<?php endif; ?>
 		<?php foreach ( (array) $tokens as $token ) : ?>
+			<?php print_r($token); ?>
 			<option value="<?php echo $token->get_uniq_id(); ?>"><?php echo $token->get_display(); ?></option>
 		<?php endforeach; ?>
 		</select><?php
 	}
 	
 	static function is_error( $obj ) {
-		return is_a( $obj, 'Keyring_Error' ) ? true : false;
+		return is_a( $obj, 'Keyring_Error' );
 	}
 }
 
 class Keyring_Error extends WP_Error { }
 
 add_action( 'plugins_loaded', array( 'Keyring', 'plugins_loaded' ) );
-add_action( 'init', array( 'Keyring', 'init' ) );
 

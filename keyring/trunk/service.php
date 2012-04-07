@@ -4,29 +4,60 @@
  * authentication. Each Service should have a series of methods for handling the creation
  * of an authentication token, verifying the token and for performing authenticated
  * requests.
+ * 
+ * @package Keyring
  */
 abstract class Keyring_Service {
-	const NAME = '';
-	const LABEL = '';
+	const NAME          = '';
+	const LABEL         = '';
+	var $token          = false;
+	var $requires_token = true;
+	var $store          = false;
 	
+	/**
+	 * Handle the first part of getting a Token for this Service. In some cases
+	 * this may involve UI, in others it might just be a redirect.
+	 */
 	abstract function request_token();
+	
+	/**
+	 * Second step/verification of a Token. This is where you can make a
+	 * test request, load meta, whatever you need to do. MUST include a call
+	 * to ::verified() at the end, if the Token is successfully verified.
+	 *
+	 * @return void
+	 * @author Beau Lebens
+	 */
 	abstract function verify_token();
-	abstract function request( $token, $url, $params );
+	
+	/**
+	 * Make an outbound request against this Service, using the current Token
+	 * if ->requires_token() return true.
+	 *
+	 * @param string $url The URL to make the request against
+	 * @param array $params Additional parameters for the request (a la WP_HTTP)
+	 * @return String containing the body of the response on success, or Keyring_Error on any non-200 response
+	 */
+	abstract function request( $url, $params );
+	
+	/**
+	 * Get a displayable string for the passed token, for this service
+	 *
+	 * @param obj $token Keyring_Token object
+	 * @return String for display, describing $token
+	 */
 	abstract function get_display( $token );
 	
-	function __construct( $details = array() ) {
-		$defaults = array(
-			'name'  => false,
-			'label' => false,
-		);
+	function __construct( $token = false ) {
+		$this->store = Keyring::get_token_store();
 		
-		$details = wp_parse_args( $defaults, $details );
-		
-		if ( $details['label'] && !$this->label )
-			$this->label = $details['label'];
-		
-		if ( $details['name'] && !$this->name )
-			$this->name = $details['name'];
+		// Token can be passed in as either a Keyring_Token object, or a unique id to load from the DB
+		if ( $token ) {
+			if ( is_subclass_of( $token, 'Keyring_Token' ) ) // TODO need is_a() as well?
+				$this->token = $token;
+			else if ( ctype_digit( $token ) )
+				$this->token = $this->store->get_token( $this->get_name(), $token );
+		}
 		
 		// Default methods for handling actions, should always be defined (thus abstract, see above)
 		add_action( 'keyring_' . $this->get_name() . '_request', array( $this, 'request_token' ) );
@@ -50,6 +81,23 @@ abstract class Keyring_Service {
 			return $instance;
 		}
 		return false;
+	}
+	
+	/**
+	 * Get/set whether this Service requires a token before making requests.
+	 *
+	 * @param boolean $does_it 
+	 * @return True if token is required, false if not. If called with no
+	 *         param, then just returns true/false. If called with a bool,
+	 *         then set requirement to true/false as specified.
+	 */
+	function requires_token( $does_it = null ) {
+		if ( null == $does_it )
+			return $this->requires_token;
+		
+		$requires = $this->requires_token;
+		$this->requires_token = $does_it;
+		return $requires;
 	}
 	
 	function get_name() {
@@ -97,6 +145,8 @@ abstract class Keyring_Service {
 			$api_secret = $creds['secret'];
 		}
 		
+		echo apply_filters( 'keyring_' . $this->get_name() . '_basic_ui_intro', '' );
+		
 		// Output basic form for collecting key/secret
 		echo '<form method="post" action="">';
 		echo '<input type="hidden" name="service" value="' . esc_attr( $this->get_name() ) . '" />';
@@ -141,7 +191,11 @@ abstract class Keyring_Service {
 	
 	function verified( $id ) {
 		$c = get_called_class();
-		$service = $c::NAME;
+		
+		// If something else needs to be done, do it
+		if ( has_action( 'keyring_' . $c::NAME . '_post_verification' ) )
+			do_action( 'keyring_' . $c::NAME . '_post_verification', $c::NAME, $id );
+		
 		// Back to Keyring admin, with ?service=SERVICE&created=UNIQUE_ID
 		$url = Keyring_Util::admin_url( $c::NAME, array( 'action' => 'created', 'id' => $id ) );
 		Keyring_Util::debug( $url );
@@ -156,25 +210,33 @@ abstract class Keyring_Service {
 	}
 	
 	function store_token( $token, $meta ) {
-		$store = Keyring::get_token_store();
-		$meta['classname'] = get_called_class();
-		return $store->insert( $this->get_name(), $token, $meta );
+		$meta['_classname'] = get_called_class();
+		$id = $this->store->insert( $this->get_name(), $token, $meta );
+		$this->token = $this->store->get_token( $this->get_name(), $id, $meta );
+		return $id;
+	}
+	
+	function set_token( $token ) {
+		if ( is_a( $token, 'Keyring_Token' ) )
+			$this->token = $token;
 	}
 	
 	function get_tokens( $id = false ) {
 		$c = get_called_class();
-		return Keyring::get_tokens( $c::NAME, $id );
+		return $this->store->get_tokens( $c::NAME );
 	}
 	
 	function token_select_box( $name, $create = false ) {
-		$tokens = $this->get_tokens( false );
+		$tokens = $this->get_tokens();
 		return Keyring_Util::token_select_box( $tokens, $name, $create );
 	}
 }
 
-// Load all packaged services in the ./services/ directory by including all PHP files, first in core, then in extended
+// Load all packaged services in the ./includes/services/ directory by including all PHP files, first in core, then in extended
+// Remove a Service (prevent it from loading at all) by filtering on 'keyring_services'
 $keyring_services = glob( dirname( __FILE__ ) . "/includes/services/core/*.php" );
 $keyring_services = array_merge( $keyring_services, glob( dirname( __FILE__ ) . "/includes/services/extended/*.php" ) );
+$keyring_services = apply_filters( 'keyring_services', $keyring_services );
 foreach ( $keyring_services as $service )
-	require_once $service;
+	require $service;
 unset( $keyring_services );

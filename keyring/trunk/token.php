@@ -1,18 +1,26 @@
 <?php
 
+/**
+ * Keyring connection tokens all look the same, although they may have varying
+ * amounts of information stuffed in their meta values. Store a meta value 
+ * called "_classname" which contains the name of a Keyring_Service class to
+ * use to "re-hydrate" the service this token is associated with.
+ *
+ * @package Keyring
+ */
 class Keyring_Token {
 	var $name      = false;
-	var $meta      = array();
 	var $token     = false;
-	var $service   = false;
+	var $meta      = array();
+	var $service   = false; // Will contain a Keyring_Service object
 	var $unique_id = false;
 	
 	function __construct( $service, $token, $meta = array(), $uniq = false ) {
-		$this->name      = $service; // Name of the service this token is for
+		$this->name      = strtolower( $service ); // Name of the service this token is for
 		$this->token     = $token;
 		$this->unique_id = $uniq;
 		foreach ( (array) $meta as $key => $val )
-			$this->meta[ $key ] = $val[0];
+			$this->meta[ $key ] = $val;
 		$this->get_service();
 	}
 	
@@ -35,8 +43,8 @@ class Keyring_Token {
 	function get_service() {
 		if ( !$this->service ) {
 			$meta = $this->get_meta();
-			if ( is_string( $meta['classname'] ) && class_exists( $meta['classname'] ) ) {
-				$this->service = $meta['classname']::init();
+			if ( !empty( $meta['_classname'] ) && is_string( $meta['_classname'] ) && class_exists( $meta['_classname'] ) ) {
+				$this->service = $meta['_classname']::init();
 			}
 		}
 		return $this->service;
@@ -50,10 +58,5 @@ class Keyring_Token {
 		if ( isset( $this->meta ) )
 			return $this->meta;
 		return array();
-	}
-	
-	function request( $url, $params = array() ) {
-		$this->get_service();
-		return $this->service->request( &$this, $url, $params );
 	}
 }
