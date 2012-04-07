@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * A simple Service definition for services that just use HTTP Basic for
+ * authentication. You will need to extend this and supply a verify endpoint
+ * which is where the user/pass will be tested against (for a 401 response).
+ *
+ * @package Keyring
+ */
 class Keyring_Service_HTTP_Basic extends Keyring_Service {
 	var $username      = null;
 	var $password      = null;
@@ -39,6 +46,8 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 			echo '</ul>';
 		}
 		
+		echo apply_filters( 'keyring_' . $this->get_name() . '_request_ui_intro', '' );
+		
 		// Output basic form for collecting user/pass
 		echo '<p>' . sprintf( __( 'Enter your username and password for accessing %s:', 'keyring' ), $this->get_label() ) . '</p>';
 		echo '<form method="post" action="">';
@@ -46,9 +55,9 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		echo '<input type="hidden" name="action" value="verify" />';
 		echo '<table class="form-table">';
 		echo '<tr><th scope="row">' . __( 'Username', 'keyring' ) . '</th>';
-		echo '<td><input type="text" name="username" value="' . esc_attr( $username ) . '" id="username" class="regular-text"></td></tr>';
+		echo '<td><input type="text" name="username" value="" id="username" class="regular-text"></td></tr>';
 		echo '<tr><th scope="row">' . __( 'Password', 'keyring' ) . '</th>';
-		echo '<td><input type="password" name="password" value="' . esc_attr( $password ) . '" id="password" class="regular-text"></td></tr>';
+		echo '<td><input type="password" name="password" value="" id="password" class="regular-text"></td></tr>';
 		echo '</table>';
 		echo '<p class="submitbox">';
 		echo '<input type="submit" name="submit" value="' . __( 'Verify Details', 'keyring' ) . '" id="submit" class="button-primary">';
@@ -99,8 +108,11 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		$this->verified( $id );
 	}
 	
-	function request( $token, $url, $params = array() ) {
-		$params['headers'] = array( 'Authorization' => 'Basic ' . $token );
+	function request( $url, $params = array() ) {
+		if ( $this->requires_token() && empty( $this->token ) )
+			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
+
+		$params['headers'] = array( 'Authorization' => 'Basic ' . $this->token );
 		if ( 'GET' == strtoupper( $params['method'] ) ) {
 			$res = wp_remote_get( $url, $params );
 		} else {

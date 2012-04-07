@@ -1,5 +1,15 @@
 <?php
 
+/**
+ * Spec OAuth2 implementation for services using OAuth for authentication.
+ * You will want to define an authorize and access_token endpoint. Keyring
+ * will walk the user through the OAuth dance. Once an access token is 
+ * obtained, it's considered verified. You may still want to do an additional
+ * request to get some details or verify something specific. To do that, hook
+ * something to 'keyring_SERVICE_post_verification' (see Keyring_Service::verified())
+ *
+ * @package Keyring
+ */
 class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 	function request_token() {
 		$url = $this->authorize_url;
@@ -50,11 +60,11 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		return false;
 	}
 	
-	function request( $token, $url, $params = array() ) {
-		if ( empty( $token ) )
+	function request( $url, $params = array() ) {
+		if ( $this->requires_token() && empty( $this->token ) )
 			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
 		
-		$params = array_merge( array( 'oauth_token' => (string) $token ), $params );
+		$params = array_merge( array( 'oauth_token' => (string) $this->token ), $params );
 		if ( empty( $params['oauth_token'] ) )
 			return false;
 		

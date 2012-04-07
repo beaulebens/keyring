@@ -23,6 +23,8 @@ class Keyring_Service_Facebook extends Keyring_Service {
 		}
 		
 		$this->redirect_uri = Keyring_Util::admin_url( self::NAME, array( 'action' => 'verify' ) );
+		
+		$this->requires_token( true );
 	}
 	
 	function request_token() {
@@ -32,6 +34,8 @@ class Keyring_Service_Facebook extends Keyring_Service {
 	}
 	
 	function get_display( $token ) {
+		$meta = $token->get_meta();
+		return $meta['name'];
 	}
 	
 	function verify_token() {
@@ -68,7 +72,7 @@ class Keyring_Service_Facebook extends Keyring_Service {
 		}
 	}
 	
-	function request( $token, $url, $params = array() ) {
+	function request( $url, $params = array() ) {
 		// @todo
 	}
 }

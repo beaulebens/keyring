@@ -59,8 +59,9 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 			$token = wp_remote_retrieve_body( $res );
 			Keyring_Util::debug( $token );
 			if ( $token = json_decode( $token ) ) {
-				$keyring_token = new Keyring_Token( $this->get_name(), $token->access_token, array() );
-				$res = $this->request( $keyring_token, $this->self_url );
+				$token = new Keyring_Token( $this->get_name(), $token->access_token, array() );
+				$this->set_token( $token );
+				$res = $this->request( $this->self_url );
 				if ( !Keyring_Util::is_error( $res ) ) {
 					if ( $res = json_decode( $res ) ) {
 						$meta = array(
@@ -68,7 +69,7 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 							'firstName' => $res->response->user->firstName,
 							'lastName' => $res->response->user->lastName,
 						);
-						$id = $this->store_token( $token->access_token, $meta );
+						$id = $this->store_token( $token, $meta );
 						$this->verified( $id );
 					}
 				} else {
