@@ -251,8 +251,7 @@ class Keyring {
 		$keyring = Keyring::init();
 		
 		if ( !$keyring->store ) {
-			$store = KEYRING__TOKEN_STORE;
-			$keyring->store = $store::init();
+			$keyring->store = call_user_func( array( KEYRING__TOKEN_STORE, 'init' ) );
 		}
 		
 		return $keyring->store;
