@@ -14,13 +14,8 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 	var $verify_method = null;
 	var $token         = null;
 	
-	function __construct( $details = array() ) {
+	function __construct( $token = false ) {
 		parent::__construct( $details );
-		
-		if ( !empty( $details['usernmae'] ) )
-			$this->username = $username;
-		if ( !empty( $details['password'] ) )
-			$this->password = $password;
 		
 		add_action( 'keyring_' . $this->get_name() . '_request_ui', array( $this, 'request_ui' ) );
 	}
@@ -79,12 +74,19 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 	function verify_token() {
 		$token = base64_encode( $_POST['username'] . ':' . $_POST['password'] );
 		$params = array( 'headers' => array( 'Authorization' => 'Basic ' . $token ) );
-		if ( 'GET' == $this->verify_method ) {
-			// GET Request
+		
+		switch ( strtoupper( $this->verify_method ) ) {
+		case 'GET':
 			$res = wp_remote_get( $this->verify_url, $params );
-		} else {
-			// POST Request
+			break;
+			
+		case 'POST':
 			$res = wp_remote_post( $this->verify_url, $params );
+			break;
+			
+		default;
+			wp_die( __( 'Unsupported method specified for verify_token.', 'keyring' ) );
+			exit;
 		}
 		
 		// We will get a 401 if they entered an incorrect user/pass combo
@@ -103,21 +105,45 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 			exit;
 		}
 		
+		if ( method_exists( $this, 'custom_verify_token' ) )
+			$this->custom_verify_token( $token );
+		
+		$meta = array( 'username' => $_POST['username'] );
+		if ( method_exists( $this, 'build_token_meta' ) )
+			$meta = $this->build_token_meta( $token );
+		
 		// If we didn't get a 401, then we'll assume it's OK
-		$id = $this->store_token( $token, array( 'username' => $_POST['username'] ) );
+		$id = $this->store_token( $token, $meta );
 		$this->verified( $id );
 	}
 	
 	function request( $url, $params = array() ) {
 		if ( $this->requires_token() && empty( $this->token ) )
 			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
-
-		$params['headers'] = array( 'Authorization' => 'Basic ' . $this->token );
-		if ( 'GET' == strtoupper( $params['method'] ) ) {
-			$res = wp_remote_get( $url, $params );
-		} else {
-			$res = wp_remote_post( $url, $params );
+		
+		if ( $this->requires_token() )
+			$params['headers'] = array( 'Authorization' => 'Basic ' . $this->token );
+		
+		$method = 'GET';
+		if ( isset( $params['method'] ) ) {
+			$method = strtoupper( $params['method'] );
+			unset( $params['method'] );
 		}
+		
+		switch ( strtoupper( $method ) ) {
+		case 'GET':
+			$res = wp_remote_get( $url, $params );
+			break;
+			
+		case 'POST':
+			$res = wp_remote_post( $url, $params );
+			break;
+			
+		default:
+			wp_die( __( 'Unsupported method specified for verify_token.', 'keyring' ) );
+			exit;
+		}
+		
 		if ( 200 == wp_remote_retrieve_response_code( $res ) ) {
 			return wp_remote_retrieve_body( $res );
 		} else {

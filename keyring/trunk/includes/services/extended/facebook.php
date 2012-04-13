@@ -73,7 +73,16 @@ class Keyring_Service_Facebook extends Keyring_Service {
 	}
 	
 	function request( $url, $params = array() ) {
-		// @todo
+		if ( $this->requires_token() && empty( $this->token ) )
+			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
+		
+		$url = strstr( $url, '?' ) ? $url . '&': $url . '?';
+		$res = wp_remote_get( $url . "access_token=" . $token['access_token'], array( 'sslverify' => false ) );
+		if ( 200 == wp_remote_retrieve_response_code( $res ) ) {
+			return json_decode( wp_remote_retrieve_body( $res ) );
+		} else {
+			return new Keyring_Error( 'keyring-request-error', $res );
+		}
 	}
 }
 

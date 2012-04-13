@@ -19,9 +19,9 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 		// Enable "basic" UI for entering key/secret
 		add_action( 'keyring_foursquare_manage_ui', array( $this, 'basic_ui' ) );
 		
-		$this->set_endpoint( 'authorize',    'https://foursquare.com/oauth2/authenticate' );
-		$this->set_endpoint( 'access_token', 'https://foursquare.com/oauth2/access_token' );
-		$this->set_endpoint( 'self',         'https://api.foursquare.com/v2/users/self'   );
+		$this->set_endpoint( 'authorize',    'https://foursquare.com/oauth2/authenticate', 'GET' );
+		$this->set_endpoint( 'access_token', 'https://foursquare.com/oauth2/access_token', 'GET' );
+		$this->set_endpoint( 'self',         'https://api.foursquare.com/v2/users/self',   'GET' );
 		
 		if ( $creds = $this->get_credentials() ) {
 			$this->key = $creds['key'];

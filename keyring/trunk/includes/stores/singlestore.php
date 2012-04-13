@@ -63,7 +63,7 @@ class Keyring_SingleStore extends Keyring_Store {
 	}
 	
 	function update( $service, $id, $token = false, $meta = false ) {
-		// @todo token singlestore update
+		// TODO token singlestore update
 	}
 	
 	function delete( $service, $id = false, $meta = false ) {

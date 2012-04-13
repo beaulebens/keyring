@@ -297,7 +297,7 @@ class Keyring_Util {
 	}
 	
 	static function is_service( $service ) {
-		if ( is_object( $service ) && is_subclass_of( $service, 'Keyring_Service' ) ) // TODO need is_a() as well?
+		if ( is_object( $service ) && is_subclass_of( $service, 'Keyring_Service' ) )
 			return true;
 		
 		return false;
