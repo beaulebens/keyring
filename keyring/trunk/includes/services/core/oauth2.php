@@ -64,9 +64,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		if ( $this->requires_token() && empty( $this->token ) )
 			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
 		
-		$params = array_merge( array( 'oauth_token' => (string) $this->token ), $params );
-		if ( empty( $params['oauth_token'] ) )
-			return false;
+		$params['oauth_token'] =  (string) $this->token;
 		
 		if ( stristr( $url, '?' ) )
 			$url .= '&';
@@ -75,7 +73,34 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		$url .= 'oauth_token=' . $params['oauth_token'];
 		unset( $params['oauth_token'] );
 		
-		$res = wp_remote_get( $url, $params );
+		$method = 'GET';
+		if ( isset( $params['method'] ) ) {
+			$method = strtoupper( $params['method'] );
+			unset( $params['method'] );
+		}
+		
+		$query = '';
+		$parsed = parse_url( $url );
+		if ( !empty( $parsed['query'] ) && 'POST' == $method ) {
+			$url = str_replace( $parsed['query'], '', $url );
+			$query = $parsed['query'];
+		}
+		
+		switch ( strtoupper( $method ) ) {
+		case 'GET':
+			$res = wp_remote_get( $url, $params );
+			break;
+			
+		case 'POST':
+			$params = array_merge( array( 'body' => $query, 'sslverify' => false ), $params );
+			$res = wp_remote_post( $url, $params );
+			break;
+			
+		default:
+			wp_die( __( 'Unsupported method specified for request_token.', 'keyring' ) );
+			exit;
+		}
+		
 		if ( 200 == wp_remote_retrieve_response_code( $res ) )
 			return wp_remote_retrieve_body( $res );
 		else

@@ -53,7 +53,7 @@ abstract class Keyring_Service {
 		
 		// Token can be passed in as either a Keyring_Token object, or a unique id to load from the DB
 		if ( $token ) {
-			if ( is_subclass_of( $token, 'Keyring_Token' ) ) // TODO need is_a() as well?
+			if ( is_a( $token, 'Keyring_Token' ) )
 				$this->token = $token;
 			else if ( ctype_digit( $token ) )
 				$this->token = $this->store->get_token( $this->get_name(), $token );
@@ -193,8 +193,8 @@ abstract class Keyring_Service {
 		$c = get_called_class();
 		
 		// If something else needs to be done, do it
-		if ( has_action( 'keyring_' . $c::NAME . '_post_verification' ) )
-			do_action( 'keyring_' . $c::NAME . '_post_verification', $c::NAME, $id );
+		do_action( 'keyring_' . $c::NAME . '_after_verification', $c::NAME, $id );
+		do_action( 'keyring_all_after_verification', $c::NAME, $id );
 		
 		// Back to Keyring admin, with ?service=SERVICE&created=UNIQUE_ID
 		$url = Keyring_Util::admin_url( $c::NAME, array( 'action' => 'created', 'id' => $id ) );
@@ -212,7 +212,7 @@ abstract class Keyring_Service {
 	function store_token( $token, $meta ) {
 		$meta['_classname'] = get_called_class();
 		$id = $this->store->insert( $this->get_name(), $token, $meta );
-		$this->token = $this->store->get_token( $this->get_name(), $id, $meta );
+		$this->set_token( $this->store->get_token( $this->get_name(), $id, $meta ) );
 		return $id;
 	}
 	
