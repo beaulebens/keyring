@@ -218,9 +218,11 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			$query = $parsed['query'];
 		}
 		
+		$token = $this->token->token ? $this->token->token : null;
+		
 		$req = OAuthRequest::from_consumer_and_token(
 			$this->consumer,
-			null,
+			$token,
 			$method,
 			$url,
 			$params
@@ -228,19 +230,19 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		$req->sign_request(
 			$this->signature_method,
 			$this->consumer,
-			null
+			$token
 		);
 		
 		Keyring_Util::debug( "OAuth1 Request URL: $req" );
 		switch ( $method ) {
 		case 'GET':
-			$res = wp_remote_get( $req, $params );
+			$res = wp_remote_get( (string) $req, $params );
 			break;
 			
 		case 'POST':
 			// TODO support POST (test post-body etc)
 			$params = array_merge( array( 'body' => $query, 'sslverify' => false ), $params );
-			$res = wp_remote_post( $req, $params );
+			$res = wp_remote_post( (string) $req, $params );
 			break;
 			
 		default:
