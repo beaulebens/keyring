@@ -1,18 +1,18 @@
 <?php
 
 /**
- * Facebook service definition for Keyring. Clean implementation of OAuth1
+ * Facebook service definition for Keyring. Clean implementation of OAuth2
  */
 
 class Keyring_Service_Facebook extends Keyring_Service {
 	const NAME  = 'facebook';
 	const LABEL = 'Facebook';
 
-	function __construct( $details = array() ) {
-		parent::__construct( $details );
+	function __construct() {
+		parent::__construct();
 		
 		// Enable "basic" UI for entering key/secret
-		add_action( 'keyring_facebook_manage_ui', array( $this, 'basic_ui' ) );
+		add_action( 'keyring_facebook_manage_ui', array( &$this, 'basic_ui' ) );
 		
 		if ( $creds = $this->get_credentials() ) {
 			$this->app_id = $creds['key'];
@@ -22,18 +22,25 @@ class Keyring_Service_Facebook extends Keyring_Service {
 			$this->secret = KEYRING__FACEBOOK_SECRET;
 		}
 		
-		$this->redirect_uri = Keyring_Util::admin_url( self::NAME, array( 'action' => 'verify' ) );
+		$kr_nonce = wp_create_nonce( 'keyring-verify' );
+		$nonce = wp_create_nonce( 'keyring-verify-facebook' );
+		$this->redirect_uri = Keyring_Util::admin_url( self::NAME, array( 'action' => 'verify', 'kr_nonce' => $kr_nonce, 'nonce' => $nonce, ) );
 		
 		$this->requires_token( true );
 	}
 	
 	function request_token() {
 		// Redirect to FB to handle logging in and authorizing
-		wp_redirect( 'https://www.facebook.com/dialog/oauth?client_id=' . $this->app_id . '&redirect_uri=' . urlencode( $this->redirect_uri ) . '&scope=' . implode( ',', apply_filters( 'keyring_facebook_scope', array( 'offline_access', 'publish_stream' ) ) ) );
+		$params = array(
+			'client_id' => $this->app_id,
+			'redirect_uri' => $this->redirect_uri,
+			'scope' => implode( ',', apply_filters( 'keyring_facebook_scope', array( 'offline_access', 'publish_stream' ) ) ),
+		);
+		wp_redirect( 'https://www.facebook.com/dialog/oauth?' . http_build_query( $params ) );
 		exit;
 	}
 	
-	function get_display( $token ) {
+	function get_display( Keyring_Token $token ) {
 		$meta = $token->get_meta();
 		return $meta['name'];
 	}
@@ -46,24 +53,31 @@ class Keyring_Service_Facebook extends Keyring_Service {
 		}
 		
 		// Use code to get an access token
-		$res = wp_remote_get( "https://graph.facebook.com/oauth/access_token?client_id={$this->app_id}&redirect_uri=" . urlencode( $this->redirect_uri ) . "&client_secret={$this->secret}&code=" . $_GET['code'], array(
-			'sslverify' => false,
-		) );
+		$params = array(
+			'client_id' => $this->app_id,
+			'redirect_uri' => $this->redirect_uri,
+			'client_secret' => $this->secret,
+			'code' => $_GET['code'],
+		);
+		$res = wp_remote_get( "https://graph.facebook.com/oauth/access_token?" . http_build_query( $params ), array( 'sslverify' => false ) );
 		if ( 200 == wp_remote_retrieve_response_code( $res ) ) {
 			$token = wp_remote_retrieve_body( $res );
 			parse_str( trim( $token ), $token );
 			
-			$res = wp_remote_get( "https://graph.facebook.com/me?access_token=" . $token['access_token'], array( 'sslverify' => false ) );
-			if ( 200 == wp_remote_retrieve_response_code( $res ) ) {
-				$res = wp_remote_retrieve_body( $res );
-				$data = json_decode( $res );
-				$this->store_token( $token['access_token'], array(
+			$this->set_token( new Keyring_Token( 'facebook', $token['access_token'] ) );
+			$res = $this->request( "https://graph.facebook.com/me" );
+			if ( !Keyring_Util::is_error( $res ) ) {
+				if ( empty( $res->username ) )
+					$res->username = $res->name; // not all fb users have a set username
+				
+				$id = $this->store_token( $token['access_token'], array(
 					'id' => $data->id,
 					'username' => $data->username,
 					'name' => $data->name,
 					'link' => $data->link,
 				) );
-				wp_redirect( Keyring_Util::admin_url() );
+				
+				$this->verified( $id );
 				exit;
 			} else {
 				Keyring::error( __( 'Could not verify your Facebook profile information.' ) );
@@ -72,12 +86,14 @@ class Keyring_Service_Facebook extends Keyring_Service {
 		}
 	}
 	
-	function request( $url, $params = array() ) {
-		if ( $this->requires_token() && empty( $this->token ) )
+	function request( $url, array $params = array() ) {
+		if ( empty( $this->token ) )
 			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
 		
-		$url = strstr( $url, '?' ) ? $url . '&': $url . '?';
-		$res = wp_remote_get( $url . "access_token=" . $token['access_token'], array( 'sslverify' => false ) );
+		// TODO prefer to send token in Authorization header when supported
+		$url = add_query_arg( array( 'access_token' => urlencode( (string) $this->token ) ), $url );
+		
+		$res = wp_remote_get( $url, array( 'sslverify' => false ) );
 		if ( 200 == wp_remote_retrieve_response_code( $res ) ) {
 			return json_decode( wp_remote_retrieve_body( $res ) );
 		} else {

@@ -8,11 +8,11 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 	const NAME  = 'flickr';
 	const LABEL = 'Flickr';
 
-	function __construct( $details = array() ) {
-		parent::__construct( $details );
+	function __construct() {
+		parent::__construct();
 		
 		// Enable "basic" UI for entering key/secret
-		add_action( 'keyring_flickr_manage_ui', array( $this, 'basic_ui' ) );
+		add_action( 'keyring_flickr_manage_ui', array( &$this, 'basic_ui' ) );
 		
 		$this->set_endpoint( 'request_token', 'http://www.flickr.com/services/oauth/request_token', 'GET' );
 		$this->set_endpoint( 'authorize',     'http://www.flickr.com/services/oauth/authorize',     'GET' );
@@ -32,7 +32,7 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 		$this->requires_token( true );
 	}
 
-	function get_display( $token ) {
+	function get_display( Keyring_Token $token ) {
 		$return = '';
 		$meta = $token->get_meta();
 		if ( !empty( $meta['full_name'] ) )

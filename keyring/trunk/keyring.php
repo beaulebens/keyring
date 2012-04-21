@@ -30,15 +30,14 @@ define( 'KEYRING__VERSION', 1.1 );
  * @package Keyring
  */
 class Keyring {
-	var $registered_services = array();
-	var $store     = false;
-	var $errors    = array();
-	var $messages  = array();
+	protected $registered_services = array();
+	protected $store     = false;
+	protected $errors    = array();
+	protected $messages  = array();
 	
 	function __construct() {
 		// Hook up WP
-		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
-		add_action( 'admin_head', array( $this, 'inline_css' ) );
+		add_action( 'admin_menu', array( &$this, 'admin_menu' ) );
 	}
 	
 	static function &init() {
@@ -74,7 +73,7 @@ class Keyring {
 		 * redirects, errors etc.
 		 * @see ::request_handlers()
 		 */
-		add_action( 'init', array( 'Keyring', 'request_handlers' ), 100 );
+		add_action( 'admin_init', array( 'Keyring', 'request_handlers' ), 100 );
 	}
 		
 	/**
@@ -86,9 +85,6 @@ class Keyring {
 	}
 	
 	function inline_css() {
-		if ( empty( $_REQUEST['page'] ) || 'keyring' != $_REQUEST['page'] )
-			return;
-		
 		?><style type="text/css">
 		.wrap ul li {
 			list-style-type: square;
@@ -108,25 +104,35 @@ class Keyring {
 			&&
 				!empty( $_REQUEST['action'] )
 			&&
-				in_array( $_REQUEST['action'], apply_filters( 'keyring_allowed_actions', array( 'request', 'verify', 'created', 'delete' ) ) )
+				in_array( $_REQUEST['action'], apply_filters( 'keyring_core_actions', array( 'request', 'verify', 'created', 'delete', 'manage' ) ) )
 			&&
 				!empty( $_REQUEST['service'] )
 			&&
 				in_array( $_REQUEST['service'], array_keys( Keyring::get_registered_services() ) )
 		) {
+			// Core nonce check required for everything. "keyring-ACTION" is the kr_nonce format
+			if ( !isset( $_REQUEST['kr_nonce'] ) || !wp_verify_nonce( $_REQUEST['kr_nonce'], 'keyring-' . $_REQUEST['action'] ) )
+				wp_die( __( 'Invalid/missing Keyring core nonce. All core actions require a valid nonce.', 'keyring' ) );
+			
 			do_action( "keyring_{$_REQUEST['service']}_{$_REQUEST['action']}", $_REQUEST );
 		}
 	}
 	
 	function admin_menu() {
-		$hook = add_management_page( 'Keyring', 'Keyring', 'read', 'keyring', array( $this, 'admin_page' ), '' );
+		$hook = add_management_page( 'Keyring', 'Keyring', 'read', 'keyring', array( &$this, 'admin_page' ), '' );
+		add_action( "load-$hook", array( &$this, 'admin_page_load' ) );
 	}
 	
-	function admin_page_header( $active = false ) {
+	function admin_page_load() {
+		add_action( 'admin_head', array( &$this, 'inline_css' ) );
+	}
+
+	
+	function admin_page_header( $screen = false ) {
 		// Output the actual heading + icon for the page
 		echo '<div class="wrap">';
 		screen_icon( 'ms-admin' );
-		switch ( $active ) {
+		switch ( $screen ) {
 		case 'tokens' :
 			echo '<h2>' . __( 'Keyring: Managed Keys', 'keyring' ) . ' <a href="' . Keyring_Util::admin_url( false, array( 'action' => 'services' ) ) . '" class="add-new-h2">' . __( 'Add New', 'keyring' ) . '</a></h2>';
 			break;
@@ -144,10 +150,9 @@ class Keyring {
 		// Output any errors if we have them, then stop, and link back to home.
 		$keyring = Keyring::init();
 		if ( $keyring->has_errors() ) {
-			$keyring->admin_page_header( 'error' );
-			echo '<div id="keyring-admin-errors"><ul>';
+			echo '<div id="keyring-admin-errors" class="updated"><ul>';
 			foreach ( $keyring->errors as $error ) {
-				echo "<li>$error</li>";
+				echo "<li>" . esc_html( $error ) . "</li>";
 			}
 			echo '</ul></div>';
 			echo '<p class="submit"><a href="' . Keyring_Util::admin_url( $_REQUEST['service'] ) . '" class="button-primary">' . __( 'Start Again', 'keyring' ) . '</a></p>';
@@ -156,9 +161,9 @@ class Keyring {
 		
 		// Output any messages as part of the UI (don't abort).
 		if ( $keyring->has_messages() ) {
-			echo '<div id="keyring-admin-messages"><ul>';
+			echo '<div id="keyring-admin-messages" class="updated"><ul>';
 			foreach ( $keyring->messages as $message ) {
-				echo "<li>$message</li>";
+				echo "<li>" . esc_html( $message ) . "</li>";
 			}
 			echo '</ul></div>';
 		}
@@ -170,10 +175,14 @@ class Keyring {
 	
 	function admin_page() {
 		// Handle delete request. Will default back to "tokens" later
-		// TODO nonce check before delete
 		if ( isset( $_REQUEST['action'] ) && 'delete' == $_REQUEST['action'] ) {
-			$this->get_token_store()->delete( $_REQUEST['service'], (int) $_REQUEST['token'] );
-			$this->message( __( 'That token has been deleted.', 'keyring' ) );
+			if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-delete-' . $_REQUEST['service'] . '-' . $_REQUEST['token'] ) )
+				wp_die( __( 'Invalid/missing delete nonce.', 'keyring' ) );
+			
+			if ( $this->get_token_store()->delete( $_REQUEST['service'], (int) $_REQUEST['token'] ) )
+				$this->message( __( 'That token has been deleted.', 'keyring' ) );
+			else
+				$this->error( __( 'Could not delete that token!', 'keyring' ) );
 		}
 		
 		// Set up our defaults
@@ -185,7 +194,7 @@ class Keyring {
 		if ( isset( $_REQUEST['action'] ) && in_array( $_REQUEST['action'], array( 'tokens', 'services', 'request', 'verify', 'manage' ) ) )
 			$action = $_REQUEST['action'];
 		
-		// Custom UI optionally hooked in to handle things in this case. Trigger that action
+		// Custom UI optionally hooked in to handle this service/action. Trigger action
 		// and assume it handles everything, so bail out after that.
 		if ( Keyring_Util::has_custom_ui( $service, $action ) ) {
 			do_action( "keyring_{$service}_{$action}_ui" );
@@ -200,7 +209,11 @@ class Keyring {
 			if ( count( $tokens ) ) {
 				echo '<ul>';
 				foreach ( $tokens as $token ) {
-					echo '<li><strong>' . esc_html( $token->get_display() ) . '</strong> (' . esc_html( $token->get_service()->get_label() ) . ') [<a href="' . Keyring_Util::admin_url( false, array( 'action' => 'delete', 'service' => $token->get_service()->get_name(), 'token' => $token->get_uniq_id() ) ) . '" title="' . __( 'Delete', 'keyring' ) . '">&times;</a>]<br /><pre>' . print_r( $token->get_meta(), true ) . '</pre></li>';
+					$kr_nonce = wp_create_nonce( 'keyring-delete' );
+					$delete_nonce = wp_create_nonce( 'keyring-delete-' . $token->get_service()->get_name() . '-' . $token->get_uniq_id() );
+					echo '<li><strong>' . esc_html( $token->get_display() ) . '</strong> (' . esc_html( $token->get_service()->get_label() ) . ') ';
+					echo '[<a href="' . Keyring_Util::admin_url( false, array( 'action' => 'delete', 'service' => $token->get_service()->get_name(), 'token' => $token->get_uniq_id(), 'kr_nonce' => $kr_nonce, 'nonce' => $delete_nonce ) ) . '" title="' . __( 'Delete', 'keyring' ) . '">&times;</a>]';
+					echo '<br /><pre>' . print_r( $token->get_meta(), true ) . '</pre></li>';
 				}
 				echo '</ul>';
 			} else {
@@ -208,16 +221,24 @@ class Keyring {
 			}
 			$this->admin_page_footer();
 			break;
+		
 		case 'services' :
 			$this->admin_page_header( 'services' );
 			echo '<p>' . __( 'Click a service to create a new authorized connection:', 'keyring' ) . '</p>';
-			$services = Keyring::get_registered_services();
+			$services = $this->get_registered_services();
 			if ( count( $services ) ) {
 				echo '<ul>';
 				foreach ( $services as $service ) {
-					echo '<li><a href="' . esc_url( Keyring_Util::admin_url( $service->get_name(), array( 'action' => 'request' ) ) ) . '">' . esc_html( $service->get_label() ) . '</a>';
-					if ( has_action( 'keyring_' . $service->get_name() . '_manage_ui' ) )
-						echo ' (<a href="' . esc_url( Keyring_Util::admin_url( $service->get_name(), array( 'action' => 'manage' ) ) ) . '">' . __( 'Manage', 'keyring' ) . '</a>)';
+					$request_kr_nonce = wp_create_nonce( 'keyring-request' );
+					$request_nonce = wp_create_nonce( 'keyring-request-' . $service->get_name() );
+					echo '<li><a href="' . esc_url( Keyring_Util::admin_url( $service->get_name(), array( 'action' => 'request', 'kr_nonce' => $request_kr_nonce, 'nonce' => $request_nonce ) ) ) . '">' . esc_html( $service->get_label() ) . '</a>';
+					
+					if ( has_action( 'keyring_' . $service->get_name() . '_manage_ui' ) ) {
+						$manage_kr_nonce = wp_create_nonce( 'keyring-manage' );
+						$manage_nonce = wp_create_nonce( 'keyring-manage-' . $service->get_name() );
+						echo ' (<a href="' . esc_url( Keyring_Util::admin_url( $service->get_name(), array( 'action' => 'manage', 'kr_nonce' => $manage_kr_nonce, 'nonce' => $manage_nonce ) ) ) . '">' . __( 'Manage', 'keyring' ) . '</a>)';
+					}
+					
 					echo '</li>';
 				}
 				echo '</ul>';
@@ -227,7 +248,7 @@ class Keyring {
 		}
 	}
 	
-	static function register_service( $service ) {
+	static function register_service( Keyring_Service $service ) {
 		if ( Keyring_Util::is_service( $service ) ) {
 			Keyring::init()->registered_services[ $service->get_name() ] = $service;
 			return true;
@@ -250,9 +271,8 @@ class Keyring {
 	static function get_token_store() {
 		$keyring = Keyring::init();
 		
-		if ( !$keyring->store ) {
+		if ( !$keyring->store )
 			$keyring->store = call_user_func( array( KEYRING__TOKEN_STORE, 'init' ) );
-		}
 		
 		return $keyring->store;
 	}
@@ -314,17 +334,20 @@ class Keyring_Util {
 	 * @return URL to Keyring admin UI (main listing, or specific service verify process)
 	 */
 	static function admin_url( $service = false, $params = array() ) {
+		$url = apply_filters( 'keyring_admin_url', admin_url( 'tools.php?page=keyring' ) );
+		
 		if ( $service )
-			$service = "&service=$service";
+			$url = add_query_arg( array( 'service' => $service ), $url );
+		
 		if ( count( $params ) )
-			foreach ( $params as $key => $val )
-				$params[$key] = urlencode( $key ) . '=' . urlencode( $val );
-		return admin_url( "tools.php?page=keyring$service&" . implode( '&', $params ) );
+			$url = add_query_arg( $params, $url );
+		
+		return $url;
 	}
 	
-	static function connect_to( $service, $cookie ) {
+	static function connect_to( $service, $cookie_name ) {
 		// Redirect into Keyring's auth handler if a valid service is provided
-		setcookie( $cookie, true, ( time() + apply_filters( 'keyring_connect_to_timeout', 300 ) ) ); // Stop watching after 5 minutes
+		setcookie( $cookie_name, true, ( time() + apply_filters( 'keyring_connect_to_timeout', 300 ) ) ); // Stop watching after 5 minutes
 		wp_safe_redirect( Keyring_Util::admin_url( $service, array( 'action' => 'request' ) ) );
 		exit;
 	} 

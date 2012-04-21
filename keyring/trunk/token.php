@@ -42,9 +42,9 @@ class Keyring_Token {
 	
 	function get_service() {
 		if ( !$this->service ) {
-			$meta = $this->get_meta();
-			if ( !empty( $meta['_classname'] ) && is_string( $meta['_classname'] ) && class_exists( $meta['_classname'] ) ) {
-				$this->service = $meta['_classname']::init();
+			$class = $this->get_meta( '_classname', true );
+			if ( $class && class_exists( $class ) ) {
+				$this->service = $class::init();
 			}
 		}
 		return $this->service;
@@ -54,9 +54,29 @@ class Keyring_Token {
 		return $this->name;
 	}
 	
-	function get_meta() {
-		if ( isset( $this->meta ) )
-			return $this->meta;
-		return array();
+	/**
+	 * Get a specific piece of meta data for this token, or all meta as an array.
+	 *
+	 * @param mixed $name The key name for a specific meta item, or false for all.
+	 * @param bool $allow_hidden Allow access to "hidden" meta (prefixed with "_")
+	 * @return Mixed meta value, array of meta values, or null
+	 */
+	function get_meta( $name = false, $allow_hidden = false ) {
+		$return = null;
+		if ( $name ) {
+			if ( '_' != substr( $name, 0, 1 ) || $allow_hidden ) {
+				if ( isset( $this->meta[ $name ] ) ) {
+					$return = $this->meta[ $name ];
+				}
+			}
+		} else {
+			foreach ( (array) $this->meta as $key => $val ) {
+				if ( '_' != substr( $key, 0, 1 ) || $allow_hidden ) {
+					$return[ $key ] = $val;
+				}
+			}
+		}
+		
+		return $return;
 	}
 }

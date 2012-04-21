@@ -84,6 +84,6 @@ abstract class Keyring_Store {
 // Remove a Token Store (prevent it from loading at all) by filtering on 'keyring_token_stores'
 $keyring_stores = glob( dirname( __FILE__ ) . "/includes/stores/*.php" );
 $keyring_stores = apply_filters( 'keyring_token_stores', $keyring_stores );
-foreach ( $keyring_stores as $store )
-	require $store;
-unset( $keyring_stores );
+foreach ( $keyring_stores as $keyring_store )
+	require $keyring_store;
+unset( $keyring_stores, $keyring_store );
