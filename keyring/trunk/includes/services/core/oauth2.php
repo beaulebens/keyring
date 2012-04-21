@@ -66,7 +66,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		
 		// TODO prefer to send token in Authorization header when supported
 		if ( $this->token )
-			$url = add_query_arg( array( 'access_token' => urlencode( (string) $this->token ) ), $url );
+			$url = add_query_arg( array( 'oauth_token' => urlencode( (string) $this->token ) ), $url );
 		
 		$method = 'GET';
 		if ( isset( $params['method'] ) ) {

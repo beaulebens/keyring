@@ -348,7 +348,9 @@ class Keyring_Util {
 	static function connect_to( $service, $cookie_name ) {
 		// Redirect into Keyring's auth handler if a valid service is provided
 		setcookie( $cookie_name, true, ( time() + apply_filters( 'keyring_connect_to_timeout', 300 ) ) ); // Stop watching after 5 minutes
-		wp_safe_redirect( Keyring_Util::admin_url( $service, array( 'action' => 'request' ) ) );
+		$kr_nonce = wp_create_nonce( 'keyring-request' );
+		$request_nonce = wp_create_nonce( 'keyring-request-' . $service );
+		wp_safe_redirect( Keyring_Util::admin_url( $service, array( 'action' => 'request', 'kr_nonce' => $kr_nonce, 'nonce' => $request_nonce ) ) );
 		exit;
 	} 
 	

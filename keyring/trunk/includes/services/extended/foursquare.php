@@ -61,7 +61,7 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 			if ( $token = json_decode( $token ) ) {
 				$token = new Keyring_Token( $this->get_name(), $token->access_token, array() );
 				$this->set_token( $token );
-				$res = $this->request( $this->self_url );
+				$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
 				if ( !Keyring_Util::is_error( $res ) ) {
 					if ( $res = json_decode( $res ) ) {
 						$meta = array(
@@ -72,11 +72,10 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 						$id = $this->store_token( $token, $meta );
 						$this->verified( $id );
 					}
-				} else {
-					Keyring_Util::debug( $res );
 				}
 			}
 		}
+		print_r( $res );
 		Keyring::error(
 			sprintf( __( 'There was a problem authorizing with %s. Please try again in a moment.', 'keyring' ), $this->get_label() )
 		);
