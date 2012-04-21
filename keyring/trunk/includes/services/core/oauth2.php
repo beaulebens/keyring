@@ -60,18 +60,13 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		return false;
 	}
 	
-	function request( $url, $params = array() ) {
+	function request( $url, array $params = array() ) {
 		if ( $this->requires_token() && empty( $this->token ) )
 			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
 		
-		$params['oauth_token'] =  (string) $this->token;
-		
-		if ( stristr( $url, '?' ) )
-			$url .= '&';
-		else
-			$url .= '?';
-		$url .= 'oauth_token=' . $params['oauth_token'];
-		unset( $params['oauth_token'] );
+		// TODO prefer to send token in Authorization header when supported
+		if ( $this->token )
+			$url = add_query_arg( array( 'access_token' => urlencode( (string) $this->token ) ), $url );
 		
 		$method = 'GET';
 		if ( isset( $params['method'] ) ) {

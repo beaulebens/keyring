@@ -8,19 +8,19 @@
  * @package Keyring
  */
 class Keyring_Service_HTTP_Basic extends Keyring_Service {
-	var $username      = null;
-	var $password      = null;
-	var $verify_url    = null;
-	var $verify_method = null;
-	var $token         = null;
+	protected $username      = null;
+	protected $password      = null;
+	protected $verify_url    = null;
+	protected $verify_method = null;
+	protected $token         = null;
 	
 	function __construct( $token = false ) {
-		parent::__construct( $details );
+		parent::__construct( $token );
 		
-		add_action( 'keyring_' . $this->get_name() . '_request_ui', array( $this, 'request_ui' ) );
+		add_action( 'keyring_' . $this->get_name() . '_request_ui', array( &$this, 'request_ui' ) );
 	}
 	
-	function get_display( $token ) {
+	function get_display( Keyring_Token $token ) {
 		$meta = $token->get_meta();
 		return $meta['username'];
 	}
@@ -33,12 +33,16 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		
 		// Handle errors
 		if ( isset( $_GET['error'] ) ) {
-			echo '<ul>';
+			echo '<div id="keyring-admin-errors" class="updated"><ul>';
 			switch ( $_GET['error'] ) {
 			case '401':
 				echo '<li>' . __( 'Your account details could not be confirmed, please try again.', 'keyring' ) . '</li>';
+				break;
+			case 'empty':
+				echo '<li>' . __( 'Please make sure you enter a username and password.', 'keyring' ) . '</li>';
+				break;
 			}
-			echo '</ul>';
+			echo '</ul></div>';
 		}
 		
 		echo apply_filters( 'keyring_' . $this->get_name() . '_request_ui_intro', '' );
@@ -48,6 +52,8 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		echo '<form method="post" action="">';
 		echo '<input type="hidden" name="service" value="' . esc_attr( $this->get_name() ) . '" />';
 		echo '<input type="hidden" name="action" value="verify" />';
+		wp_nonce_field( 'keyring-verify', 'kr_nonce', false );
+		wp_nonce_field( 'keyring-verify-' . $this->get_name(), 'nonce', false );
 		echo '<table class="form-table">';
 		echo '<tr><th scope="row">' . __( 'Username', 'keyring' ) . '</th>';
 		echo '<td><input type="text" name="username" value="" id="username" class="regular-text"></td></tr>';
@@ -72,6 +78,24 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 	}
 	
 	function verify_token() {
+		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-verify-' . $this->get_name() ) )
+			wp_die( __( 'Invalid/missing verification nonce.', 'keyring' ) );
+
+		if ( !strlen( $_POST['username'] ) ) {
+			$url = Keyring_Util::admin_url(
+				$this->get_name(),
+				array(
+					'action' => 'request',
+					'error' => 'empty',
+					'kr_nonce' => wp_create_nonce( 'keyring-request' )
+				)
+			);
+			Keyring_Util::debug( $url );
+			wp_safe_redirect( $url );
+			exit;
+		}
+			
+		
 		$token = base64_encode( $_POST['username'] . ':' . $_POST['password'] );
 		$params = array( 'headers' => array( 'Authorization' => 'Basic ' . $token ) );
 		
@@ -90,14 +114,14 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		}
 		
 		// We will get a 401 if they entered an incorrect user/pass combo
-		if ( 401 == wp_remote_retrieve_response_code( $res ) ) {
-			$c = get_called_class();
-			$service = $c::NAME;
+		// TODO change so that anything except a 2xx/3xx triggers this?
+		if ( 200 != wp_remote_retrieve_response_code( $res ) ) {
 			$url = Keyring_Util::admin_url(
-				$c::NAME,
+				$this->get_name(),
 				array(
 					'action' => 'request',
 					'error' => '401',
+					'kr_nonce' => wp_create_nonce( 'keyring-request' )
 				)
 			);
 			Keyring_Util::debug( $url );
@@ -117,7 +141,7 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		$this->verified( $id );
 	}
 	
-	function request( $url, $params = array() ) {
+	function request( $url, array $params = array() ) {
 		if ( $this->requires_token() && empty( $this->token ) )
 			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
 		

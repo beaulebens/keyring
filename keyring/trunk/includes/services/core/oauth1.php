@@ -11,36 +11,43 @@
  * @package Keyring
  */
 class Keyring_Service_OAuth1 extends Keyring_Service {
-	var $request_token_url    = ''; // @see ::set_endpoint()
-	var $request_token_method = 'GET';
-	var $access_token_url     = '';
-	var $access_token_method  = 'GET';
-	var $authorize_url        = '';
-	var $authorize_method     = 'GET';
+	protected $request_token_url    = ''; // @see ::set_endpoint()
+	protected $request_token_method = 'GET';
+	protected $access_token_url     = '';
+	protected $access_token_method  = 'GET';
+	protected $authorize_url        = '';
+	protected $authorize_method     = 'GET';
 	
-	var $key                  = null;
-	var $secret               = null;
-	var $consumer             = null;
-	var $signature_method     = null;
-	var $callback_url         = null;
+	protected $key                  = null;
+	protected $secret               = null;
+	protected $consumer             = null;
+	protected $signature_method     = null;
+	protected $callback_url         = null;
 	
 	var $token                = null;
 	
-	function __construct( $token = false ) {
-		parent::__construct( $token );
+	function __construct() {
+		parent::__construct();
 		
-		$class = get_called_class();
-		$this->callback_url = Keyring_Util::admin_url( $class::NAME, array( 'action' => 'verify' ) );
+		// Nonces for the callback URL, which is used during the verify step
+		$kr_nonce = wp_create_nonce( 'keyring-verify' );
+		$nonce = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
+		$this->callback_url = Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify', 'kr_nonce' => $kr_nonce, 'nonce' => $nonce ) );
 		
 		if ( !class_exists( 'OAuthRequest' ) )
 			require dirname( dirname( dirname( __FILE__ ) ) ) . '/oauth-php/OAuth.php';
 	}
 	
-	function get_display( $token ) {
+	function get_display( Keyring_Token $token ) {
 		return $this->key;
 	}
 	
 	function request_token() {
+		Keyring_Util::debug( 'Keyring_Service_OAuth1::request_token()' );
+		
+		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-request-' . $this->get_name() ) )
+			wp_die( __( 'Invalid/missing request nonce.', 'keyring' ) );
+		
 		$request_token_url = $this->request_token_url;
 		if ( $this->callback_url ) {
 			if ( strstr( $request_token_url, '?' ) )
@@ -122,21 +129,17 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 	
 	function verify_token() {
 		Keyring_Util::debug( 'Keyring_Service_OAuth1::verify_token()' );
+		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-verify-' . $this->get_name() ) )
+			wp_die( __( 'Invalid/missing verification nonce.', 'keyring' ) );
+		
 		// Get an access token
 		$token = isset( $_GET['oauth_token'] ) ? $_GET['oauth_token'] : false;
-		if ( empty( $token ) && isset( $_GET['?oauth_token'] ) )
-		    $token = $_GET['?oauth_token'];
 
 		$secret = $_COOKIE["keyring_{$this->get_name()}"];
 
 		$access_token_url = $this->access_token_url;
-		if ( !empty( $_GET['oauth_verifier'] ) ) {
-			if ( stristr( $access_token_url, '?' ) )
-				$access_token_url .= '&';
-			else
-				$access_token_url .= '?';
-			$access_token_url .= 'oauth_verifier=' . $_GET['oauth_verifier'];
-		}
+		if ( !empty( $_GET['oauth_verifier'] ) )
+			$access_token_url = add_query_arg( array( 'oauth_verifier' => urlencode( $_GET['oauth_verifier'] ) ) );
 		
 		// Set up a consumer token
 		$token = new OAuthConsumer( $token, $secret );
@@ -201,7 +204,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		}
 	}
 	
-	function request( $url, $params = array() ) {
+	function request( $url, array $params = array() ) {
 		if ( $this->requires_token() && empty( $this->token ) )
 			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
 		

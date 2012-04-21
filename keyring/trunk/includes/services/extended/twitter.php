@@ -8,11 +8,11 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 	const NAME  = 'twitter';
 	const LABEL = 'Twitter';
 
-	function __construct( $details = array() ) {
-		parent::__construct( $details );
+	function __construct() {
+		parent::__construct();
 		
 		// Enable "basic" UI for entering key/secret
-		add_action( 'keyring_twitter_manage_ui', array( $this, 'basic_ui' ) );
+		add_action( 'keyring_twitter_manage_ui', array( &$this, 'basic_ui' ) );
 		
 		$this->set_endpoint( 'request_token', 'https://twitter.com/oauth/request_token', 'POST' );
 		$this->set_endpoint( 'authorize',     'https://twitter.com/oauth/authorize',     'GET' );
@@ -32,7 +32,7 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 		$this->requires_token( true );
 	}
 
-	function get_display( $token ) {
+	function get_display( Keyring_Token $token ) {
 		$meta = $token->get_meta();
 		return '@' . $meta['screen_name'];
 	}

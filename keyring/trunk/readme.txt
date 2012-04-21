@@ -1,6 +1,6 @@
 === Keyring ===
 
-Contributors: beaulebens
+Contributors: beaulebens, mdawaffe, justinshreve
 Tags: authentication, security, oauth, http basic, key, token, authorization, twitter, facebook, delicious, foursquare, flickr
 Requires at least: 3.3
 Tested up to: 3.3
@@ -57,6 +57,12 @@ Most services within Keyring require some sort of API key/secret before you can 
 = Now what? =
 
 Keyring just provides a framework for handling connections to external services. You need to download another plugin which makes use of Keyring to do anything useful (e.g. an importer or content-syncing plugin).
+
+= How does Keyring store tokens? =
+
+
+= How do I add to the list of services Keyring can connect to? =
+
 
 == Changelog ==
 

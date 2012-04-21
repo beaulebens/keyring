@@ -10,9 +10,9 @@
 abstract class Keyring_Service {
 	const NAME          = '';
 	const LABEL         = '';
-	var $token          = false;
-	var $requires_token = true;
-	var $store          = false;
+	protected $token          = false;
+	protected $requires_token = true;
+	protected $store          = false;
 	
 	/**
 	 * Handle the first part of getting a Token for this Service. In some cases
@@ -38,7 +38,7 @@ abstract class Keyring_Service {
 	 * @param array $params Additional parameters for the request (a la WP_HTTP)
 	 * @return String containing the body of the response on success, or Keyring_Error on any non-200 response
 	 */
-	abstract function request( $url, $params );
+	abstract function request( $url, array $params );
 	
 	/**
 	 * Get a displayable string for the passed token, for this service
@@ -46,41 +46,31 @@ abstract class Keyring_Service {
 	 * @param obj $token Keyring_Token object
 	 * @return String for display, describing $token
 	 */
-	abstract function get_display( $token );
+	abstract function get_display( Keyring_Token $token );
 	
-	function __construct( $token = false ) {
+	function __construct() {
 		$this->store = Keyring::get_token_store();
 		
-		// Token can be passed in as either a Keyring_Token object, or a unique id to load from the DB
-		if ( $token ) {
-			if ( is_a( $token, 'Keyring_Token' ) )
-				$this->token = $token;
-			else if ( ctype_digit( $token ) )
-				$this->token = $this->store->get_token( $this->get_name(), $token );
-		}
-		
 		// Default methods for handling actions, should always be defined (thus abstract, see above)
-		add_action( 'keyring_' . $this->get_name() . '_request', array( $this, 'request_token' ) );
-		add_action( 'keyring_' . $this->get_name() . '_verify', array( $this, 'verify_token' ) );
+		add_action( 'keyring_' . $this->get_name() . '_request', array( &$this, 'request_token' ) );
+		add_action( 'keyring_' . $this->get_name() . '_verify', array( &$this, 'verify_token' ) );
 	}
 	
-	static function &init( $details = array() ) {
+	static function &init() {
 		static $instance = false;
 		
-		$class = get_called_class();
-		if ( 'Keyring_Service' == $class || is_subclass_of( $class, 'Keyring_Service' ) ) {
-			if ( !$instance ) {
-				if ( !in_array( $class::NAME, Keyring::get_registered_services() ) ) {
-					$instance = new $class( $details );
-					Keyring::register_service( $instance );
-				} else {
-					$services = Keyring::get_registered_services();
-					$instance = $services[ $class::NAME ];
-				}
+		if ( !$instance ) {
+			$class = get_called_class();
+			$services = Keyring::get_registered_services();
+			if ( in_array( $class::NAME, array_keys( $services ) ) ) {
+				$instance = $services[ $class::NAME ];
+			} else {
+				$instance = new $class;
+				Keyring::register_service( $instance );
 			}
-			return $instance;
 		}
-		return false;
+		
+		return $instance;
 	}
 	
 	/**
@@ -92,7 +82,7 @@ abstract class Keyring_Service {
 	 *         then set requirement to true/false as specified.
 	 */
 	function requires_token( $does_it = null ) {
-		if ( null == $does_it )
+		if ( is_null( $does_it ) )
 			return $this->requires_token;
 		
 		$requires = $this->requires_token;
@@ -125,6 +115,9 @@ abstract class Keyring_Service {
 	}
 	
 	function basic_ui() {
+		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-manage-' . $this->get_name() ) )
+			wp_die( __( 'Invalid/missing management nonce.', 'keyring' ) );
+		
 		// Common Header
 		echo '<div class="wrap">';
 		screen_icon( 'ms-admin' );
@@ -135,7 +128,10 @@ abstract class Keyring_Service {
 		// Handle actually saving credentials
 		if ( isset( $_POST['api_key'] ) && isset( $_POST['api_secret'] ) ) {
 			// Store credentials against this service
-			$this->update_credentials( array( 'key' => $_POST['api_key'], 'secret' => $_POST['api_secret'] ) );
+			$this->update_credentials( array(
+				'key' => stripslashes( $_POST['api_key'] ),
+				'secret' => stripslashes( $_POST['api_secret'] )
+			) );
 			echo '<div class="updated"><p>' . __( 'Credentials saved.', 'keyring' ) . '</p></div>';
 		}
 		
@@ -151,6 +147,8 @@ abstract class Keyring_Service {
 		echo '<form method="post" action="">';
 		echo '<input type="hidden" name="service" value="' . esc_attr( $this->get_name() ) . '" />';
 		echo '<input type="hidden" name="action" value="manage" />';
+		wp_nonce_field( 'keyring-manage', 'kr_nonce', false );
+		wp_nonce_field( 'keyring-manage-' . $this->get_name(), 'nonce', false );
 		echo '<table class="form-table">';
 		echo '<tr><th scope="row">' . __( 'API Key', 'keyring' ) . '</th>';
 		echo '<td><input type="text" name="api_key" value="' . esc_attr( $api_key ) . '" id="api_key" class="regular-text"></td></tr>';
@@ -183,7 +181,7 @@ abstract class Keyring_Service {
 	 *
 	 * @param array $credentials 
 	 */
-	function update_credentials( $credentials ) {
+	function update_credentials( array $credentials ) {
 		$all = get_option( 'keyring_credentials' );
 		$all[ $this->get_name() ] = $credentials;
 		return update_option( 'keyring_credentials', $all );
@@ -196,8 +194,9 @@ abstract class Keyring_Service {
 		do_action( 'keyring_' . $c::NAME . '_after_verification', $c::NAME, $id );
 		do_action( 'keyring_all_after_verification', $c::NAME, $id );
 		
-		// Back to Keyring admin, with ?service=SERVICE&created=UNIQUE_ID
-		$url = Keyring_Util::admin_url( $c::NAME, array( 'action' => 'created', 'id' => $id ) );
+		// Back to Keyring admin, with ?service=SERVICE&created=UNIQUE_ID&kr_nonce=NONCE
+		$kr_nonce = wp_create_nonce( 'keyring-created' );
+		$url = Keyring_Util::admin_url( $c::NAME, array( 'action' => 'created', 'id' => $id, 'kr_nonce' => $kr_nonce ) );
 		Keyring_Util::debug( $url );
 		wp_safe_redirect( $url );
 		exit;
@@ -209,16 +208,15 @@ abstract class Keyring_Service {
 		return $store->count( $c::NAME );
 	}
 	
-	function store_token( $token, $meta ) {
+	function store_token( Keyring_Token $token, $meta ) {
 		$meta['_classname'] = get_called_class();
 		$id = $this->store->insert( $this->get_name(), $token, $meta );
 		$this->set_token( $this->store->get_token( $this->get_name(), $id, $meta ) );
 		return $id;
 	}
 	
-	function set_token( $token ) {
-		if ( is_a( $token, 'Keyring_Token' ) )
-			$this->token = $token;
+	function set_token( Keyring_Token $token ) {
+		$this->token = $token;
 	}
 	
 	function get_tokens( $id = false ) {
