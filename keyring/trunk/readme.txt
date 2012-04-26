@@ -37,6 +37,12 @@ You can very easily write your own Service definitions and then use all the powe
 
 == Frequently Asked Questions ==
 
+= Will Keyring work on my WordPress? =
+
+Keyring requires PHP 5.3+ to work, because it makes use of some modern features in PHP like late static binding and abstract classes. Other than that, as long as you meet the minimum required WP version, you should be OK to get started.
+
+Your webserver will also need to be able to make outbound HTTPS requests for some operations with some services to work correctly.
+
 = How do I configure Services? =
 
 Most services within Keyring require some sort of API key/secret before you can connect to them.
@@ -60,11 +66,12 @@ Keyring just provides a framework for handling connections to external services.
 
 = How does Keyring store tokens? =
 
+* By default, on a single-site install, Keyring stores tokens in your wp_posts table with a custom post type of 'keyring_token'
+* Coming soon, Keyring will store tokens for a multi-site install in a specified blog/site's wp_posts (so you can set a single site aside for just token storage if you like)
+* Keyring provides a framework for you to write your own token storage engine (see store.php and includes/stores/).
 
 = How do I add to the list of services Keyring can connect to? =
 
+Add files to includes/services/extended/ that either implement one of the includes/services/core/ service foundations, or start from scratch. Follow one of the existing service definitions for a template, and see service.php in the root of Keyring for some detail on methods you need to define, and optional ones that might make your life easier.
 
 == Changelog ==
-
-= trunk =
-* Initial upload (unreleased)
