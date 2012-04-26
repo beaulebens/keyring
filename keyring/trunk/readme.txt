@@ -1,6 +1,6 @@
 === Keyring ===
 
-Contributors: beaulebens, mdawaffe, justinshreve
+Contributors: beaulebens, mdawaffe, jshreve, automattic
 Tags: authentication, security, oauth, http basic, key, token, authorization, twitter, facebook, delicious, foursquare, flickr
 Requires at least: 3.3
 Tested up to: 3.3
