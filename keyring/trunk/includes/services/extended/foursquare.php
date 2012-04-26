@@ -35,56 +35,26 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
 	}
 	
-	function verify_token() {
-		if ( !isset( $_GET['code'] ) ) {
-			Keyring::error(
-				sprintf( __( 'There was a problem authorizing with %s. Please try again in a moment.', 'keyring' ), $this->get_label() )
-			);
-			return false;
-		}
-
-		$url = $this->access_token_url;
-		if ( !stristr( $url, '?' ) )
-			$url .= '?';
-		$params = array(
-			'client_id' => $this->key,
-			'client_secret' => $this->secret,
-			'grant_type' => 'authorization_code',
-			'redirect_uri' => $this->callback_url,
-			'code' => $_GET['code'],
-		);
-		Keyring_Util::debug( 'OAuth2 Access Token URL: ' . $url . http_build_query( $params ) );
-		$res = wp_remote_get( $url . http_build_query( $params ) );
-		if ( 200 == wp_remote_retrieve_response_code( $res ) ) {
-			$token = wp_remote_retrieve_body( $res );
-			Keyring_Util::debug( $token );
-			if ( $token = json_decode( $token ) ) {
-				$token = new Keyring_Token( $this->get_name(), $token->access_token, array() );
-				$this->set_token( $token );
-				$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
-				if ( !Keyring_Util::is_error( $res ) ) {
-					if ( $res = json_decode( $res ) ) {
-						$meta = array(
-							'id' => $res->response->user->id,
-							'firstName' => $res->response->user->firstName,
-							'lastName' => $res->response->user->lastName,
-						);
-						$id = $this->store_token( $token, $meta );
-						$this->verified( $id );
-					}
-				}
+	function build_token_meta( $token ) {
+		$meta = array();
+		$token = new Keyring_Token( $this->get_name(), $token['access_token'], array() );
+		$this->set_token( $token );
+		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
+		if ( !Keyring_Util::is_error( $res ) ) {
+			if ( $res = json_decode( $res ) ) {
+				$meta = array(
+					'user_id'   => $res->response->user->id,
+					'firstName' => $res->response->user->firstName,
+					'lastName'  => $res->response->user->lastName,
+				);
 			}
 		}
-		print_r( $res );
-		Keyring::error(
-			sprintf( __( 'There was a problem authorizing with %s. Please try again in a moment.', 'keyring' ), $this->get_label() )
-		);
-		return false;
+		return $meta;
 	}
 	
 	function get_display( Keyring_Token $token ) {
 		$meta = $token->get_meta();
-		return trim( $meta['firstName'] . ' ' . $meta['lastName'] ) . ' (' . $meta['id'] . ')';
+		return ltrim( $meta['firstName'] . ' ' . $meta['lastName'] ) . ' (' . $meta['user_id'] . ')';
 	}
 }
 

@@ -11,6 +11,13 @@
  * @package Keyring
  */
 class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
+	/**
+	 * Tokens should be passed in the authorization header if the service supports it
+	 * and only fallback to the query string if neccessary
+	 */
+	var $authorization_header      = true;
+	var $authorization_header_type = 'OAuth';
+	
 	function request_token() {
 		$url = $this->authorize_url;
 		if ( !stristr( $url, '?' ) )
@@ -48,8 +55,16 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		if ( 200 == wp_remote_retrieve_response_code( $res ) ) {
 			$token = wp_remote_retrieve_body( $res );
 			Keyring_Util::debug( $token );
-			if ( $token = json_decode( $token ) ) {
-				$this->store_token( $token->access_token, array() );
+			
+			$token = $this->parse_access_token( $token );
+			
+			if ( is_array( $token ) ) {
+				if ( method_exists( $this, 'custom_verify_token' ) )
+					$this->custom_verify_token( $token );
+
+				$meta = $this->build_token_meta( $token );
+				
+				$this->store_token( $token['access_token'], $meta );
 				wp_redirect( Keyring_Util::admin_url() );
 				exit;
 			}
@@ -60,13 +75,31 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		return false;
 	}
 	
+	/**
+	 * The OAuth2 spec indicates that responses should be in JSON, but separating
+	 * this allows different services to potentially use querystring-encoded
+	 * responses or something else, and just define this method within themselves
+	 * to handle decoding the access_token response.
+	 *
+	 * @param string $token The response from the access_token request
+	 * @return Array containing key/value pairs from the token response
+	 */
+	function parse_access_token( $token ) {
+		return (array) json_decode( $token );
+	}
+	
 	function request( $url, array $params = array() ) {
 		if ( $this->requires_token() && empty( $this->token ) )
 			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
 		
-		// TODO prefer to send token in Authorization header when supported
-		if ( $this->token )
-			$url = add_query_arg( array( 'oauth_token' => urlencode( (string) $this->token ) ), $url );
+		if ( $this->token ) {
+			if ( $this->authorization_header ) {
+				// type can be OAuth, Bearer, ...
+				$params['headers']['Authorization'] = $this->authorization_header_type . ' ' . (string) $this->token;
+			} else {
+				$url = add_query_arg( array( 'access_token' => urlencode( (string) $this->token ) ), $url );
+			}
+		}
 		
 		$method = 'GET';
 		if ( isset( $params['method'] ) ) {
