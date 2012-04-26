@@ -31,6 +31,14 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 		
 		$this->requires_token( true );
 	}
+	
+	function build_token_meta( $token ) {
+		return array(
+			'user_id'  => $token['user_nsid'],
+			'username' => $token['username'],
+			'name'     => $token['fullname'],
+		);
+	}
 
 	function get_display( Keyring_Token $token ) {
 		$return = '';

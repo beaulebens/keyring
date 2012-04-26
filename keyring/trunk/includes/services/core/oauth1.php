@@ -48,21 +48,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-request-' . $this->get_name() ) )
 			wp_die( __( 'Invalid/missing request nonce.', 'keyring' ) );
 		
-		$request_token_url = $this->request_token_url;
-		if ( $this->callback_url ) {
-			if ( strstr( $request_token_url, '?' ) )
-				$request_token_url .= '&';
-			else
-				$request_token_url .= '?';
-			$request_token_url .= 'oauth_callback=' . urlencode( $this->callback_url );
-		}
-		
-		$query = '';
-		$parsed = parse_url( $request_token_url );
-		if ( !empty( $parsed['query'] ) && 'POST' == strtoupper( $this->request_token_method ) ) {
-			$request_token_url = str_replace( $parsed['query'], '', $request_token_url );
-			$query = $parsed['query'];
-		}
+		$request_token_url = add_query_arg( array( 'oauth_callback' => urlencode( $this->callback_url ) ), $this->request_token_url );
 		
 		// Set up OAuth request
 		$req = OAuthRequest::from_consumer_and_token(
@@ -78,22 +64,35 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			null
 		);
 		
+		$query = '';
+		$parsed = parse_url( (string) $req );
+		if ( !empty( $parsed['query'] ) && 'POST' == strtoupper( $this->request_token_method ) ) {
+			$request_token_url = str_replace( '?' . $parsed['query'], '', (string) $req );
+			$query = $parsed['query'];
+		} else {
+			$request_token_url = (string) $req;
+		}
+		
+		
 		// Get a request token
 		switch ( strtoupper( $this->request_token_method ) ) {
 		case 'GET':
-			Keyring_Util::debug( "OAuth GET Request Token URL: $req" );
-			$res = wp_remote_get( $req );
+			Keyring_Util::debug( "OAuth1 GET Request Token URL: $request_token_url" );
+			$res = wp_remote_get( $request_token_url );
 			break;
 			
 		case 'POST':
-			Keyring_Util::debug( "OAuth POST Request Token URL: $req" );
-			$res = wp_remote_post( $req, array( 'body' => $query, 'sslverify' => false ) );
+			Keyring_Util::debug( "OAuth1 POST Request Token URL: $request_token_url" );
+			Keyring_Util::debug( $query );
+			$res = wp_remote_post( $request_token_url, array( 'body' => $query, 'sslverify' => false ) );
 			break;
 			
 		default:
 			wp_die( __( 'Unsupported method specified for request_token.', 'keyring' ) );
 			exit;
 		}
+		
+		Keyring_Util::debug( $res );
 		
 		if ( 200 == wp_remote_retrieve_response_code( $res ) ) {
 			// Get the values returned from the remote service
@@ -139,62 +138,25 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 
 		$access_token_url = $this->access_token_url;
 		if ( !empty( $_GET['oauth_verifier'] ) )
-			$access_token_url = add_query_arg( array( 'oauth_verifier' => urlencode( $_GET['oauth_verifier'] ) ) );
+			$access_token_url = add_query_arg( array( 'oauth_verifier' => urlencode( $_GET['oauth_verifier'] ) ), $access_token_url );
 		
-		// Set up a consumer token
+		// Set up a consumer token and make the request for an access_token
 		$token = new OAuthConsumer( $token, $secret );
-		Keyring_Util::debug( 'OAuthConsumer: ' . print_r( $token, true ) );
-		
-		$query = '';
-		$parsed = parse_url( $access_token_url );
-		if ( !empty( $parsed['query'] ) && 'POST' == strtoupper( $this->access_token_method ) ) {
-			$access_token_url = str_replace( $parsed['query'], '', $access_token_url );
-			$query = $parsed['query'];
-		}
-		
-		// Set up OAuth request
-		$req = OAuthRequest::from_consumer_and_token(
-			$this->consumer,
-			$token,
-			$this->access_token_method,
-			$access_token_url
-		);
-		$req->sign_request(
-			$this->signature_method,
-			$this->consumer,
-			$token
-		);
-		
-		// Make verification request
-		switch ( strtoupper( $this->access_token_method ) ) {
-		case 'GET':
-			Keyring_Util::debug( "OAuth GET Verify Token URL: $req" );
-			$res = wp_remote_get( $req );
-			break;
-			
-		case 'POST':
-			Keyring_Util::debug( "OAuth POST Verify Token URL: $req" );
-			$res = wp_remote_post( $req, array( 'body' => $query, 'sslverify' => false ) );
-			break;
-			
-		default:
-			wp_die( __( 'Unsupported method specified for verify_token.', 'keyring' ) );
-			exit;
-		}
-		
+		$this->set_token( new Keyring_Token( $this->get_name(), $token, array() ) );
+		$res = $this->request( $access_token_url, array( 'method' => $this->access_token_method ) );
 		Keyring_Util::debug( $res );
-		if ( 200 == wp_remote_retrieve_response_code( $res ) ) {
-			$token = wp_remote_retrieve_body( $res );
-			parse_str( trim( $token ), $token );
+		
+		if ( !Keyring_Util::is_error( $res ) ) {
+			parse_str( trim( $res ), $token );
 			
 			if ( method_exists( $this, 'custom_verify_token' ) )
 				$this->custom_verify_token( $token );
 			
-			$meta = array();
-			if ( method_exists( $this, 'build_token_meta' ) )
-				$meta = $this->build_token_meta( $token );
+			$meta = $this->build_token_meta( $token );
 			
-			$id = $this->store_token( $token['oauth_token'], $meta );
+			$token = new OAuthToken( $token['oauth_token'], $token['oauth_token_secret'] );
+			Keyring_Util::debug( $token );
+			$id = $this->store_token( $token, $meta );
 			$this->verified( $id );
 		} else {
 			Keyring::error(
@@ -222,6 +184,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		}
 		
 		$token = $this->token->token ? $this->token->token : null;
+		Keyring_Util::debug( $token );
 		
 		$req = OAuthRequest::from_consumer_and_token(
 			$this->consumer,

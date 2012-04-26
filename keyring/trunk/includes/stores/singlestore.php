@@ -34,7 +34,7 @@ class Keyring_SingleStore extends Keyring_Store {
 			'meta_key' => 'service',
 			'meta_value' => $service,
 			'author_id' => get_current_user_id(),
-			's' => $token, // Search the post content for this token
+			's' => maybe_serialize( $token ), // Search the post content for this token
 			'exact' => true, // Require exact content match
 		) );
 		
@@ -46,7 +46,7 @@ class Keyring_SingleStore extends Keyring_Store {
 		$post = array(
 			'post_type' => 'keyring_token',
 			'post_status' => 'publish',
-			'post_content' => $token,
+			'post_content' => maybe_serialize( $token ),
 		);
 		$id = wp_insert_post( add_magic_quotes( $post ) );
 		if ( $id ) {
@@ -92,7 +92,7 @@ class Keyring_SingleStore extends Keyring_Store {
 						'service',
 						true
 					),
-					$post->post_content,
+					maybe_unserialize( $post->post_content ),
 					$meta,
 					$post->ID
 				);
@@ -116,7 +116,7 @@ class Keyring_SingleStore extends Keyring_Store {
 					'service',
 					true
 				),
-				$post->post_content,
+				maybe_unserialize( $post->post_content ),
 				$meta,
 				$post->ID
 			);
@@ -146,7 +146,7 @@ class Keyring_SingleStore extends Keyring_Store {
 						'service',
 						true
 					),
-					$post->post_content,
+					maybe_unserialize( $post->post_content ),
 					$meta,
 					$post->ID
 				);

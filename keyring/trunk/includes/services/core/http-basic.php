@@ -97,25 +97,12 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 			
 		
 		$token = base64_encode( $_POST['username'] . ':' . $_POST['password'] );
-		$params = array( 'headers' => array( 'Authorization' => 'Basic ' . $token ) );
+		$this->set_token( new Keyring_Token( $this->get_name(), $token, array() ) );
+		$res = $this->request( $this->verify_url, array( 'method' => $this->verify_method ) );
 		
-		switch ( strtoupper( $this->verify_method ) ) {
-		case 'GET':
-			$res = wp_remote_get( $this->verify_url, $params );
-			break;
-			
-		case 'POST':
-			$res = wp_remote_post( $this->verify_url, $params );
-			break;
-			
-		default;
-			wp_die( __( 'Unsupported method specified for verify_token.', 'keyring' ) );
-			exit;
-		}
-		
-		// We will get a 401 if they entered an incorrect user/pass combo
-		// TODO change so that anything except a 2xx/3xx triggers this?
-		if ( 200 != wp_remote_retrieve_response_code( $res ) ) {
+		// We will get a 401 if they entered an incorrect user/pass combo. ::request
+		// will then return a Keyring_Error
+		if ( Keyring_Util::is_error( $res ) ) {
 			$url = Keyring_Util::admin_url(
 				$this->get_name(),
 				array(
@@ -132,9 +119,7 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		if ( method_exists( $this, 'custom_verify_token' ) )
 			$this->custom_verify_token( $token );
 		
-		$meta = array( 'username' => $_POST['username'] );
-		if ( method_exists( $this, 'build_token_meta' ) )
-			$meta = $this->build_token_meta( $token );
+		$meta = array_merge( array( 'username' => $_POST['username'] ), $this->build_token_meta( $token ) );
 		
 		// If we didn't get a 401, then we'll assume it's OK
 		$id = $this->store_token( $token, $meta );

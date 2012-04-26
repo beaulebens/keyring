@@ -48,6 +48,16 @@ abstract class Keyring_Service {
 	 */
 	abstract function get_display( Keyring_Token $token );
 	
+	/**
+	 * Get an array of meta data to store with this token,
+	 *
+	 * @param Mixed $token 
+	 * @return Array containing keyed values to store along with this token
+	 */
+	function build_token_meta( $token ) {
+		return array();
+	}
+	
 	function __construct() {
 		$this->store = Keyring::get_token_store();
 		
@@ -208,7 +218,7 @@ abstract class Keyring_Service {
 		return $store->count( $c::NAME );
 	}
 	
-	function store_token( Keyring_Token $token, $meta ) {
+	function store_token( $token, $meta ) {
 		$meta['_classname'] = get_called_class();
 		$id = $this->store->insert( $this->get_name(), $token, $meta );
 		$this->set_token( $this->store->get_token( $this->get_name(), $id, $meta ) );

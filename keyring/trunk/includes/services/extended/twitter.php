@@ -31,10 +31,17 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 		
 		$this->requires_token( true );
 	}
+	
+	function build_token_meta( $token ) {
+		return array(
+			'user_id' => $token['user_id'],
+			'username' => $token['screen_name'],
+		);
+	}
 
 	function get_display( Keyring_Token $token ) {
 		$meta = $token->get_meta();
-		return '@' . $meta['screen_name'];
+		return '@' . $meta['username'];
 	}
 }
 
