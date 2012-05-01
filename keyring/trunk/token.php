@@ -44,7 +44,7 @@ class Keyring_Token {
 		if ( !$this->service ) {
 			$class = $this->get_meta( '_classname', true );
 			if ( $class && class_exists( $class ) ) {
-				$this->service = $class::init();
+				$this->service = call_user_func( array( $class, 'init' ) );
 			}
 		}
 		return $this->service;
