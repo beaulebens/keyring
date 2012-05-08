@@ -13,10 +13,9 @@
 class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 	/**
 	 * Tokens should be passed in the authorization header if the service supports it
-	 * and only fallback to the query string if neccessary
+	 * and only fallback to the query string if neccessary. Set to false to use ?oauth_token=
 	 */
-	var $authorization_header      = true;
-	var $authorization_header_type = 'OAuth';
+	var $authorization_header = 'OAuth';
 	
 	function request_token() {
 		$url = $this->authorize_url;
@@ -95,9 +94,9 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		if ( $this->token ) {
 			if ( $this->authorization_header ) {
 				// type can be OAuth, Bearer, ...
-				$params['headers']['Authorization'] = $this->authorization_header_type . ' ' . (string) $this->token;
+				$params['headers']['Authorization'] = $this->authorization_header . ' ' . (string) $this->token;
 			} else {
-				$url = add_query_arg( array( 'access_token' => urlencode( (string) $this->token ) ), $url );
+				$url = add_query_arg( array( 'oauth_token' => urlencode( (string) $this->token ) ), $url );
 			}
 		}
 		

@@ -24,7 +24,9 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 	protected $signature_method     = null;
 	protected $callback_url         = null;
 	
-	var $token                = null;
+	var $token                      = null;
+	var $authorization_header       = false;
+	var $authorization_realm        = '';
 	
 	function __construct() {
 		parent::__construct();
@@ -117,9 +119,9 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		}
 		
 		// Redirect user to get us an authorize token
-		$authorize = $this->authorize_url . '?oauth_token=' . urlencode( $token['oauth_token'] );
+		$authorize = add_query_arg( 'oauth_token', urlencode( $token['oauth_token'] ), $this->authorize_url ) ;
 		if ( $this->callback_url )
-			$authorize .= '&oauth_callback=' . urlencode( $this->callback_url );
+			$authorize = add_query_arg( 'oauth_callback', urlencode( $this->callback_url ), $authorize );
 		
 		Keyring_Util::debug( "OAuth Authorize Redirect: $authorize", KEYRING__DEBUG_NOTICE );
 		wp_redirect( $authorize );
@@ -176,13 +178,6 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			unset( $params['method'] );
 		}
 		
-		$query = '';
-		$parsed = parse_url( $url );
-		if ( !empty( $parsed['query'] ) && 'POST' == $method ) {
-			$url = str_replace( $parsed['query'], '', $url );
-			$query = $parsed['query'];
-		}
-		
 		$token = $this->token->token ? $this->token->token : null;
 		Keyring_Util::debug( $token );
 		
@@ -198,17 +193,37 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			$this->consumer,
 			$token
 		);
+		$request_url = (string) $req;
 		
-		Keyring_Util::debug( "OAuth1 Request URL: $req" );
+		if ( $this->token && $this->authorization_header ) {
+			$header = $req->to_header( $this->authorization_realm ); // Gives a complete header string, not just the second half
+			$bits = explode( ': ', $header );
+			$params['headers']['Authorization'] = $bits[1];
+			Keyring_Util::debug( $params );
+			
+			// oauth_verifier was probably added directly to the URL, need to manually remove it
+			$request_url = remove_query_arg( 'oauth_verifier', $url );
+		}
+		
+		$query = '';
+		$parsed = parse_url( $request_url );
+		if ( !empty( $parsed['query'] ) && 'POST' == $method ) {
+			$request_url = str_replace( '?' . $parsed['query'], '', $request_url );
+			$query = $parsed['query'];
+		}
+		
+		Keyring_Util::debug( "OAuth1 Request URL: $request_url" );
 		switch ( $method ) {
 		case 'GET':
-			$res = wp_remote_get( (string) $req, $params );
+			Keyring_Util::debug( 'OAuth1 GET ' . $request_url );
+			$res = wp_remote_get( $request_url, $params );
 			break;
 			
 		case 'POST':
-			// TODO support POST (test post-body etc)
 			$params = array_merge( array( 'body' => $query, 'sslverify' => false ), $params );
-			$res = wp_remote_post( (string) $req, $params );
+			Keyring_Util::debug( 'OAuth1 POST ' . $request_url );
+			Keyring_Util::debug( $params );
+			$res = wp_remote_post( $request_url, $params );
 			break;
 			
 		default:

@@ -14,8 +14,8 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 	protected $verify_method = null;
 	protected $token         = null;
 	
-	function __construct( $token = false ) {
-		parent::__construct( $token );
+	function __construct() {
+		parent::__construct();
 		
 		add_action( 'keyring_' . $this->get_name() . '_request_ui', array( &$this, 'request_ui' ) );
 	}
