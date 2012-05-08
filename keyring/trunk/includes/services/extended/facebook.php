@@ -53,8 +53,7 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 	}
 	
 	function get_display( Keyring_Token $token ) {
-		$meta = $token->get_meta();
-		return $meta['name'];
+		return $token->get_meta( 'name' );
 	}
 	
 	function build_token_meta( $token ) {
