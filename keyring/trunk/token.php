@@ -25,7 +25,7 @@ class Keyring_Token {
 	}
 	
 	function __toString() {
-		return $this->token;
+		return (string) $this->token;
 	}
 	
 	function get_uniq_id() {

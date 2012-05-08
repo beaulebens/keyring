@@ -1,5 +1,16 @@
 <?php
 
+/**
+ * Provides the core admin UI (Tools > Keyring) which includes:
+ *  - managing Service credentials
+ *  - creating connections
+ *  - deleting connections
+ *  - (coming soon) managing active/inactive Services
+ * 
+ * Run Keyring with KEYRING__HEADLESS_MODE defined as true to disable all UI.
+ *
+ * @package Keyring
+ */
 class Keyring_Admin_UI {
 	var $keyring = false;
 	
@@ -58,7 +69,7 @@ class Keyring_Admin_UI {
 		// Output any errors if we have them, then stop, and link back to home.
 		if ( $this->keyring->has_errors() ) {
 			echo '<div id="keyring-admin-errors" class="updated"><ul>';
-			foreach ( $this->keyring->errors as $error ) {
+			foreach ( $this->keyring->get_errors() as $error ) {
 				echo "<li>" . esc_html( $error ) . "</li>";
 			}
 			echo '</ul></div>';
@@ -69,7 +80,7 @@ class Keyring_Admin_UI {
 		// Output any messages as part of the UI (don't abort).
 		if ( $this->keyring->has_messages() ) {
 			echo '<div id="keyring-admin-messages" class="updated"><ul>';
-			foreach ( $this->keyring->messages as $message ) {
+			foreach ( $this->keyring->get_messages() as $message ) {
 				echo "<li>" . esc_html( $message ) . "</li>";
 			}
 			echo '</ul></div>';
@@ -87,9 +98,9 @@ class Keyring_Admin_UI {
 				wp_die( __( 'Invalid/missing delete nonce.', 'keyring' ) );
 			
 			if ( $this->keyring->get_token_store()->delete( $_REQUEST['service'], (int) $_REQUEST['token'] ) )
-				$this->message( __( 'That token has been deleted.', 'keyring' ) );
+				Keyring::message( __( 'That token has been deleted.', 'keyring' ) );
 			else
-				$this->error( __( 'Could not delete that token!', 'keyring' ) );
+				Keyring::error( __( 'Could not delete that token!', 'keyring' ) );
 		}
 		
 		// Set up our defaults
