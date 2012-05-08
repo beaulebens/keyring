@@ -40,8 +40,7 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 	}
 
 	function get_display( Keyring_Token $token ) {
-		$meta = $token->get_meta();
-		return '@' . $meta['username'];
+		return '@' . $token->get_meta( 'username' );
 	}
 }
 
