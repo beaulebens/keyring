@@ -41,13 +41,11 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 		$this->set_token( $token );
 		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
 		if ( !Keyring_Util::is_error( $res ) ) {
-			if ( $res = json_decode( $res ) ) {
-				$meta = array(
-					'user_id'   => $res->response->user->id,
-					'firstName' => $res->response->user->firstName,
-					'lastName'  => $res->response->user->lastName,
-				);
-			}
+			$meta = array(
+				'user_id'   => $res->response->user->id,
+				'firstName' => $res->response->user->firstName,
+				'lastName'  => $res->response->user->lastName,
+			);
 		}
 		return $meta;
 	}

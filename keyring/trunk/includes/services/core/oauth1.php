@@ -51,7 +51,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			wp_die( __( 'Invalid/missing request nonce.', 'keyring' ) );
 		
 		$request_token_url = add_query_arg( array( 'oauth_callback' => urlencode( $this->callback_url ) ), $this->request_token_url );
-		
+
 		// Set up OAuth request
 		$req = OAuthRequest::from_consumer_and_token(
 			$this->consumer,
@@ -145,7 +145,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		// Set up a consumer token and make the request for an access_token
 		$token = new OAuthConsumer( $token, $secret );
 		$this->set_token( new Keyring_Token( $this->get_name(), $token, array() ) );
-		$res = $this->request( $access_token_url, array( 'method' => $this->access_token_method ) );
+		$res = $this->request( $access_token_url, array( 'method' => $this->access_token_method, 'raw_response' => true ) );
 		Keyring_Util::debug( $res );
 		
 		if ( !Keyring_Util::is_error( $res ) ) {
@@ -172,21 +172,42 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		if ( $this->requires_token() && empty( $this->token ) )
 			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
 		
+		$raw_response = false;
+		if ( isset( $params['raw_response'] ) ) {
+			$raw_response = (bool) $params['raw_response'];
+			unset( $params['raw_response'] );
+		}
+		
 		$method = 'GET';
 		if ( isset( $params['method'] ) ) {
 			$method = strtoupper( $params['method'] );
 			unset( $params['method'] );
 		}
 		
+		$sign_parameters = true;
+		if ( isset( $params['sign_parameters'] ) ) {
+			$sign_parameters = (bool) $params['sign_parameters'];
+			unset( $params['sign_parameters'] );
+		}
+		
 		$token = $this->token->token ? $this->token->token : null;
 		Keyring_Util::debug( $token );
 		
+		$sign_vars = false;
+		if ( isset( $params['body'] ) && $sign_parameters ) {
+			if ( is_string( $params['body'] ) ) {
+				wp_parse_str( $params['body'], $sign_vars );
+			} elseif ( is_array( $params['body'] ) ) {
+				$sign_vars = $params['body'];
+			}
+		}
+				
 		$req = OAuthRequest::from_consumer_and_token(
 			$this->consumer,
 			$token,
 			$method,
 			$url,
-			$params
+			$sign_vars
 		);
 		$req->sign_request(
 			$this->signature_method,
@@ -197,7 +218,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		
 		if ( $this->token && $this->authorization_header ) {
 			$header = $req->to_header( $this->authorization_realm ); // Gives a complete header string, not just the second half
-			$bits = explode( ': ', $header );
+			$bits = explode( ': ', $header, 2 );
 			$params['headers']['Authorization'] = $bits[1];
 			Keyring_Util::debug( $params );
 			
@@ -226,6 +247,11 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			$res = wp_remote_post( $request_url, $params );
 			break;
 			
+		case 'PUT':
+			$params = array_merge( array( 'method' => 'PUT' ), $params );
+			$res = wp_remote_request( $request_url, $params );
+			break;
+			
 		default:
 			wp_die( __( 'Unsupported method specified.', 'keyring' ) );
 			exit;
@@ -233,9 +259,27 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		
 		Keyring_Util::debug( $res );
 		if ( 200 == wp_remote_retrieve_response_code( $res ) ) {
-			return wp_remote_retrieve_body( $res );
+			if ( $raw_response )
+				return wp_remote_retrieve_body( $res );
+			else
+				return $this->parse_response( wp_remote_retrieve_body( $res ) );
 		} else {
 			return new Keyring_Error( 'keyring-request-error', $res );
 		}
+	}
+	
+	/**
+	 * This method is provided as a base point for parsing/decoding response
+	 * values provided by ->request(). Different services encode their responses
+	 * differently, but this provides a standardized place to handle that. You
+	 * may use JSON, XML, parse_str or some other, completely unique method here
+	 * to provide more workable data structures based on the responses from a
+	 * Service's API. The default does nothing, just returns the string.
+	 *
+	 * @param string $response 
+	 * @return Mixed data that is easier to work with, based on each Service
+	 */
+	function parse_response( $response ) {
+		return $response;
 	}
 }

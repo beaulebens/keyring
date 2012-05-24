@@ -26,6 +26,7 @@ And specific extensions for connecting to:
 * [Flickr](http://flickr.com/)
 * [Foursquare](http://foursquare.com/)
 * [Twitter](http://twitter.com/)
+* [Tumblr](http://tumblr.om/)
 
 You can very easily write your own Service definitions and then use all the power of Keyring to hook into that authentication flow (tutorial/code samples coming soon).
 
@@ -39,7 +40,7 @@ You can very easily write your own Service definitions and then use all the powe
 
 = Will Keyring work on my WordPress? =
 
-Keyring requires PHP 5.3+ to work, because it makes use of some modern features in PHP like late static binding and abstract classes. Other than that, as long as you meet the minimum required WP version, you should be OK to get started.
+Keyring requires PHP 5.3+ to work, because it makes use of some modern features in PHP like late static binding and abstract classes. Other than that, as long as you meet the minimum required WP version, you should be OK to get started. If you get a cryptic "T_PAAMAYIM_NEKUDOTAYIM" error, you need to upgrade to PHP 5.3+.
 
 Your webserver will also need to be able to make outbound HTTPS requests for some operations with some services to work correctly.
 

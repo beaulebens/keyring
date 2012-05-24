@@ -33,6 +33,10 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 		$this->authorization_realm = 'tumblr.com';
 	}
 	
+	function parse_response( $response ) {
+		return json_decode( $response );
+	}
+
 	function build_token_meta( $token ) {
 		// Set the token so that we can make requests using it
 		$this->set_token(
@@ -45,13 +49,11 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 			)
 		);
 	
-		$request = $this->request( 'http://api.tumblr.com/v2/user/info', array( 'method' => 'POST' ) );
+		$response = $this->request( 'http://api.tumblr.com/v2/user/info', array( 'method' => 'POST' ) );
 		
-		if ( Keyring_Util::is_error( $request ) ) {
+		if ( Keyring_Util::is_error( $response ) )
 			return array();
-		}
 		
-		$response = json_decode( $request );
 		$this->person = $response->response->user;
 		
 		$meta = array(

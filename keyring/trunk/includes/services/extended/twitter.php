@@ -32,6 +32,10 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 		$this->requires_token( true );
 	}
 	
+	function parse_response( $response ) {
+		return json_decode( $response );
+	}
+	
 	function build_token_meta( $token ) {
 		return array(
 			'user_id' => $token['user_id'],
