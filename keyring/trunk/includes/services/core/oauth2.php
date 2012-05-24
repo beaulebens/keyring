@@ -100,6 +100,12 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			}
 		}
 		
+		$raw_response = false;
+		if ( isset( $params['raw_response'] ) ) {
+			$raw_response = (bool) $params['raw_response'];
+			unset( $params['raw_response'] );
+		}
+		
 		$method = 'GET';
 		if ( isset( $params['method'] ) ) {
 			$method = strtoupper( $params['method'] );
@@ -129,8 +135,19 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		}
 		
 		if ( 200 == wp_remote_retrieve_response_code( $res ) )
-			return wp_remote_retrieve_body( $res );
+			if ( $raw_response )
+				return wp_remote_retrieve_body( $res );
+			else
+				return $this->parse_response( wp_remote_retrieve_body( $res ) );
 		else
 			return new Keyring_Error( 'keyring-request-error', $res );
+	}
+	
+	/**
+	 * OAuth2 implementations generally use JSON. You can still override this
+	 * per service if you like, but by default we'll assume JSON.
+	 */
+	function parse_response( $response ) {
+		return json_decode( $response );
 	}
 }

@@ -61,8 +61,6 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 		$this->set_token( $token );
 		$me = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
 		if ( !Keyring_Util::is_error( $me ) ) {
-			$me = json_decode( $me );
-			
 			return array(
 				'username' => $me->username,
 				'user_id'  => $me->id,
