@@ -96,6 +96,14 @@ class Keyring {
 	 * almost everything. Based entirely on $_REQUEST[page|action|service]
 	 */
 	function request_handlers() {
+		global $current_user;
+
+		if ( defined( 'KEYRING__FORCE_USER' ) && KEYRING__FORCE_USER && in_array( $_REQUEST['action'], array( 'request', 'verify' ) ) ) {
+			global $current_user;
+			$real_user = $current_user->ID;
+			wp_set_current_user( KEYRING__FORCE_USER );
+		}
+		
 		if (
 				( isset( $_REQUEST['page'] ) && 'keyring' == $_REQUEST['page'] )
 			&&
@@ -113,6 +121,9 @@ class Keyring {
 			
 			do_action( "keyring_{$_REQUEST['service']}_{$_REQUEST['action']}", $_REQUEST );
 		}
+		
+		if ( defined( 'KEYRING__FORCE_USER' ) && KEYRING__FORCE_USER && in_array( $_REQUEST['action'], array( 'request', 'verify' ) ) )
+			wp_set_current_user( $real_user );
 	}
 	
 	static function register_service( Keyring_Service $service ) {
@@ -149,9 +160,10 @@ class Keyring {
 		$keyring->messages[] = $str;
 	}
 	
-	static function error( $str ) {
+	static function error( $str, $debug_info = array() ) {
 		$keyring = Keyring::init();
 		$keyring->errors[] = $str;
+		do_action( 'keyring_error', $str, $debug_info );
 	}
 	
 	function has_errors() {
@@ -160,14 +172,6 @@ class Keyring {
 	
 	function has_messages() {
 		return count( $this->messages );
-	}
-	
-	function get_errors() {
-		return (array) $this->errors;
-	}
-	
-	function get_messages() {
-		return (array) $this->messages;
 	}
 }
 

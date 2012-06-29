@@ -12,7 +12,7 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 		parent::__construct();
 		
 		// Enable "basic" UI for entering key/secret
-		add_action( 'keyring_flickr_manage_ui', array( &$this, 'basic_ui' ) );
+		add_action( 'keyring_flickr_manage_ui', array( $this, 'basic_ui' ) );
 		
 		$this->set_endpoint( 'request_token', 'http://www.flickr.com/services/oauth/request_token', 'GET' );
 		$this->set_endpoint( 'authorize',     'http://www.flickr.com/services/oauth/authorize',     'GET' );

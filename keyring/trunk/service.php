@@ -62,8 +62,8 @@ abstract class Keyring_Service {
 		$this->store = Keyring::get_token_store();
 		
 		// Default methods for handling actions, should always be defined (thus abstract, see above)
-		add_action( 'keyring_' . $this->get_name() . '_request', array( &$this, 'request_token' ) );
-		add_action( 'keyring_' . $this->get_name() . '_verify', array( &$this, 'verify_token' ) );
+		add_action( 'keyring_' . $this->get_name() . '_request', array( $this, 'request_token' ) );
+		add_action( 'keyring_' . $this->get_name() . '_verify', array( $this, 'verify_token' ) );
 	}
 	
 	static function &init() {
@@ -112,10 +112,10 @@ abstract class Keyring_Service {
 	function get_label() {
 		$c = get_called_class();
 		if ( '' != $c::LABEL )
-			$name = $c::LABEL;
+			$label = $c::LABEL;
 		else
-			$name = $this->get_name();
-		return $name;
+			$label = $this->get_name();
+		return $label;
 	}
 	
 	function set_endpoint( $type, $url, $method = 'GET' ) {
@@ -201,12 +201,11 @@ abstract class Keyring_Service {
 		$c = get_called_class();
 		
 		// If something else needs to be done, do it
-		do_action( 'keyring_' . $c::NAME . '_after_verification', $c::NAME, $id );
-		do_action( 'keyring_all_after_verification', $c::NAME, $id );
+		do_action( 'keyring_connection_verified', $c::NAME, $id );
 		
 		// Back to Keyring admin, with ?service=SERVICE&created=UNIQUE_ID&kr_nonce=NONCE
 		$kr_nonce = wp_create_nonce( 'keyring-created' );
-		$url = Keyring_Util::admin_url( $c::NAME, array( 'action' => 'created', 'id' => $id, 'kr_nonce' => $kr_nonce ) );
+		$url = apply_filters( 'keyring_verified_redirect', Keyring_Util::admin_url( $c::NAME, array( 'action' => 'created', 'id' => $id, 'kr_nonce' => $kr_nonce ) ), $c::NAME );
 		Keyring_Util::debug( $url );
 		wp_safe_redirect( $url );
 		exit;
@@ -221,7 +220,15 @@ abstract class Keyring_Service {
 	function store_token( $token, $meta ) {
 		$meta['_classname'] = get_called_class();
 		$id = $this->store->insert( $this->get_name(), $token, $meta );
-		$this->set_token( $this->store->get_token( $this->get_name(), $id, $meta ) );
+		if ( !$id ) {
+			return $id;
+		}
+
+		$get_token = $this->store->get_token( $this->get_name(), $id, $meta );
+		if ( $get_token ) {
+			$this->set_token( $get_token );
+		}
+
 		return $id;
 	}
 	
@@ -245,6 +252,6 @@ abstract class Keyring_Service {
 $keyring_services = glob( dirname( __FILE__ ) . "/includes/services/core/*.php" );
 $keyring_services = array_merge( $keyring_services, glob( dirname( __FILE__ ) . "/includes/services/extended/*.php" ) );
 $keyring_services = apply_filters( 'keyring_services', $keyring_services );
-foreach ( $keyring_services as $service )
-	require $service;
-unset( $keyring_services );
+foreach ( $keyring_services as $keyring_service )
+	require $keyring_service;
+unset( $keyring_services, $keyring_service );

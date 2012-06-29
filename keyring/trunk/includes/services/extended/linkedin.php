@@ -10,8 +10,12 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth1 {
 	const NAME  = 'linkedin';
 	const LABEL = 'LinkedIn';
 
-	function __construct( $token = false ) {
-		parent::__construct( $token );
+	function __construct() {
+		parent::__construct();
+		
+		$this->authorization_header = true;
+		$this->authorization_realm = "api.linkedin.com";
+		
 		$this->set_endpoint( 'request_token', 'https://api.linkedin.com/uas/oauth/requestToken', 'POST' );
 		$this->set_endpoint( 'authorize',     'https://api.linkedin.com/uas/oauth/authorize',    'GET'  );
 		$this->set_endpoint( 'access_token',  'https://api.linkedin.com/uas/oauth/accessToken',  'GET'  );
@@ -25,7 +29,10 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth1 {
 	}
 	
 	function parse_response( $response ) {
-		return json_decode( $response );
+		if ( '<?xml' == substr( $response, 0, 5 ) ) // Errors always come back as XML
+			return simplexml_load_string( $response );
+		else
+			return json_decode( $response );
 	}
 	
 	function build_token_meta( $token ) {
@@ -57,6 +64,7 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth1 {
 		
 		return $meta;
 	}
+
 }
 
 add_action( 'keyring_load_services', array( 'Keyring_Service_LinkedIn', 'init' ) );

@@ -36,7 +36,7 @@ class Keyring_Token {
 	
 	function get_display() {
 		if ( $service = $this->get_service() )
-			return $service->get_display( &$this );
+			return $service->get_display( $this );
 		return $this->name;
 	}
 	
@@ -76,7 +76,24 @@ class Keyring_Token {
 				}
 			}
 		}
-		
+
 		return $return;
+	}
+	
+	/**
+	* Check if a token has expired, or will expire in the next $window seconds
+	**/
+	function is_expired( $window = 0 ) {
+		if ( !$expires = $this->get_meta( 'expires' ) )
+			return false; // No expires value, assume it's a permanent token
+		
+		if ( '0000-00-00 00:00:00' == $expires )
+			return false; // Doesn't expire
+		
+		if ( ( time() + $window ) > strtotime( $expires ) )
+			return true; // Token's expiry time has passed, or will pass before $window
+		
+		// Not expired
+		return false;
 	}
 }

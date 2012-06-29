@@ -16,11 +16,11 @@ class Keyring_Service_Example extends Keyring_Service {
 		// action is in the format "keyring_{$service}_{request/verify}_ui".
 		// These are optional, and are only required if you need the user to see/do something during
 		// each step.
-		add_action( 'keyring_example_request_ui', array( &$this, 'request_ui' ) );
-		add_action( 'keyring_example_verify_ui', array( &$this, 'verify_ui' ) );
+		add_action( 'keyring_example_request_ui', array( $this, 'request_ui' ) );
+		add_action( 'keyring_example_verify_ui', array( $this, 'verify_ui' ) );
 		
 		// Enable "basic" UI for entering key/secret, which a lot of services require
-		// add_action( 'keyring_example_manage_ui', array( &$this, 'basic_ui' ) );
+		// add_action( 'keyring_example_manage_ui', array( $this, 'basic_ui' ) );
 		
 		// Optionally make this a service that we can communicate with *without*
 		// requiring any sort of connection

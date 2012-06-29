@@ -17,7 +17,7 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 	function __construct() {
 		parent::__construct();
 		
-		add_action( 'keyring_' . $this->get_name() . '_request_ui', array( &$this, 'request_ui' ) );
+		add_action( 'keyring_' . $this->get_name() . '_request_ui', array( $this, 'request_ui' ) );
 	}
 	
 	function get_display( Keyring_Token $token ) {
@@ -139,22 +139,34 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 			unset( $params['method'] );
 		}
 		
+		$raw_response = false;
+		if ( isset( $params['raw_response'] ) ) {
+			$raw_response = (bool) $params['raw_response'];
+			unset( $params['raw_response'] );
+		}
+		
+		Keyring_Util::debug( "HTTP Basic $method $url" );
+		Keyring_Util::debug( $params );
+		
 		switch ( strtoupper( $method ) ) {
 		case 'GET':
 			$res = wp_remote_get( $url, $params );
 			break;
-			
+
 		case 'POST':
 			$res = wp_remote_post( $url, $params );
 			break;
-			
+
 		default:
 			wp_die( __( 'Unsupported method specified for verify_token.', 'keyring' ) );
 			exit;
 		}
 		
-		if ( 200 == wp_remote_retrieve_response_code( $res ) ) {
-			return wp_remote_retrieve_body( $res );
+		if ( 200 == wp_remote_retrieve_response_code( $res ) || 201 == wp_remote_retrieve_response_code( $res ) ) {
+			if ( $raw_response )
+				return wp_remote_retrieve_body( $res );
+			else
+				return $this->parse_response( wp_remote_retrieve_body( $res ) );
 		} else {
 			return new Keyring_Error( 'keyring-request-error', $res );
 		}

@@ -75,7 +75,6 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			$request_token_url = (string) $req;
 		}
 		
-		
 		// Get a request token
 		switch ( strtoupper( $this->request_token_method ) ) {
 		case 'GET':
@@ -201,7 +200,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 				$sign_vars = $params['body'];
 			}
 		}
-				
+		
 		$req = OAuthRequest::from_consumer_and_token(
 			$this->consumer,
 			$token,
@@ -258,7 +257,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		}
 		
 		Keyring_Util::debug( $res );
-		if ( 200 == wp_remote_retrieve_response_code( $res ) ) {
+		if ( 200 == wp_remote_retrieve_response_code( $res ) || 201 == wp_remote_retrieve_response_code( $res ) ) {
 			if ( $raw_response )
 				return wp_remote_retrieve_body( $res );
 			else

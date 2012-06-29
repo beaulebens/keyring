@@ -15,7 +15,7 @@ class Keyring_Admin_UI {
 	var $keyring = false;
 	
 	function __construct() {
-		add_action( 'admin_menu', array( &$this, 'admin_menu' ) );
+		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
 	}
 	
 	static function &init() {
@@ -38,13 +38,13 @@ class Keyring_Admin_UI {
 	}
 	
 	function admin_menu() {
-		$hook = add_management_page( 'Keyring', 'Keyring', 'read', 'keyring', array( &$this, 'admin_page' ), '' );
-		add_action( "load-$hook", array( &$this, 'admin_page_load' ) );
+		$hook = add_management_page( 'Keyring', 'Keyring', 'read', 'keyring', array( $this, 'admin_page' ), '' );
+		add_action( "load-$hook", array( $this, 'admin_page_load' ) );
 	}
 	
 	function admin_page_load() {
 		$this->keyring = Keyring::init();
-		add_action( 'admin_head', array( &$this, 'inline_css' ) );
+		add_action( 'admin_head', array( $this, 'inline_css' ) );
 	}
 	
 	function admin_page_header( $screen = false ) {
