@@ -10,8 +10,8 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 	const NAME  = 'yahoo';
 	const LABEL = 'Yahoo! Updates';
 
-	function __construct( $token = false ) {
-		parent::__construct( $token );
+	function __construct() {
+		parent::__construct();
 		$this->set_endpoint( 'request_token', 'https://api.login.yahoo.com/oauth/v2/get_request_token', 'POST' );
 		$this->set_endpoint( 'authorize',     'https://api.login.yahoo.com/oauth/v2/request_auth',      'GET' );
 		$this->set_endpoint( 'access_token',  'https://api.login.yahoo.com/oauth/v2/get_token',         'POST' );
@@ -28,6 +28,26 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 		return json_decode( $response );
 	}
 	
+	function custom_token_object( $token_object, $token ) {
+		$token_object->guid = $token['xoauth_yahoo_guid'];
+		$token_object->consumer = $this->key;
+		$token_object->sessionHandle = $token['oauth_session_handle'];
+		
+		$now = time();
+		
+		if( !empty( $token['oauth_expires_in'] ) ) 
+			$token_object->tokenExpires = $now + $token["oauth_expires_in"];
+		else
+			$token_object->tokenExpires = -1;
+
+		if ( !empty( $token['oauth_authorization_expires_in'] ) )
+			$token_object->handleExpires = $now + $token["oauth_authorization_expires_in"];
+		else
+			$token_object->handleExpires = -1;
+			
+		return $token_object;
+	}
+
 	function build_token_meta( $token ) {
 		$expires = isset( $token['oauth_expires_in'] ) ? gmdate( 'Y-m-d H:i:s', time() + $token['oauth_expires_in'] ) : 0;
 		Keyring_Util::debug( $token );

@@ -12,7 +12,7 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 		parent::__construct();
 		
 		// Enable "basic" UI for entering key/secret
-		add_action( 'keyring_tumblr_manage_ui', array( &$this, 'basic_ui' ) );
+		add_action( 'keyring_tumblr_manage_ui', array( $this, 'basic_ui' ) );
 		
 		$this->set_endpoint( 'request_token', 'http://www.tumblr.com/oauth/request_token', 'POST' );
 		$this->set_endpoint( 'authorize',     'http://www.tumblr.com/oauth/authorize',     'GET' );
@@ -62,7 +62,7 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 		
 		return $meta;
 	}
-	
+
 	function get_display( Keyring_Token $token ) {
 		return $token->get_meta( 'name' );
 	}

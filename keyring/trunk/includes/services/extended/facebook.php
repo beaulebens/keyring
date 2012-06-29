@@ -12,7 +12,7 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 		parent::__construct();
 		
 		// Enable "basic" UI for entering key/secret
-		add_action( 'keyring_facebook_manage_ui', array( &$this, 'basic_ui' ) );
+		add_action( 'keyring_facebook_manage_ui', array( $this, 'basic_ui' ) );
 		
 		$this->set_endpoint( 'access_token', 'https://graph.facebook.com/oauth/access_token', 'GET' );
 		$this->set_endpoint( 'self',         'https://graph.facebook.com/me',                 'GET' );

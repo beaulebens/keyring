@@ -88,15 +88,18 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 	}
 	
 	function request( $url, array $params = array() ) {
+		
 		if ( $this->requires_token() && empty( $this->token ) )
 			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
 		
-		if ( $this->token ) {
+		$token = $this->token->token ? $this->token->token : null;
+		
+		if ( is_object( $token ) && $token->key ) {
 			if ( $this->authorization_header ) {
 				// type can be OAuth, Bearer, ...
-				$params['headers']['Authorization'] = $this->authorization_header . ' ' . (string) $this->token;
+				$params['headers']['Authorization'] = $this->authorization_header . ' ' . (string) $token->key;
 			} else {
-				$url = add_query_arg( array( 'oauth_token' => urlencode( (string) $this->token ) ), $url );
+				$url = add_query_arg( array( 'oauth_token' => urlencode( (string) $token->key ) ), $url );
 			}
 		}
 		
@@ -134,7 +137,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			exit;
 		}
 		
-		if ( 200 == wp_remote_retrieve_response_code( $res ) )
+		if ( 200 == wp_remote_retrieve_response_code( $res ) || 201 == wp_remote_retrieve_response_code( $res ) )
 			if ( $raw_response )
 				return wp_remote_retrieve_body( $res );
 			else
