@@ -173,6 +173,14 @@ class Keyring {
 	function has_messages() {
 		return count( $this->messages );
 	}
+
+	function get_messages() {
+		return $this->messages;
+	}
+
+	function get_errors() {
+		return $this->errors;
+	}
 }
 
 class Keyring_Util {

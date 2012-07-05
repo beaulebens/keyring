@@ -92,14 +92,14 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		if ( $this->requires_token() && empty( $this->token ) )
 			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
 		
-		$token = $this->token->token ? $this->token->token : null;
+		$token = $this->token ? $this->token : null;
 		
-		if ( is_object( $token ) && $token->key ) {
+		if ( !is_null( $token ) ) {
 			if ( $this->authorization_header ) {
 				// type can be OAuth, Bearer, ...
-				$params['headers']['Authorization'] = $this->authorization_header . ' ' . (string) $token->key;
+				$params['headers']['Authorization'] = $this->authorization_header . ' ' . (string) $token;
 			} else {
-				$url = add_query_arg( array( 'oauth_token' => urlencode( (string) $token->key ) ), $url );
+				$url = add_query_arg( array( 'oauth_token' => urlencode( (string) $token ) ), $url );
 			}
 		}
 		
@@ -121,6 +121,9 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			$url = str_replace( $parsed['query'], '', $url );
 			$query = $parsed['query'];
 		}
+
+		Keyring_Util::debug( 'OAuth2 Params' );
+		Keyring_Util::debug( $params );
 		
 		switch ( strtoupper( $method ) ) {
 		case 'GET':
@@ -136,6 +139,9 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			wp_die( __( 'Unsupported method specified for request_token.', 'keyring' ) );
 			exit;
 		}
+
+		Keyring_Util::debug( 'OAuth2 Response' );
+		Keyring_Util::debug( $res );
 		
 		if ( 200 == wp_remote_retrieve_response_code( $res ) || 201 == wp_remote_retrieve_response_code( $res ) )
 			if ( $raw_response )
