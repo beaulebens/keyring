@@ -161,6 +161,8 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 			wp_die( __( 'Unsupported method specified for verify_token.', 'keyring' ) );
 			exit;
 		}
+
+		Keyring_Util::debug( $res );
 		
 		if ( 200 == wp_remote_retrieve_response_code( $res ) || 201 == wp_remote_retrieve_response_code( $res ) ) {
 			if ( $raw_response )

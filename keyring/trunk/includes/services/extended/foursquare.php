@@ -10,6 +10,8 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 	const NAME  = 'foursquare';
 	const LABEL = 'Foursquare';
 	
+	const API_VERSION = '20120701';
+
 	var $self_url    = '';
 	var $self_method = '';
 
@@ -53,6 +55,11 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 	function get_display( Keyring_Token $token ) {
 		$meta = $token->get_meta();
 		return ltrim( $meta['firstName'] . ' ' . $meta['lastName'] ) . ' (' . $meta['user_id'] . ')';
+	}
+
+	function request( $url, array $params = array() ) {
+		$url = add_query_arg( array( 'v' => self::API_VERSION ), $url );
+		return parent::request( $url, $params );
 	}
 }
 
