@@ -9,7 +9,7 @@ Author URI: http://dentedreality.com.au
 */
 
 // Define this in your wp-config (and set to true) to enable debugging
-defined( 'KEYRING__DEBUG_MODE' ) or define( 'KEYRING__DEBUG_MODE', true );
+defined( 'KEYRING__DEBUG_MODE' ) or define( 'KEYRING__DEBUG_MODE', false );
 
 // The name of a class which extends Keyring_Store to handle storage/manipulation of tokens.
 // Optionally define this in your wp-config.php or some other global config file.
@@ -69,10 +69,10 @@ class Keyring {
 		require_once dirname( __FILE__ ) . '/service.php';
 
 		// Initiate Keyring
-		add_action( 'init', array( 'Keyring', 'init' ) );
+		add_action( 'init', array( 'Keyring', 'init' ), 1 );
 
 		// Load external Services (plugins etc should hook to this to define new ones/extensions)
-		add_action( 'init', array( 'Keyring', 'load_services' ) );
+		add_action( 'init', array( 'Keyring', 'load_services' ), 2 );
 
 		/**
 		 * And trigger request handlers, which plugins and extended Services use to handle UI,
