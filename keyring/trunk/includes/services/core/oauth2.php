@@ -3,7 +3,7 @@
 /**
  * Spec OAuth2 implementation for services using OAuth for authentication.
  * You will want to define an authorize and access_token endpoint. Keyring
- * will walk the user through the OAuth dance. Once an access token is 
+ * will walk the user through the OAuth dance. Once an access token is
  * obtained, it's considered verified. You may still want to do an additional
  * request to get some details or verify something specific. To do that, hook
  * something to 'keyring_SERVICE_post_verification' (see Keyring_Service::verified())
@@ -16,7 +16,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 	 * and only fallback to the query string if neccessary. Set to false to use ?oauth_token=
 	 */
 	var $authorization_header = 'OAuth';
-	
+
 	function request_token() {
 		$url = $this->authorize_url;
 		if ( !stristr( $url, '?' ) )
@@ -30,7 +30,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		wp_redirect( $url . http_build_query( $params ) );
 		exit;
 	}
-	
+
 	function verify_token() {
 		if ( !isset( $_GET['code'] ) ) {
 			Keyring::error(
@@ -38,7 +38,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			);
 			return false;
 		}
-		
+
 		$url = $this->access_token_url;
 		if ( !stristr( $url, '?' ) )
 			$url .= '?';
@@ -54,15 +54,15 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		if ( 200 == wp_remote_retrieve_response_code( $res ) ) {
 			$token = wp_remote_retrieve_body( $res );
 			Keyring_Util::debug( $token );
-			
+
 			$token = $this->parse_access_token( $token );
-			
+
 			if ( is_array( $token ) ) {
 				if ( method_exists( $this, 'custom_verify_token' ) )
 					$this->custom_verify_token( $token );
 
 				$meta = $this->build_token_meta( $token );
-				
+
 				$this->store_token( $token['access_token'], $meta );
 				wp_redirect( Keyring_Util::admin_url() );
 				exit;
@@ -73,7 +73,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		);
 		return false;
 	}
-	
+
 	/**
 	 * The OAuth2 spec indicates that responses should be in JSON, but separating
 	 * this allows different services to potentially use querystring-encoded
@@ -86,14 +86,14 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 	function parse_access_token( $token ) {
 		return (array) json_decode( $token );
 	}
-	
+
 	function request( $url, array $params = array() ) {
-		
+
 		if ( $this->requires_token() && empty( $this->token ) )
 			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
-		
+
 		$token = $this->token ? $this->token : null;
-		
+
 		if ( !is_null( $token ) ) {
 			if ( $this->authorization_header ) {
 				// type can be OAuth, Bearer, ...
@@ -102,19 +102,19 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 				$url = add_query_arg( array( 'oauth_token' => urlencode( (string) $token ) ), $url );
 			}
 		}
-		
+
 		$raw_response = false;
 		if ( isset( $params['raw_response'] ) ) {
 			$raw_response = (bool) $params['raw_response'];
 			unset( $params['raw_response'] );
 		}
-		
+
 		$method = 'GET';
 		if ( isset( $params['method'] ) ) {
 			$method = strtoupper( $params['method'] );
 			unset( $params['method'] );
 		}
-		
+
 		$query = '';
 		$parsed = parse_url( $url );
 		if ( !empty( $parsed['query'] ) && 'POST' == $method ) {
@@ -124,17 +124,17 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 
 		Keyring_Util::debug( 'OAuth2 Params' );
 		Keyring_Util::debug( $params );
-		
+
 		switch ( strtoupper( $method ) ) {
 		case 'GET':
 			$res = wp_remote_get( $url, $params );
 			break;
-			
+
 		case 'POST':
 			$params = array_merge( array( 'body' => $query, 'sslverify' => false ), $params );
 			$res = wp_remote_post( $url, $params );
 			break;
-			
+
 		default:
 			wp_die( __( 'Unsupported method specified for request_token.', 'keyring' ) );
 			exit;
@@ -142,7 +142,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 
 		Keyring_Util::debug( 'OAuth2 Response' );
 		Keyring_Util::debug( $res );
-		
+
 		if ( 200 == wp_remote_retrieve_response_code( $res ) || 201 == wp_remote_retrieve_response_code( $res ) )
 			if ( $raw_response )
 				return wp_remote_retrieve_body( $res );
@@ -151,7 +151,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		else
 			return new Keyring_Error( 'keyring-request-error', $res );
 	}
-	
+
 	/**
 	 * OAuth2 implementations generally use JSON. You can still override this
 	 * per service if you like, but by default we'll assume JSON.
