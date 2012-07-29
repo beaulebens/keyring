@@ -5,7 +5,7 @@
  * MUST extend this. These engines are used for storing and managing
  * authentication tokens for remote Services. Use $meta to handle any
  * custom requirements (access v request tokens, scope, etc)
- * 
+ *
  * @package Keyring
  */
 abstract class Keyring_Store {
@@ -13,7 +13,7 @@ abstract class Keyring_Store {
 	 * Any set up required to initiate this storage engine.
 	 */
 	abstract static function &init();
-	
+
 	/**
 	 * Insert a new token into this storage engine.
 	 *
@@ -23,7 +23,7 @@ abstract class Keyring_Store {
 	 *                     Meta values with a leading "_" are considered "hidden" in core UI
 	 */
 	abstract function insert( $service, $token, $meta = array() );
-	
+
 	/**
 	 * Update an existing token with a new token value and/or metadata.
 	 *
@@ -33,7 +33,7 @@ abstract class Keyring_Store {
 	 * @param mixed $meta The new (array) meta values (pass false to leave it unchanged)
 	 */
 	abstract function update( $service, $id, $token = false, $meta = false );
-	
+
 	/**
 	 * Delete a stored token permanently.
 	 *
@@ -42,7 +42,7 @@ abstract class Keyring_Store {
 	 * @param mixed $meta Array of meta values that may help delete additional information for this token
 	 */
 	abstract function delete( $service, $id = false, $meta = false );
-	
+
 	/**
 	 * Get an array of tokens for $service. If an $id is provided, then only get that single
 	 * specific token (for the specified service). Include '_classname' corresponding
@@ -55,13 +55,13 @@ abstract class Keyring_Store {
 	 * @return An array containing all tokens for a service, or a single token if $id is specified. False if none found.
 	 */
 	abstract function get_tokens( $service, $meta = false );
-	
+
 	/**
 	 * Singular version of ::get_tokens(). Functions exactly the same, but
 	 * only ever returns one token.
 	 */
 	abstract function get_token( $service, $id = false, $meta = false );
-	
+
 	/**
 	 * Get all tokens within this storage engine.
 	 *
@@ -69,7 +69,7 @@ abstract class Keyring_Store {
 	 * @return Array containing all tokens for this engine, false if none.
 	 */
 	abstract function get_all_tokens( $meta = false );
-	
+
 	/**
 	 * Get the number of tokens for a service
 	 *

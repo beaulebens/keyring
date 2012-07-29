@@ -12,29 +12,29 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth1 {
 
 	function __construct() {
 		parent::__construct();
-		
+
 		$this->authorization_header = true;
 		$this->authorization_realm = "api.linkedin.com";
-		
+
 		$this->set_endpoint( 'request_token', 'https://api.linkedin.com/uas/oauth/requestToken', 'POST' );
 		$this->set_endpoint( 'authorize',     'https://api.linkedin.com/uas/oauth/authorize',    'GET'  );
 		$this->set_endpoint( 'access_token',  'https://api.linkedin.com/uas/oauth/accessToken',  'GET'  );
-		
+
 		$this->app_id = KEYRING__LINKEDIN_ID;
 		$this->key = KEYRING__LINKEDIN_KEY;
 		$this->secret = KEYRING__LINKEDIN_SECRET;
-		
+
 		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
 	}
-	
+
 	function parse_response( $response ) {
 		if ( '<?xml' == substr( $response, 0, 5 ) ) // Errors always come back as XML
 			return simplexml_load_string( $response );
 		else
 			return json_decode( $response );
 	}
-	
+
 	function build_token_meta( $token ) {
 		// Set the token so that we can make requests using it
 		$this->set_token(
@@ -49,19 +49,19 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth1 {
 				)
 			)
 		);
-		
+
 		// Get user profile information
 		$response = $this->request( "https://api.linkedin.com/v1/people/~:(id,formatted-name)?format=json" );
-		
+
 		if ( Keyring_Util::is_error( $response ) )
 			return array();
-		
+
 		$this->person = $response;
 		$meta = array(
 			'user_id' => $this->person->id,
 			'name'    => $this->person->formattedName,
 		);
-		
+
 		return $meta;
 	}
 

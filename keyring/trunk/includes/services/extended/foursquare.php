@@ -9,7 +9,7 @@
 class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 	const NAME  = 'foursquare';
 	const LABEL = 'Foursquare';
-	
+
 	const API_VERSION = '20120701';
 
 	var $self_url    = '';
@@ -17,14 +17,14 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 
 	function __construct() {
 		parent::__construct();
-		
+
 		// Enable "basic" UI for entering key/secret
 		add_action( 'keyring_foursquare_manage_ui', array( $this, 'basic_ui' ) );
-		
+
 		$this->set_endpoint( 'authorize',    'https://foursquare.com/oauth2/authenticate', 'GET' );
 		$this->set_endpoint( 'access_token', 'https://foursquare.com/oauth2/access_token', 'GET' );
 		$this->set_endpoint( 'self',         'https://api.foursquare.com/v2/users/self',   'GET' );
-		
+
 		if ( $creds = $this->get_credentials() ) {
 			$this->key = $creds['key'];
 			$this->secret = $creds['secret'];
@@ -32,11 +32,11 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 			$this->key = KEYRING__FOURSQUARE_KEY;
 			$this->secret = KEYRING__FOURSQUARE_SECRET;
 		}
-		
+
 		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
 	}
-	
+
 	function build_token_meta( $token ) {
 		$meta = array();
 		$token = new Keyring_Token( $this->get_name(), $token['access_token'], array() );
@@ -51,7 +51,7 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 		}
 		return $meta;
 	}
-	
+
 	function get_display( Keyring_Token $token ) {
 		$meta = $token->get_meta();
 		return ltrim( $meta['firstName'] . ' ' . $meta['lastName'] ) . ' (' . $meta['user_id'] . ')';
