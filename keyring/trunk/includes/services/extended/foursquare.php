@@ -54,6 +54,8 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 
 	function get_display( Keyring_Token $token ) {
 		$meta = $token->get_meta();
+		if ( empty( $meta['user_id'] ) )
+			return (string) $token;
 		return ltrim( $meta['firstName'] . ' ' . $meta['lastName'] ) . ' (' . $meta['user_id'] . ')';
 	}
 
