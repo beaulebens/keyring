@@ -23,9 +23,10 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			$url .= '?';
 		$params = array(
 			'response_type' => 'code',
-			'client_id' => $this->key,
-			'redirect_uri' => $this->callback_url,
+			'client_id'     => $this->key,
+			'redirect_uri'  => $this->callback_url,
 		);
+		$params = apply_filters( 'keyring_' . $this->get_name() . '_request_token_params', $params );
 		Keyring_Util::debug( 'OAuth2 Redirect URL: ' . $url . http_build_query( $params ) );
 		wp_redirect( $url . http_build_query( $params ) );
 		exit;
@@ -43,14 +44,23 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		if ( !stristr( $url, '?' ) )
 			$url .= '?';
 		$params = array(
-			'client_id' => $this->key,
+			'client_id'     => $this->key,
 			'client_secret' => $this->secret,
-			'grant_type' => 'authorization_code',
-			'redirect_uri' => $this->callback_url,
-			'code' => $_GET['code'],
+			'grant_type'    => 'authorization_code',
+			'redirect_uri'  => $this->callback_url,
+			'code'          => $_GET['code'],
 		);
+		$params = apply_filters( 'keyring_' . $this->get_name() . '_verify_token_params', $params );
 		Keyring_Util::debug( 'OAuth2 Access Token URL: ' . $url . http_build_query( $params ) );
-		$res = wp_remote_get( $url . http_build_query( $params ) );
+		switch ( strtoupper( $this->access_token_method ) ) {
+		case 'GET':
+			$res = wp_remote_get( $url . http_build_query( $params ) );
+			break;
+		case 'POST':
+			$res = wp_remote_post( $url, array( 'body' => $params ) );
+			break;
+		}
+
 		if ( 200 == wp_remote_retrieve_response_code( $res ) ) {
 			$token = wp_remote_retrieve_body( $res );
 			Keyring_Util::debug( $token );
