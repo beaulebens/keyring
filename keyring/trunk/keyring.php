@@ -115,10 +115,15 @@ class Keyring {
 			&&
 				in_array( $_REQUEST['service'], array_keys( Keyring::get_registered_services() ) )
 		) {
+			// We have an action here to allow us to do things pre-authorization, just in case
+			do_action( "pre_keyring_{$_REQUEST['service']}_{$_REQUEST['action']}", $_REQUEST );
+
 			// Core nonce check required for everything. "keyring-ACTION" is the kr_nonce format
 			if ( !isset( $_REQUEST['kr_nonce'] ) || !wp_verify_nonce( $_REQUEST['kr_nonce'], 'keyring-' . $_REQUEST['action'] ) )
 				wp_die( __( 'Invalid/missing Keyring core nonce. All core actions require a valid nonce.', 'keyring' ) );
 
+			Keyring_Util::debug( "keyring_{$_REQUEST['service']}_{$_REQUEST['action']}" );
+			Keyring_Util::debug( $_GET );
 			do_action( "keyring_{$_REQUEST['service']}_{$_REQUEST['action']}", $_REQUEST );
 		}
 
@@ -233,6 +238,7 @@ class Keyring_Util {
 	}
 
 	static function connect_to( $service, $cookie_name ) {
+		Keyring_Util::debug( 'Connect to: ' . $service );
 		// Redirect into Keyring's auth handler if a valid service is provided
 		setcookie( $cookie_name, true, ( time() + apply_filters( 'keyring_connect_to_timeout', 300 ) ) ); // Stop watching after 5 minutes
 		$kr_nonce = wp_create_nonce( 'keyring-request' );
