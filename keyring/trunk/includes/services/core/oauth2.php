@@ -63,8 +63,8 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 
 				$meta = $this->build_token_meta( $token );
 
-				$this->store_token( $token['access_token'], $meta );
-				wp_redirect( Keyring_Util::admin_url() );
+				$id = $this->store_token( $token['access_token'], $meta );
+				$this->verified( $id );
 				exit;
 			}
 		}
@@ -88,6 +88,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 	}
 
 	function request( $url, array $params = array() ) {
+		Keyring_Util::debug( $url );
 
 		if ( $this->requires_token() && empty( $this->token ) )
 			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
