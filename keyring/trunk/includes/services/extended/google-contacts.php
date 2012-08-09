@@ -32,12 +32,12 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'access_token', 'https://accounts.google.com/o/oauth2/token',    'POST' );
 		$this->set_endpoint( 'self',         'https://www.googleapis.com/oauth2/v1/userinfo', 'GET' );
 
-		if ( $creds = $this->get_credentials() ) {
-			$this->key = $creds['key'];
-			$this->secret = $creds['secret'];
-		} else if ( defined( 'KEYRING__GOOGLECONTACTS_KEY' ) && defined( 'KEYRING__GOOGLECONTACTS_SECRET' ) ) {
+		if ( defined( 'KEYRING__GOOGLECONTACTS_KEY' ) && defined( 'KEYRING__GOOGLECONTACTS_SECRET' ) ) {
 			$this->key = KEYRING__GOOGLECONTACTS_KEY;
 			$this->secret = KEYRING__GOOGLECONTACTS_SECRET;
+		} else if ( $creds = $this->get_credentials() ) {
+			$this->key = $creds['key'];
+			$this->secret = $creds['secret'];
 		}
 
 		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );

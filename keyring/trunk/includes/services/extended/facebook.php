@@ -17,12 +17,12 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'access_token', 'https://graph.facebook.com/oauth/access_token', 'GET' );
 		$this->set_endpoint( 'self',         'https://graph.facebook.com/me',                 'GET' );
 
-		if ( $creds = $this->get_credentials() ) {
-			$this->key    = $creds['key'];
-			$this->secret = $creds['secret'];
-		} else if ( defined( 'KEYRING__FACEBOOK_ID' ) && defined( 'KEYRING__FACEBOOK_SECRET' ) ) {
+		if ( defined( 'KEYRING__FACEBOOK_ID' ) && defined( 'KEYRING__FACEBOOK_SECRET' ) ) {
 			$this->key    = KEYRING__FACEBOOK_ID;
 			$this->secret = KEYRING__FACEBOOK_SECRET;
+		} else if ( $creds = $this->get_credentials() ) {
+			$this->key    = $creds['key'];
+			$this->secret = $creds['secret'];
 		}
 
 		$kr_nonce = wp_create_nonce( 'keyring-verify' );

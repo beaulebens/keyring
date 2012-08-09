@@ -12,13 +12,21 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 
 	function __construct() {
 		parent::__construct();
+
+		// Enable "basic" UI for entering key/secret
+		add_action( 'keyring_yahoo_manage_ui', array( $this, 'basic_ui' ) );
+
 		$this->set_endpoint( 'request_token', 'https://api.login.yahoo.com/oauth/v2/get_request_token', 'POST' );
 		$this->set_endpoint( 'authorize',     'https://api.login.yahoo.com/oauth/v2/request_auth',      'GET' );
 		$this->set_endpoint( 'access_token',  'https://api.login.yahoo.com/oauth/v2/get_token',         'POST' );
 
-		$this->app_id = KEYRING__YAHOO_ID;
-		$this->key = KEYRING__YAHOO_KEY;
-		$this->secret = KEYRING__YAHOO_SECRET;
+		if ( defined( 'KEYRING__YAHOO_KEY' ) && defined( 'KEYRING__YAHOO_SECRET' ) ) {
+			$this->key = KEYRING__YAHOO_KEY;
+			$this->secret = KEYRING__YAHOO_SECRET;
+		} else if ( $creds = $this->get_credentials() ) {
+			$this->key = $creds['key'];
+			$this->secret = $creds['secret'];
+		}
 
 		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
@@ -35,7 +43,7 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 
 		$now = time();
 
-		if( !empty( $token['oauth_expires_in'] ) ) 
+		if( !empty( $token['oauth_expires_in'] ) )
 			$token_object->tokenExpires = $now + $token["oauth_expires_in"];
 		else
 			$token_object->tokenExpires = -1;
