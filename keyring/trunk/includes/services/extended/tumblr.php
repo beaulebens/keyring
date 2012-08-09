@@ -18,12 +18,12 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 		$this->set_endpoint( 'authorize',     'http://www.tumblr.com/oauth/authorize',     'GET' );
 		$this->set_endpoint( 'access_token',  'http://www.tumblr.com/oauth/access_token',  'POST' );
 
-		if ( $creds = $this->get_credentials() ) {
-			$this->key = $creds['key'];
-			$this->secret = $creds['secret'];
-		} else if ( defined( 'KEYRING__TUMBLR_KEY' ) && defined( 'KEYRING__TUMBLR_SECRET' ) ) {
+		if ( defined( 'KEYRING__TUMBLR_KEY' ) && defined( 'KEYRING__TUMBLR_SECRET' ) ) {
 			$this->key = KEYRING__TUMBLR_KEY;
 			$this->secret = KEYRING__TUMBLR_SECRET;
+		} else if ( $creds = $this->get_credentials() ) {
+			$this->key = $creds['key'];
+			$this->secret = $creds['secret'];
 		}
 
 		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );

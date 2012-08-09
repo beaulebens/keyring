@@ -1,7 +1,5 @@
 <?php
 
-return;
-
 /**
  * LinkedIn service definition for Keyring. Clean implementation of OAuth1
  */
@@ -16,13 +14,20 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth1 {
 		$this->authorization_header = true;
 		$this->authorization_realm = "api.linkedin.com";
 
+		// Enable "basic" UI for entering key/secret
+		add_action( 'keyring_linkedin_manage_ui', array( $this, 'basic_ui' ) );
+
 		$this->set_endpoint( 'request_token', 'https://api.linkedin.com/uas/oauth/requestToken', 'POST' );
 		$this->set_endpoint( 'authorize',     'https://api.linkedin.com/uas/oauth/authorize',    'GET'  );
 		$this->set_endpoint( 'access_token',  'https://api.linkedin.com/uas/oauth/accessToken',  'GET'  );
 
-		$this->app_id = KEYRING__LINKEDIN_ID;
-		$this->key = KEYRING__LINKEDIN_KEY;
-		$this->secret = KEYRING__LINKEDIN_SECRET;
+		if ( defined( 'KEYRING__LINKEDIN_KEY' ) && defined( 'KEYRING__LINKEDIN_SECRET' ) ) {
+			$this->key    = KEYRING__LINKEDIN_KEY;
+			$this->secret = KEYRING__LINKEDIN_SECRET;
+		} else if ( $creds = $this->get_credentials() ) {
+			$this->key    = $creds['key'];
+			$this->secret = $creds['secret'];
+		}
 
 		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
@@ -65,6 +70,9 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth1 {
 		return $meta;
 	}
 
+	function get_display( Keyring_Token $token ) {
+		return $token->get_meta( 'name' );
+	}
 }
 
 add_action( 'keyring_load_services', array( 'Keyring_Service_LinkedIn', 'init' ) );

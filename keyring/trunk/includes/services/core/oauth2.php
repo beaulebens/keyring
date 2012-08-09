@@ -17,6 +17,14 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 	 */
 	var $authorization_header = 'OAuth';
 
+	/**
+	 * If you're not sending the authorization in the header, some services will accept
+	 * it as a querystring parameter. The spec says to send it as oauth_token, but some services
+	 * want it called something else... like 'access_token'
+	 * @var string
+	 */
+	var $authorization_parameter = 'oauth_token';
+
 	function request_token() {
 		$url = $this->authorize_url;
 		if ( !stristr( $url, '?' ) )
@@ -110,7 +118,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 				// type can be OAuth, Bearer, ...
 				$params['headers']['Authorization'] = $this->authorization_header . ' ' . (string) $token;
 			} else {
-				$url = add_query_arg( array( 'oauth_token' => urlencode( (string) $token ) ), $url );
+				$url = add_query_arg( array( $this->authorization_parameter => urlencode( (string) $token ) ), $url );
 			}
 		}
 

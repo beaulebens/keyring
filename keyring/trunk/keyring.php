@@ -253,7 +253,6 @@ class Keyring_Util {
 			<option value="new"><?php _e( 'Create a new connection...', 'keyring' ); ?></option>
 		<?php endif; ?>
 		<?php foreach ( (array) $tokens as $token ) : ?>
-			<?php print_r($token); ?>
 			<option value="<?php echo $token->get_uniq_id(); ?>"><?php echo $token->get_display(); ?></option>
 		<?php endforeach; ?>
 		</select><?php

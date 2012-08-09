@@ -24,12 +24,12 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 		$this->set_endpoint( 'authorize',     'https://twitter.com/oauth/authorize',     'GET' );
 		$this->set_endpoint( 'access_token',  'https://twitter.com/oauth/access_token',  'POST' );
 
-		if ( $creds = $this->get_credentials() ) {
-			$this->key = $creds['key'];
-			$this->secret = $creds['secret'];
-		} else if ( defined( 'KEYRING__TWITTER_KEY' ) && defined( 'KEYRING__TWITTER_SECRET' ) ) {
+		if ( defined( 'KEYRING__TWITTER_KEY' ) && defined( 'KEYRING__TWITTER_SECRET' ) ) {
 			$this->key = KEYRING__TWITTER_KEY;
 			$this->secret = KEYRING__TWITTER_SECRET;
+		} else if ( $creds = $this->get_credentials() ) {
+			$this->key = $creds['key'];
+			$this->secret = $creds['secret'];
 		}
 
 		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );

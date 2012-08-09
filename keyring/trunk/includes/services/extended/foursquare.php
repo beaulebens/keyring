@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Foursquare service definition for Keyring. Actually OAuth2, but can be done using the OAuth1 Service
+ * Foursquare service definition for Keyring.
  * https://developer.foursquare.com/docs/oauth.html
  * https://foursquare.com/oauth/
  */
@@ -11,9 +11,6 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 	const LABEL = 'Foursquare';
 
 	const API_VERSION = '20120701';
-
-	var $self_url    = '';
-	var $self_method = '';
 
 	function __construct() {
 		parent::__construct();
@@ -25,12 +22,12 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'access_token', 'https://foursquare.com/oauth2/access_token', 'GET' );
 		$this->set_endpoint( 'self',         'https://api.foursquare.com/v2/users/self',   'GET' );
 
-		if ( $creds = $this->get_credentials() ) {
-			$this->key = $creds['key'];
-			$this->secret = $creds['secret'];
-		} else if ( defined( 'KEYRING__FOURSQUARE_KEY' ) && defined( 'KEYRING__FOURSQUARE_SECRET' ) ) {
+		if ( defined( 'KEYRING__FOURSQUARE_KEY' ) && defined( 'KEYRING__FOURSQUARE_SECRET' ) ) {
 			$this->key = KEYRING__FOURSQUARE_KEY;
 			$this->secret = KEYRING__FOURSQUARE_SECRET;
+		} else if ( $creds = $this->get_credentials() ) {
+			$this->key = $creds['key'];
+			$this->secret = $creds['secret'];
 		}
 
 		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );

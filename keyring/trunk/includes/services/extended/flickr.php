@@ -18,12 +18,12 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 		$this->set_endpoint( 'authorize',     'http://www.flickr.com/services/oauth/authorize',     'GET' );
 		$this->set_endpoint( 'access_token',  'http://www.flickr.com/services/oauth/access_token',  'GET' );
 
-		if ( $creds = $this->get_credentials() ) {
+		if ( defined( 'KEYRING__FLICKR_KEY' ) && defined( 'KEYRING__FLICKR_SECRET' ) ) {
+			$this->key = KEYRING__FLICKR_KEY;
+			$this->secret = KEYRING__FLICKR_SECRET;
+		} else if ( $creds = $this->get_credentials() ) {
 			$this->key = $creds['key'];
 			$this->secret = $creds['secret'];
-		} else if ( defined( 'KEYRING__TWITTER_KEY' ) && defined( 'KEYRING__TWITTER_SECRET' ) ) {
-			$this->key = KEYRING__TWITTER_KEY;
-			$this->secret = KEYRING__TWITTER_SECRET;
 		}
 
 		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );

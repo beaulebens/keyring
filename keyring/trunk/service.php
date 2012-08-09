@@ -236,6 +236,14 @@ abstract class Keyring_Service {
 		$this->token = $token;
 	}
 
+	/**
+	 * Just returns the currently-set token for this service
+	 * @return [type] [description]
+	 */
+	function get_token() {
+		return $this->token;
+	}
+
 	function get_tokens( $id = false ) {
 		$c = get_called_class();
 		return $this->store->get_tokens( $c::NAME );
