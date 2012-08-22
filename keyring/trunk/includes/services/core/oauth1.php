@@ -18,12 +18,12 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 	protected $authorize_url        = '';
 	protected $authorize_method     = 'GET';
 
-	protected $key                  = null;
-	protected $secret               = null;
 	protected $consumer             = null;
 	protected $signature_method     = null;
 	protected $callback_url         = null;
 
+	var $key                        = null;
+	var $secret                     = null;
 	var $token                      = null;
 	var $authorization_header       = false;
 	var $authorization_realm        = '';
