@@ -72,7 +72,9 @@ class Keyring {
 		add_action( 'init', array( 'Keyring', 'init' ), 1 );
 
 		// Load external Services (plugins etc should hook to this to define new ones/extensions)
-		add_action( 'init', array( 'Keyring', 'load_services' ), 2 );
+		add_action( 'init', function() {
+			do_action( 'keyring_load_services' );
+		}, 2 );
 
 		/**
 		 * And trigger request handlers, which plugins and extended Services use to handle UI,
@@ -80,14 +82,6 @@ class Keyring {
 		 * @see ::request_handlers()
 		 */
 		add_action( 'admin_init', array( 'Keyring', 'request_handlers' ), 100 );
-	}
-
-	/**
-	 * Very simple, just triggers the loading of all services. After this, they should all
-	 * be ready to go, and have attached any hooks they need, etc.
-	 */
-	function load_services() {
-		do_action( 'keyring_load_services' );
 	}
 
 	/**
@@ -263,7 +257,11 @@ class Keyring_Util {
 	}
 }
 
+/**
+ * Stub implementation of an error object. May at some point get custom, but
+ * treat it like a normal WP_Error for now.
+ */
 class Keyring_Error extends WP_Error { }
 
+// This is the main hook that kicks off everything. Needs to be early so we have time to load everything.
 add_action( 'plugins_loaded', array( 'Keyring', 'plugins_loaded' ) );
-

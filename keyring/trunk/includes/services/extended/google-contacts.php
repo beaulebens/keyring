@@ -47,7 +47,9 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 
 		// Need to reset the callback because Google is very strict about where it sends people
 		if ( !empty( $creds['redirect_uri'] ) )
-			$this->callback_url = $creds['redirect_uri'];
+			$this->callback_url = $creds['redirect_uri']; // Allow user to manually enter a redirect URI
+		else
+			$this->callback_url = remove_query_arg( array( 'nonce', 'kr_nonce' ), $this->callback_url ); // At least strip nonces, since you can't save them in your app config
 	}
 
 	function request_token_params( $params ) {
@@ -80,7 +82,7 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 		if ( !$token )
 			return $meta;
 
-		$token = new Keyring_Token( $this->get_name(), $token['access_token'], array() );
+		$token = new Keyring_Token( $this->get_name(), new OAuthToken( $token['access_token'], '' ), array() );
 		$this->set_token( $token );
 		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
 		if ( !Keyring_Util::is_error( $res ) ) {
