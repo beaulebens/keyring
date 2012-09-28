@@ -33,23 +33,43 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 	}
 
 	function build_token_meta( $token ) {
+		// Need to make a request to get full information
+		$this->set_token(
+			new Keyring_Token(
+				$this->get_name(),
+				new OAuthToken(
+					$token['oauth_token'],
+					$token['oauth_token_secret']
+				)
+			)
+		);
+		$url = "http://api.flickr.com/services/rest/?";
+		$params = array(
+			'method'  => 'flickr.people.getInfo',
+			'api_key' => $this->key,
+			'user_id' => $token['user_nsid'],
+		);
+		$url = $url . http_build_query( $params );
+
+		$profile = $this->request( $url, array( 'method' => 'GET' ) );
+		if ( Keyring_Util::is_error( $profile ) )
+			return array();
+
 		return array(
 			'user_id'  => $token['user_nsid'],
 			'username' => $token['username'],
 			'name'     => $token['fullname'],
+			'picture'  => 'http://farm' . $profile->person->iconfarm . '.staticflickr.com/' . $profile->person->iconserver . '/buddyicons/' . $token['user_nsid']. '.jpg',
 		);
 	}
 
 	function get_display( Keyring_Token $token ) {
 		$return = '';
 		$meta = $token->get_meta();
-		if ( !empty( $meta['full_name'] ) )
-			$return = $meta['full_name'];
-		if ( !empty( $return ) )
-			$return .= ' (' . $meta['username'] . ')';
-		else
-			$return = $meta['username'];
-		return $return;
+		if ( !empty( $meta['name'] ) )
+			return $meta['name'];
+		else if ( !empty( $meta['username'] ) )
+			return $meta['username'];
 	}
 
 	/**

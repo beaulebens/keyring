@@ -41,9 +41,10 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
 		if ( !Keyring_Util::is_error( $res ) ) {
 			$meta = array(
-				'user_id'   => $res->response->user->id,
-				'firstName' => $res->response->user->firstName,
-				'lastName'  => $res->response->user->lastName,
+				'user_id'    => $res->response->user->id,
+				'first_name' => $res->response->user->firstName,
+				'last_name'  => $res->response->user->lastName,
+				'picture'    => $res->response->user->photo->prefix . '300x300' . $res->response->user->photo->suffix,
 			);
 		}
 		return $meta;
@@ -51,9 +52,7 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 
 	function get_display( Keyring_Token $token ) {
 		$meta = $token->get_meta();
-		if ( empty( $meta['user_id'] ) )
-			return (string) $token;
-		return ltrim( $meta['firstName'] . ' ' . $meta['lastName'] ) . ' (' . $meta['user_id'] . ')';
+		return trim( $meta['first_name'] . ' ' . $meta['last_name'] );
 	}
 
 	function request( $url, array $params = array() ) {

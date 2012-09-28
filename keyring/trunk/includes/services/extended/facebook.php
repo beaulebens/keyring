@@ -52,12 +52,8 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 		return $token;
 	}
 
-	function get_display( Keyring_Token $token ) {
-		return $token->get_meta( 'name' );
-	}
-
 	function build_token_meta( $token ) {
-		$token = new Keyring_Token( 'facebook', $token['access_token'], array() );
+		$token = new Keyring_Token( $this->get_name(), $token['access_token'], array() );
 		$this->set_token( $token );
 		$me = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
 		if ( !Keyring_Util::is_error( $me ) ) {
@@ -65,9 +61,14 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 				'username' => $me->username,
 				'user_id'  => $me->id,
 				'name'     => $me->name,
+				'picture'  => 'https://graph.facebook.com/' . $me->id . '/picture?type=large',
 			);
 		}
 		return array();
+	}
+
+	function get_display( Keyring_Token $token ) {
+		return $token->get_meta( 'name' );
 	}
 }
 

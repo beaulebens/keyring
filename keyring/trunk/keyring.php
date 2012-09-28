@@ -3,7 +3,7 @@
 Plugin Name: Keyring
 Plugin URI: http://dentedreality.com.au/projects/wp-keyring/
 Description: Keyring helps you manage your keys. It provides a generic, very hookable framework for connecting to remote systems and managing your access tokens, username/password combos etc for those services. On its own it doesn't do much, but it enables other plugins to do things that require authorization to act on your behalf.
-Version: 1.0
+Version: 1.1
 Author: Beau Lebens
 Author URI: http://dentedreality.com.au
 */

@@ -87,10 +87,10 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
 		if ( !Keyring_Util::is_error( $res ) ) {
 			$meta = array(
-				'user_id' => $res->id,
-				'name'    => $res->name,
-				'url'     => $res->link,
-				'picture' => $res->picture,
+				'user_id'   => $res->id,
+				'name' => $res->name,
+				'profile'   => $res->link,
+				'picture'   => $res->picture,
 			);
 		}
 		return $meta;
@@ -148,7 +148,7 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 		echo '<table class="form-table">';
 		echo '<tr><th scope="row">' . __( 'Client ID', 'keyring' ) . '</th>';
 		echo '<td><input type="text" name="api_key" value="' . esc_attr( $api_key ) . '" id="api_key" class="regular-text"></td></tr>';
-		echo '<tr><th scope="row">' . __( 'Client secret', 'keyring' ) . '</th>';
+		echo '<tr><th scope="row">' . __( 'Client Secret', 'keyring' ) . '</th>';
 		echo '<td><input type="text" name="api_secret" value="' . esc_attr( $api_secret ) . '" id="api_secret" class="regular-text"></td></tr>';
 		echo '<tr><th scope="row">' . __( 'Redirect URI', 'keyring' ) . '</th>';
 		echo '<td><input type="text" name="redirect_uri" value="' . esc_attr( $redirect_uri ) . '" id="redirect_uri" class="regular-text"></td></tr>';
