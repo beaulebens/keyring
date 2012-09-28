@@ -44,30 +44,25 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth1 {
 		// Set the token so that we can make requests using it
 		$this->set_token(
 			new Keyring_Token(
-				'linkedin',
+				$this->get_name(),
 				new OAuthToken(
 					$token['oauth_token'],
 					$token['oauth_token_secret']
-				),
-				array(
-					'type' => 'access',
 				)
 			)
 		);
 
 		// Get user profile information
-		$response = $this->request( "https://api.linkedin.com/v1/people/~:(id,formatted-name)?format=json" );
-
+		$response = $this->request( "https://api.linkedin.com/v1/people/~:(id,formatted-name,picture-url)?format=json" );
 		if ( Keyring_Util::is_error( $response ) )
 			return array();
 
 		$this->person = $response;
-		$meta = array(
+		return array(
 			'user_id' => $this->person->id,
 			'name'    => $this->person->formattedName,
+			'picture' => $this->person->pictureUrl,
 		);
-
-		return $meta;
 	}
 
 	function get_display( Keyring_Token $token ) {

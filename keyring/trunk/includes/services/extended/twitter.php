@@ -23,6 +23,7 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 		$this->set_endpoint( 'request_token', 'https://twitter.com/oauth/request_token', 'POST' );
 		$this->set_endpoint( 'authorize',     'https://twitter.com/oauth/authorize',     'GET' );
 		$this->set_endpoint( 'access_token',  'https://twitter.com/oauth/access_token',  'POST' );
+		$this->set_endpoint( 'verify',        'https://api.twitter.com/1.1/account/verify_credentials.json', 'GET' );
 
 		if ( defined( 'KEYRING__TWITTER_KEY' ) && defined( 'KEYRING__TWITTER_SECRET' ) ) {
 			$this->key = KEYRING__TWITTER_KEY;
@@ -43,9 +44,26 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 	}
 
 	function build_token_meta( $token ) {
+		// Set the token so that we can make requests using it
+		$this->set_token(
+			new Keyring_Token(
+				$this->get_name(),
+				new OAuthToken(
+					$token['oauth_token'],
+					$token['oauth_token_secret']
+				)
+			)
+		);
+
+		$verify = $this->request( $this->verify_url, array( 'method' => $this->verify_method ) );
+		if ( Keyring_Util::is_error( $verify ) )
+			return array();
+
 		return array(
 			'user_id' => $token['user_id'],
 			'username' => $token['screen_name'],
+			'name' => $verify->name,
+			'picture' => $verify->profile_image_url,
 		);
 	}
 

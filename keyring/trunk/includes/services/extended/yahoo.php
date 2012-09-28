@@ -1,7 +1,5 @@
 <?php
 
-return;
-
 /**
  * Yahoo service definition for Keyring. Clean implementation of OAuth1
  */
@@ -77,10 +75,10 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 			return array();
 
 		$this->person = $response->profile;
-
+print_r($this->person);
 		$meta = array(
-			'user_id' => $token['xoauth_yahoo_guid'],
-			'name'    => $this->person->nickname,
+			'user_id'   => $token['xoauth_yahoo_guid'],
+			'name' => $this->person->nickname,
 		);
 
 		return $meta;
