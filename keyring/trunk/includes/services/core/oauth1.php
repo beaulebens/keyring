@@ -22,6 +22,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 	protected $signature_method     = null;
 	protected $callback_url         = null;
 
+	var $app_id                     = null;
 	var $key                        = null;
 	var $secret                     = null;
 	var $token                      = null;
@@ -40,17 +41,43 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			require dirname( dirname( dirname( __FILE__ ) ) ) . '/oauth-php/OAuth.php';
 	}
 
-	function get_display( Keyring_Token $token ) {
-		return $this->key;
-	}
-
 	function request_token() {
 		Keyring_Util::debug( 'Keyring_Service_OAuth1::request_token()' );
+		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-request-' . $this->get_name() ) ) {
+			Keyring::error( __( 'Invalid/missing request nonce.', 'keyring' ) );
+			exit;
+		}
 
-		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-request-' . $this->get_name() ) )
-			wp_die( __( 'Invalid/missing request nonce.', 'keyring' ) );
-
-		$request_token_url = add_query_arg( array( 'oauth_callback' => urlencode( $this->callback_url ) ), $this->request_token_url );
+		// Need to create a request token now, so that we have a state to pass
+		$request_token = new Keyring_Request_Token(
+			$this->get_name(),
+			array(),
+			apply_filters(
+				'keyring_request_token_meta',
+				array(
+					'for'     => isset( $_REQUEST['for'] ) ? (string) $_REQUEST['for'] : false,
+					'type'    => 'request',
+					'user_id' => get_current_user_id(),
+					'blog_id' => get_current_blog_id(),
+				),
+				$this->get_name(),
+				array() // no token
+			)
+		);
+		$request_token     = apply_filters( 'keyring_request_token', $request_token, $this );
+		$request_token_id  = $this->store_token( $request_token );
+		Keyring_Util::debug( 'OAuth1 Stored Request token ' . $request_token_id );
+		$request_token_url = add_query_arg(
+			'oauth_callback',
+			urlencode(
+				add_query_arg(
+					'state',
+					$request_token_id,
+					$this->callback_url
+				)
+			),
+			$this->request_token_url
+		);
 
 		// Set up OAuth request
 		$req = OAuthRequest::from_consumer_and_token(
@@ -75,7 +102,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			$request_token_url = (string) $req;
 		}
 
-		// Get a request token
+		// Go and get a request token
 		switch ( strtoupper( $this->request_token_method ) ) {
 		case 'GET':
 			Keyring_Util::debug( "OAuth1 GET Request Token URL: $request_token_url" );
@@ -89,10 +116,11 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			break;
 
 		default:
-			wp_die( __( 'Unsupported method specified for request_token.', 'keyring' ) );
+			Keyring::error( __( 'Unsupported method specified for request_token.', 'keyring' ) );
 			exit;
 		}
 
+		Keyring_Util::debug( 'OAuth1 Response' );
 		Keyring_Util::debug( $res );
 
 		if ( 200 == wp_remote_retrieve_response_code( $res ) ) {
@@ -100,16 +128,33 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			$token = wp_remote_retrieve_body( $res );
 			parse_str( trim( $token ), $token );
 
-			// Set some values to the current domain so that we can retrieve them later
-			$host = parse_url( site_url(), PHP_URL_HOST );
-			$host = str_replace( 'www.', '', $host );
+			Keyring_Util::debug( 'OAuth1 Token Response' );
+			Keyring_Util::debug( $token );
 
-			// The token secret is important
-			setcookie( "keyring_{$this->get_name()}", $token['oauth_token_secret'], ( time() + 60 * 60 ), '/', ".$host" );
+			$meta = array(
+				'_classname' => get_called_class(), // Must include this for re-hydration, since we're using manual update()
+				'user_id'    => get_current_user_id(),
+				'blog_id'    => get_current_blog_id(),
+			);
 
-			// Sometimes we have a verifier which we can use to confirm things later
-			if ( isset( $token['oauth_verifier'] ) )
-				setcookie( "keyring_{$this->get_name()}_verifier", $token['oauth_verifier'], ( time() + 60 * 60 ), '/', ".$host" );
+			// Use the ?for param to mark a connection as being for a specific plugin/feature
+			if ( isset( $_REQUEST['for'] ) ) {
+				$meta['for'] = (string) esc_attr( $_REQUEST['for'] );
+			}
+
+			$request_token = new Keyring_Request_Token(
+				$this->get_name(),
+				$token,
+				apply_filters(
+					'keyring_request_token_meta',
+					$meta,
+					$this->get_name(),
+					$token
+				),
+				$request_token_id // Overwrite the previous one
+			);
+			$request_token = apply_filters( 'keyring_request_token', $request_token );
+			$this->store->update( $request_token );
 		} else {
 			Keyring::error(
 				sprintf( __( 'There was a problem connecting to %s to create an authorized connection. Please try again in a moment.', 'keyring' ), $this->get_label() )
@@ -117,10 +162,22 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			return false;
 		}
 
-		// Redirect user to get us an authorize token
+		// Redirect user to authorize access
 		$authorize = add_query_arg( 'oauth_token', urlencode( $token['oauth_token'] ), $this->authorize_url ) ;
-		if ( $this->callback_url )
-			$authorize = add_query_arg( 'oauth_callback', urlencode( $this->callback_url ), $authorize );
+		if ( $this->callback_url ) {
+			// Add reference to our request token to the callback. Use "state" a la OAuth2 for consistency
+			$authorize = add_query_arg(
+				'oauth_callback',
+				urlencode(
+					add_query_arg(
+						'state',
+						$request_token_id,
+						$this->callback_url
+					)
+				),
+				$authorize
+			);
+		}
 
 		Keyring_Util::debug( "OAuth Authorize Redirect: $authorize", KEYRING__DEBUG_NOTICE );
 		wp_redirect( $authorize );
@@ -129,13 +186,27 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 
 	function verify_token() {
 		Keyring_Util::debug( 'Keyring_Service_OAuth1::verify_token()' );
-		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-verify-' . $this->get_name() ) )
-			wp_die( __( 'Invalid/missing verification nonce.', 'keyring' ) );
+		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-verify-' . $this->get_name() ) ) {
+			Keyring::error( __( 'Invalid/missing verification nonce.', 'keyring' ) );
+			exit;
+		}
 
-		// Get an access token
+		// Load up the request token that got us here and globalize it
+		if ( isset( $_GET['state'] ) ) {
+			global $keyring_request_token;
+			$state = (int) $_GET['state'];
+			$keyring_request_token = $this->store->get_token( array( 'id' => $state ) );
+			Keyring_Util::debug( 'OAuth1 Loaded Request Token ' . $_GET['state'] );
+			Keyring_Util::debug( $keyring_request_token );
+
+			$secret = $keyring_request_token->token['oauth_token_secret'];
+
+			// Remove request token, don't need it any more.
+			$this->store->delete( array( 'id' => $state ) );
+		}
+
+		// Get an access token, using the temporary token passed back
 		$token = isset( $_GET['oauth_token'] ) ? $_GET['oauth_token'] : false;
-
-		$secret = $_COOKIE["keyring_{$this->get_name()}"];
 
 		$access_token_url = $this->access_token_url;
 		if ( !empty( $_GET['oauth_verifier'] ) )
@@ -143,22 +214,28 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 
 		// Set up a consumer token and make the request for an access_token
 		$token = new OAuthConsumer( $token, $secret );
-		$this->set_token( new Keyring_Token( $this->get_name(), $token, array() ) );
+		$this->set_token( new Keyring_Access_Token( $this->get_name(), $token, array() ) );
 		$res = $this->request( $access_token_url, array( 'method' => $this->access_token_method, 'raw_response' => true ) );
+		Keyring_Util::debug( 'OAuth1 Access Token Response' );
 		Keyring_Util::debug( $res );
 
 		if ( !Keyring_Util::is_error( $res ) ) {
-			parse_str( trim( $res ), $token );
+			$token = $this->parse_access_token( $res );
 
-			if ( method_exists( $this, 'custom_verify_token' ) )
-				$this->custom_verify_token( $token );
+			$access_token = new Keyring_Access_Token(
+				$this->get_name(),
+				new OAuthToken(
+					$token['oauth_token'],
+					$token['oauth_token_secret']
+				),
+				$this->build_token_meta( $token )
+			);
+			$access_token = apply_filters( 'keyring_access_token', $access_token );
 
-			$meta = $this->build_token_meta( $token );
-
-			$token = new OAuthToken( $token['oauth_token'], $token['oauth_token_secret'] );
-			Keyring_Util::debug( $token );
-			$id = $this->store_token( $token, $meta );
-			$this->verified( $id );
+			Keyring_Util::debug( 'OAuth1 Access Token for storage' );
+			Keyring_Util::debug( $access_token );
+			$id = $this->store_token( $access_token );
+			$this->verified( $id, $keyring_request_token );
 			exit;
 		} else {
 			Keyring::error(
@@ -190,6 +267,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			unset( $params['sign_parameters'] );
 		}
 
+		// Should be an OAuthToken object
 		$token = $this->token->token ? $this->token->token : null;
 		Keyring_Util::debug( $token );
 
@@ -220,7 +298,8 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			$header = $req->to_header( $this->authorization_realm ); // Gives a complete header string, not just the second half
 			$bits = explode( ': ', $header, 2 );
 			$params['headers']['Authorization'] = $bits[1];
-			Keyring_Util::debug( $params );
+			Keyring_Util::debug( 'OAuth1 Authorization Header' );
+			Keyring_Util::debug( $params['headers']['Authorization'] );
 
 			// oauth_verifier was probably added directly to the URL, need to manually remove it
 			$request_url = remove_query_arg( 'oauth_verifier', $url );
@@ -253,7 +332,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			break;
 
 		default:
-			wp_die( __( 'Unsupported method specified.', 'keyring' ) );
+			Keyring::error( __( 'Unsupported method specified.', 'keyring' ) );
 			exit;
 		}
 
@@ -268,13 +347,27 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		}
 	}
 
+	function get_display( Keyring_Access_Token $token ) {
+		return (string) $token->token->key;
+	}
+
+	/**
+	 * OAuth1 always returns access tokens in querystring format,
+	 * but we provide an extendable method here just in case, and to
+	 * remain consistent with OAuth2.
+	 */
+	function parse_access_token( $token ) {
+		parse_str( $token, $token );
+		return $token;
+	}
+
 	/**
 	 * This method is provided as a base point for parsing/decoding response
 	 * values provided by ->request(). Different services encode their responses
 	 * differently, but this provides a standardized place to handle that. You
 	 * may use JSON, XML, parse_str or some other, completely unique method here
 	 * to provide more workable data structures based on the responses from a
-	 * Service's API. The default does nothing, just returns the string.
+	 * Service's API. The default just returns the string.
 	 *
 	 * @param string $response
 	 * @return Mixed data that is easier to work with, based on each Service

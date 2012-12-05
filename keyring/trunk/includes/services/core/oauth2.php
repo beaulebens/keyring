@@ -26,6 +26,28 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 	var $authorization_parameter = 'oauth_token';
 
 	function request_token() {
+		Keyring_Util::debug( 'Keyring_Service_OAuth2::request_token()' );
+		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-request-' . $this->get_name() ) ) {
+			Keyring::error( __( 'Invalid/missing request nonce.', 'keyring' ) );
+			exit;
+		}
+
+		// Need to create a request token now, so that we have a state to pass
+		$request_token = new Keyring_Request_Token(
+			$this->get_name(),
+			array(),
+			apply_filters(
+				'keyring_request_token_meta',
+				array(
+					'for' => isset( $_REQUEST['for'] ) ? (string) $_REQUEST['for'] : false
+				),
+				$this->get_name(),
+				array() // no token
+			)
+		);
+		$request_token     = apply_filters( 'keyring_request_token', $request_token, $this );
+		$request_token_id  = $this->store_token( $request_token );
+
 		$url = $this->authorize_url;
 		if ( !stristr( $url, '?' ) )
 			$url .= '?';
@@ -33,20 +55,45 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			'response_type' => 'code',
 			'client_id'     => $this->key,
 			'redirect_uri'  => $this->callback_url,
+			'state'         => $request_token_id,
 		);
 		$params = apply_filters( 'keyring_' . $this->get_name() . '_request_token_params', $params );
 		Keyring_Util::debug( 'OAuth2 Redirect URL: ' . $url . http_build_query( $params ) );
+
 		wp_redirect( $url . http_build_query( $params ) );
 		exit;
 	}
 
 	function verify_token() {
-		if ( !isset( $_GET['code'] ) ) {
+		Keyring_Util::debug( 'Keyring_Service_OAuth2::verify_token()' );
+		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-verify-' . $this->get_name() ) ) {
+			Keyring::error( __( 'Invalid/missing verification nonce.', 'keyring' ) );
+			exit;
+		}
+
+		if ( !isset( $_GET['code'] ) || !isset( $_GET['state']) ) {
 			Keyring::error(
 				sprintf( __( 'There was a problem authorizing with %s. Please try again in a moment.', 'keyring' ), $this->get_label() )
 			);
 			return false;
 		}
+
+		// Load up the request token that got us here and globalize it
+		global $keyring_request_token;
+		$state = (int) $_GET['state'];
+		$keyring_request_token = $this->store->get_token( array( 'id' => $state ) );
+		Keyring_Util::debug( 'OAuth2 Loaded Request Token ' . $_GET['state'] );
+		Keyring_Util::debug( $keyring_request_token );
+
+		if ( !$keyring_request_token ) {
+			Keyring::error(
+				sprintf( __( 'Failed to load your request token while connecting to %s. Please try again in a moment.', 'keyring' ), $this->get_label() )
+			);
+			return false;
+		}
+
+		// Remove request token, don't need it any more.
+		$this->store->delete( array( 'id' => $state ) );
 
 		$url = $this->access_token_url;
 		if ( !stristr( $url, '?' ) )
@@ -68,6 +115,8 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			$res = wp_remote_post( $url, array( 'body' => $params ) );
 			break;
 		}
+		Keyring_Util::debug( 'OAuth2 Response' );
+		Keyring_Util::debug( $res );
 
 		if ( 200 == wp_remote_retrieve_response_code( $res ) ) {
 			$token = wp_remote_retrieve_body( $res );
@@ -75,16 +124,18 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 
 			$token = $this->parse_access_token( $token );
 
-			if ( is_array( $token ) ) {
-				if ( method_exists( $this, 'custom_verify_token' ) )
-					$this->custom_verify_token( $token );
+			$access_token = new Keyring_Access_Token(
+				$this->get_name(),
+				$token['access_token'],
+				$this->build_token_meta( $token )
+			);
+			$access_token = apply_filters( 'keyring_access_token', $access_token );
 
-				$meta = $this->build_token_meta( $token );
-
-				$id = $this->store_token( $token['access_token'], $meta );
-				$this->verified( $id );
-				exit;
-			}
+			Keyring_Util::debug( 'OAuth2 Access Token for storage' );
+			Keyring_Util::debug( $access_token );
+			$id = $this->store_token( $access_token );
+			$this->verified( $id );
+			exit;
 		}
 		Keyring::error(
 			sprintf( __( 'There was a problem authorizing with %s. Please try again in a moment.', 'keyring' ), $this->get_label() )
@@ -155,7 +206,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			break;
 
 		default:
-			wp_die( __( 'Unsupported method specified for request_token.', 'keyring' ) );
+			Keyring::error( __( 'Unsupported method specified for request_token.', 'keyring' ) );
 			exit;
 		}
 

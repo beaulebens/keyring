@@ -53,7 +53,7 @@ class Keyring_Admin_UI {
 		screen_icon( 'ms-admin' );
 		switch ( $screen ) {
 		case 'tokens' :
-			echo '<h2>' . __( 'Keyring: Managed Keys', 'keyring' ) . ' <a href="' . Keyring_Util::admin_url( false, array( 'action' => 'services' ) ) . '" class="add-new-h2">' . __( 'Add New', 'keyring' ) . '</a></h2>';
+			echo '<h2>' . __( 'Keyring: Managed Connections', 'keyring' ) . ' <a href="' . Keyring_Util::admin_url( false, array( 'action' => 'services' ) ) . '" class="add-new-h2">' . __( 'Add New', 'keyring' ) . '</a></h2>';
 			break;
 		case 'services' :
 			echo '<h2>' . __( 'Add New Connection', 'keyring' ) . '</h2>';
@@ -94,10 +94,12 @@ class Keyring_Admin_UI {
 	function admin_page() {
 		// Handle delete request. Will default back to "tokens" later
 		if ( isset( $_REQUEST['action'] ) && 'delete' == $_REQUEST['action'] ) {
-			if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-delete-' . $_REQUEST['service'] . '-' . $_REQUEST['token'] ) )
-				wp_die( __( 'Invalid/missing delete nonce.', 'keyring' ) );
+			if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-delete-' . $_REQUEST['service'] . '-' . $_REQUEST['token'] ) ) {
+				Keyring::error( __( 'Invalid/missing delete nonce.', 'keyring' ) );
+				exit;
+			}
 
-			if ( $this->keyring->get_token_store()->delete( $_REQUEST['service'], (int) $_REQUEST['token'] ) )
+			if ( $this->keyring->get_token_store()->delete( array( 'id' => (int) $_REQUEST['token'] ) ) )
 				Keyring::message( __( 'That token has been deleted.', 'keyring' ) );
 			else
 				Keyring::error( __( 'Could not delete that token!', 'keyring' ) );
@@ -123,14 +125,14 @@ class Keyring_Admin_UI {
 		switch ( $action ) {
 		case 'tokens' :
 			$this->admin_page_header( 'tokens' );
-			$tokens = $this->keyring->get_token_store()->get_all_tokens();
+			$tokens = $this->keyring->get_token_store()->get_tokens();
 			if ( count( $tokens ) ) {
 				echo '<ul>';
 				foreach ( $tokens as $token ) {
 					$kr_nonce = wp_create_nonce( 'keyring-delete' );
 					$delete_nonce = wp_create_nonce( 'keyring-delete-' . $token->get_service()->get_name() . '-' . $token->get_uniq_id() );
 					echo '<li><strong>' . esc_html( $token->get_display() ) . '</strong> (' . esc_html( $token->get_service()->get_label() ) . ') ';
-					echo '[<a href="' . Keyring_Util::admin_url( false, array( 'action' => 'delete', 'service' => $token->get_service()->get_name(), 'token' => $token->get_uniq_id(), 'kr_nonce' => $kr_nonce, 'nonce' => $delete_nonce ) ) . '" title="' . __( 'Delete', 'keyring' ) . '">&times;</a>]';
+					echo '[<a href="' . Keyring_Util::admin_url( false, array( 'action' => 'delete', 'service' => $token->get_service()->get_name(), 'token' => $token->get_uniq_id(), 'kr_nonce' => $kr_nonce, 'nonce' => $delete_nonce ) ) . '" title="' . esc_attr( __( 'Delete', 'keyring' ) ) . '">&times;</a>]';
 					echo '<br /><pre>' . print_r( $token->get_meta(), true ) . '</pre></li>';
 				}
 				echo '</ul>';
@@ -154,7 +156,7 @@ class Keyring_Admin_UI {
 					if ( has_action( 'keyring_' . $service->get_name() . '_manage_ui' ) ) {
 						$manage_kr_nonce = wp_create_nonce( 'keyring-manage' );
 						$manage_nonce = wp_create_nonce( 'keyring-manage-' . $service->get_name() );
-						echo ' (<a href="' . esc_url( Keyring_Util::admin_url( $service->get_name(), array( 'action' => 'manage', 'kr_nonce' => $manage_kr_nonce, 'nonce' => $manage_nonce ) ) ) . '">' . __( 'Manage', 'keyring' ) . '</a>)';
+						echo ' (<a href="' . esc_url( Keyring_Util::admin_url( $service->get_name(), array( 'action' => 'manage', 'kr_nonce' => $manage_kr_nonce, 'nonce' => $manage_nonce ) ) ) . '">' . esc_html( __( 'Manage', 'keyring' ) ) . '</a>)';
 					}
 
 					echo '</li>';

@@ -20,7 +20,8 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
-		add_action( 'keyring_google-contacts_manage_ui', array( $this, 'basic_ui' ) );
+		if ( ! KEYRING__HEADLESS_MODE )
+			add_action( 'keyring_google-contacts_manage_ui', array( $this, 'basic_ui' ) );
 
 		// Set scope
 		add_filter( 'keyring_google-contacts_request_token_params', array( $this, 'request_token_params' ) );
@@ -30,20 +31,33 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 
 		$this->set_endpoint( 'authorize',    'https://accounts.google.com/o/oauth2/auth',     'GET'  );
 		$this->set_endpoint( 'access_token', 'https://accounts.google.com/o/oauth2/token',    'POST' );
-		$this->set_endpoint( 'self',         'https://www.googleapis.com/oauth2/v1/userinfo', 'GET' );
+		$this->set_endpoint( 'self',         'https://www.googleapis.com/oauth2/v1/userinfo', 'GET'  );
 
-		if ( defined( 'KEYRING__GOOGLECONTACTS_KEY' ) && defined( 'KEYRING__GOOGLECONTACTS_SECRET' ) ) {
-			$this->key = KEYRING__GOOGLECONTACTS_KEY;
-			$this->secret = KEYRING__GOOGLECONTACTS_SECRET;
+		if (
+			defined( 'KEYRING__GOOGLECONTACTS_URI' )
+		&&
+			defined( 'KEYRING__GOOGLECONTACTS_ID' )
+		&&
+			defined( 'KEYRING__GOOGLECONTACTS_KEY' )
+		&&
+			defined( 'KEYRING__GOOGLECONTACTS_SECRET' )
+		) {
+			$this->app_id       = KEYRING__GOOGLECONTACTS_ID;
+			$this->redirect_uri = KEYRING__GOOGLECONTACTS_URI;
+			$this->key          = KEYRING__GOOGLECONTACTS_KEY;
+			$this->secret       = KEYRING__GOOGLECONTACTS_SECRET;
 		} else if ( $creds = $this->get_credentials() ) {
-			$this->key = $creds['key'];
-			$this->secret = $creds['secret'];
+			// $this->app_id       = $creds['app_id'];
+			$this->redirect_uri = $creds['redirect_uri'];
+			$this->key          = $creds['key'];
+			$this->secret       = $creds['secret'];
 		}
 
 		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
 
-		$this->authorization_header = 'Bearer'; // Oh, you
+		$this->authorization_header    = 'Bearer'; // Oh, you
+		$this->authorization_parameter = false;
 
 		// Need to reset the callback because Google is very strict about where it sends people
 		if ( !empty( $creds['redirect_uri'] ) )
@@ -66,10 +80,10 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 				Keyring_Util::admin_url(
 					$this->get_name(),
 					array(
-						'action' => 'verify',
+						'action'   => 'verify',
 						'kr_nonce' => $kr_nonce,
-						'nonce' => $nonce,
-						'code' => $request['code'], // Auth code from successful response (maybe)
+						'nonce'    => $nonce,
+						'code'     => $request['code'], // Auth code from successful response (maybe)
 					)
 				)
 			);
@@ -82,21 +96,22 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 		if ( !$token )
 			return $meta;
 
-		$token = new Keyring_Token( $this->get_name(), new OAuthToken( $token['access_token'], '' ), array() );
+		$token = new Keyring_Access_Token( $this->get_name(), new OAuthToken( $token['access_token'], '' ), array() );
 		$this->set_token( $token );
 		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
 		if ( !Keyring_Util::is_error( $res ) ) {
 			$meta = array(
 				'user_id'   => $res->id,
-				'name' => $res->name,
+				'name'      => $res->name,
 				'profile'   => $res->link,
 				'picture'   => $res->picture,
 			);
 		}
-		return $meta;
+
+		return apply_filters( 'keyring_access_token_meta', 'google-contacts', $token, $meta, $res, $this );
 	}
 
-	function get_display( Keyring_Token $token ) {
+	function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
 	}
 
@@ -109,8 +124,10 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 
 	// Minor modifications from Keyring_Service::basic_ui
 	function basic_ui() {
-		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-manage-' . $this->get_name() ) )
-			wp_die( __( 'Invalid/missing management nonce.', 'keyring' ) );
+		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-manage-' . $this->get_name() ) ) {
+			Keyring::error( __( 'Invalid/missing management nonce.', 'keyring' ) );
+			exit;
+		}
 
 		// Common Header
 		echo '<div class="wrap">';
@@ -123,8 +140,9 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 		if ( isset( $_POST['api_key'] ) && isset( $_POST['api_secret'] ) ) {
 			// Store credentials against this service
 			$this->update_credentials( array(
-				'key' => stripslashes( $_POST['api_key'] ),
-				'secret' => stripslashes( $_POST['api_secret'] ),
+				'app_id'       => stripslashes( $_POST['app_id'] ),
+				'key'          => stripslashes( $_POST['api_key'] ),
+				'secret'       => stripslashes( $_POST['api_secret'] ),
 				'redirect_uri' => stripslashes( $_POST['redirect_uri'] ),
 			) );
 			echo '<div class="updated"><p>' . __( 'Credentials saved.', 'keyring' ) . '</p></div>';
@@ -132,8 +150,9 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 
 		$api_key = $api_secret = $redirect_uri = '';
 		if ( $creds = $this->get_credentials() ) {
-			$api_key = $creds['key'];
-			$api_secret = $creds['secret'];
+			$app_id       = $creds['app_id'];
+			$api_key      = $creds['key'];
+			$api_secret   = $creds['secret'];
 			$redirect_uri = $creds['redirect_uri'];
 		}
 
@@ -159,6 +178,14 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 		echo '</p>';
 		echo '</form>';
 		echo '</div>';
+	}
+
+	function test_connection() {
+		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
+		if ( !Keyring_Util::is_error( $res ) )
+			return true;
+
+		return $res;
 	}
 }
 

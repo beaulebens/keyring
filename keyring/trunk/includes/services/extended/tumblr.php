@@ -12,18 +12,27 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
-		add_action( 'keyring_tumblr_manage_ui', array( $this, 'basic_ui' ) );
+		if ( ! KEYRING__HEADLESS_MODE )
+			add_action( 'keyring_tumblr_manage_ui', array( $this, 'basic_ui' ) );
 
 		$this->set_endpoint( 'request_token', 'http://www.tumblr.com/oauth/request_token', 'POST' );
 		$this->set_endpoint( 'authorize',     'http://www.tumblr.com/oauth/authorize',     'GET' );
 		$this->set_endpoint( 'access_token',  'http://www.tumblr.com/oauth/access_token',  'POST' );
 
-		if ( defined( 'KEYRING__TUMBLR_KEY' ) && defined( 'KEYRING__TUMBLR_SECRET' ) ) {
-			$this->key = KEYRING__TUMBLR_KEY;
-			$this->secret = KEYRING__TUMBLR_SECRET;
+		if (
+			defined( 'KEYRING__TUMBLR_ID' )
+		&&
+			defined( 'KEYRING__TUMBLR_KEY' )
+		&&
+			defined( 'KEYRING__TUMBLR_SECRET' )
+		) {
+			$this->app_id  = KEYRING__TUMBLR_ID;
+			$this->key     = KEYRING__TUMBLR_KEY;
+			$this->secret  = KEYRING__TUMBLR_SECRET;
 		} else if ( $creds = $this->get_credentials() ) {
-			$this->key = $creds['key'];
-			$this->secret = $creds['secret'];
+			$this->app_id  = $creds['app_id'];
+			$this->key     = $creds['key'];
+			$this->secret  = $creds['secret'];
 		}
 
 		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
@@ -40,7 +49,7 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 	function build_token_meta( $token ) {
 		// Set the token so that we can make requests using it
 		$this->set_token(
-			new Keyring_Token(
+			new Keyring_Access_Token(
 				'tumblr',
 				new OAuthToken(
 					$token['oauth_token'],
@@ -51,20 +60,28 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 
 		$response = $this->request( 'http://api.tumblr.com/v2/user/info', array( 'method' => 'POST' ) );
 
-		if ( Keyring_Util::is_error( $response ) )
-			return array();
+		if ( Keyring_Util::is_error( $response ) ) {
+			$meta = array();
+		} else {
+			$this->person = $response->response->user;
+			$meta = array(
+				'name' => $this->person->name,
+			);
+		}
 
-		$this->person = $response->response->user;
-
-		$meta = array(
-			'name' => $this->person->name,
-		);
-
-		return $meta;
+		return apply_filters( 'keyring_access_token_meta', $meta, 'tumblr', $token, $response, $this );
 	}
 
-	function get_display( Keyring_Token $token ) {
+	function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
+	}
+
+	function test_connection() {
+			$res = $this->request( 'http://api.tumblr.com/v2/user/info', array( 'method' => 'POST' ) );
+			if ( !Keyring_Util::is_error( $res ) )
+				return true;
+
+			return $res;
 	}
 }
 

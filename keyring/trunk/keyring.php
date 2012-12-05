@@ -3,7 +3,7 @@
 Plugin Name: Keyring
 Plugin URI: http://dentedreality.com.au/projects/wp-keyring/
 Description: Keyring helps you manage your keys. It provides a generic, very hookable framework for connecting to remote systems and managing your access tokens, username/password combos etc for those services. On its own it doesn't do much, but it enables other plugins to do things that require authorization to act on your behalf.
-Version: 1.1
+Version: 1.2alpha
 Author: Beau Lebens
 Author URI: http://dentedreality.com.au
 */
@@ -25,7 +25,7 @@ define( 'KEYRING__DEBUG_WARN',   2 );
 define( 'KEYRING__DEBUG_ERROR',  3 );
 
 // Indicates Keyring is installed/active so that other plugins can detect it
-define( 'KEYRING__VERSION', 1.1 );
+define( 'KEYRING__VERSION', 1.2 );
 
 /**
  * Core Keyring class that handles UI and the general flow of requesting access tokens etc
@@ -35,22 +35,28 @@ define( 'KEYRING__VERSION', 1.1 );
  */
 class Keyring {
 	protected $registered_services = array();
-	protected $store     = false;
-	protected $errors    = array();
-	protected $messages  = array();
+	protected $store               = false;
+	protected $errors              = array();
+	protected $messages            = array();
+	var $admin_page                = 'keyring';
 
 	function __construct() {
 		if ( ! KEYRING__HEADLESS_MODE ) {
 			require_once dirname( __FILE__ ) . '/admin-ui.php';
 			Keyring_Admin_UI::init();
 		}
+
+		// This is used internally to create URLs, and also to know when to
+		// attach handers. @see admin_url() and request_handlers()
+		$this->admin_page = apply_filters( 'keyring_admin_page', 'keyring' );
 	}
 
 	static function &init() {
 		static $instance = false;
 
 		if ( !$instance ) {
-			load_plugin_textdomain( 'keyring', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
+			if ( ! KEYRING__HEADLESS_MODE )
+				load_plugin_textdomain( 'keyring', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 			$instance = new Keyring;
 		}
 
@@ -66,7 +72,7 @@ class Keyring {
 
 		// Load base token and service definitions + core services
 		require_once dirname( __FILE__ ) . '/token.php';
-		require_once dirname( __FILE__ ) . '/service.php';
+		require_once dirname( __FILE__ ) . '/service.php'; // Triggers a load of all core + extended service definitions
 
 		// Initiate Keyring
 		add_action( 'init', array( 'Keyring', 'init' ), 1 );
@@ -99,7 +105,7 @@ class Keyring {
 		}
 
 		if (
-				( isset( $_REQUEST['page'] ) && 'keyring' == $_REQUEST['page'] )
+				( isset( $_REQUEST['page'] ) && Keyring::init()->admin_page == $_REQUEST['page'] )
 			&&
 				!empty( $_REQUEST['action'] )
 			&&
@@ -113,12 +119,17 @@ class Keyring {
 			do_action( "pre_keyring_{$_REQUEST['service']}_{$_REQUEST['action']}", $_REQUEST );
 
 			// Core nonce check required for everything. "keyring-ACTION" is the kr_nonce format
-			if ( !isset( $_REQUEST['kr_nonce'] ) || !wp_verify_nonce( $_REQUEST['kr_nonce'], 'keyring-' . $_REQUEST['action'] ) )
-				wp_die( __( 'Invalid/missing Keyring core nonce. All core actions require a valid nonce.', 'keyring' ) );
+			if ( !isset( $_REQUEST['kr_nonce'] ) || !wp_verify_nonce( $_REQUEST['kr_nonce'], 'keyring-' . $_REQUEST['action'] ) ) {
+				Keyring::error( __( 'Invalid/missing Keyring core nonce. All core actions require a valid nonce.', 'keyring' ) );
+				exit;
+			}
 
 			Keyring_Util::debug( "keyring_{$_REQUEST['service']}_{$_REQUEST['action']}" );
 			Keyring_Util::debug( $_GET );
 			do_action( "keyring_{$_REQUEST['service']}_{$_REQUEST['action']}", $_REQUEST );
+
+			if ( 'delete' == $_REQUEST['action'] )
+				do_action( "keyring_connection_deleted", $_REQUEST['service'], $_REQUEST );
 		}
 
 		if ( defined( 'KEYRING__FORCE_USER' ) && KEYRING__FORCE_USER && in_array( $_REQUEST['action'], array( 'request', 'verify' ) ) )
@@ -159,10 +170,15 @@ class Keyring {
 		$keyring->messages[] = $str;
 	}
 
-	static function error( $str, $debug_info = array() ) {
+	/**
+	 * Generic error handler/trigger.
+	 * @param  String $str	Informational message (user-readable)
+	 * @param  array  $info Additional information relating to the error.
+	 */
+	static function error( $str, $info = array() ) {
 		$keyring = Keyring::init();
 		$keyring->errors[] = $str;
-		do_action( 'keyring_error', $str, $debug_info );
+		do_action( 'keyring_error', $str, $info, $this );
 	}
 
 	function has_errors() {
@@ -220,7 +236,7 @@ class Keyring_Util {
 	 * @return URL to Keyring admin UI (main listing, or specific service verify process)
 	 */
 	static function admin_url( $service = false, $params = array() ) {
-		$url = apply_filters( 'keyring_admin_url', admin_url( 'tools.php?page=keyring' ) );
+		$url = apply_filters( 'keyring_admin_url', admin_url( 'tools.php?page=' . Keyring::init()->admin_page ) );
 
 		if ( $service )
 			$url = add_query_arg( array( 'service' => $service ), $url );
@@ -231,20 +247,29 @@ class Keyring_Util {
 		return $url;
 	}
 
-	static function connect_to( $service, $cookie_name ) {
+	static function connect_to( $service, $for ) {
 		Keyring_Util::debug( 'Connect to: ' . $service );
 		// Redirect into Keyring's auth handler if a valid service is provided
-		setcookie( $cookie_name, true, ( time() + apply_filters( 'keyring_connect_to_timeout', 300 ) ) ); // Stop watching after 5 minutes
 		$kr_nonce = wp_create_nonce( 'keyring-request' );
 		$request_nonce = wp_create_nonce( 'keyring-request-' . $service );
-		wp_safe_redirect( Keyring_Util::admin_url( $service, array( 'action' => 'request', 'kr_nonce' => $kr_nonce, 'nonce' => $request_nonce ) ) );
+		wp_safe_redirect(
+			Keyring_Util::admin_url(
+				$service,
+				array(
+					'action'   => 'request',
+					'kr_nonce' => $kr_nonce,
+					'nonce'    => $request_nonce,
+					'for'      => $for
+				)
+			)
+		);
 		exit;
 	}
 
 	static function token_select_box( $tokens, $name, $create = false ) {
 		?><select name="<?php echo esc_attr( $name ); ?>" id="<?php echo esc_attr( $name ); ?>">
 		<?php if ( $create ) : ?>
-			<option value="new"><?php _e( 'Create a new connection...', 'keyring' ); ?></option>
+			<option value="new"><?php _e( 'Create a new connection&hellips;', 'keyring' ); ?></option>
 		<?php endif; ?>
 		<?php foreach ( (array) $tokens as $token ) : ?>
 			<option value="<?php echo $token->get_uniq_id(); ?>"><?php echo $token->get_display(); ?></option>

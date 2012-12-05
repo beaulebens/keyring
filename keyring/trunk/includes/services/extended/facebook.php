@@ -12,35 +12,45 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
-		add_action( 'keyring_facebook_manage_ui', array( $this, 'basic_ui' ) );
+		if ( ! KEYRING__HEADLESS_MODE )
+			add_action( 'keyring_facebook_manage_ui', array( $this, 'basic_ui' ) );
 
+		$this->set_endpoint( 'authorize',     'https://www.facebook.com/dialog/oauth',        'GET' );
 		$this->set_endpoint( 'access_token', 'https://graph.facebook.com/oauth/access_token', 'GET' );
 		$this->set_endpoint( 'self',         'https://graph.facebook.com/me',                 'GET' );
 
-		if ( defined( 'KEYRING__FACEBOOK_ID' ) && defined( 'KEYRING__FACEBOOK_SECRET' ) ) {
-			$this->key    = KEYRING__FACEBOOK_ID;
-			$this->secret = KEYRING__FACEBOOK_SECRET;
+		if (
+			defined( 'KEYRING__FACEBOOK_ID' )
+		&&
+			defined( 'KEYRING__FACEBOOK_SECRET' )
+		) {
+			$this->app_id  = KEYRING__FACEBOOK_ID;
+			$this->key     = KEYRING__FACEBOOK_ID; // Intentionally duplicated from above
+			$this->secret  = KEYRING__FACEBOOK_SECRET;
 		} else if ( $creds = $this->get_credentials() ) {
-			$this->key    = $creds['key'];
-			$this->secret = $creds['secret'];
+			$this->app_id  = $creds['key'];
+			$this->key     = $creds['key']; // Intentionally duplicated from above
+			$this->secret  = $creds['secret'];
 		}
 
 		$kr_nonce = wp_create_nonce( 'keyring-verify' );
-		$nonce = wp_create_nonce( 'keyring-verify-facebook' );
+		$nonce    = wp_create_nonce( 'keyring-verify-facebook' );
 		$this->redirect_uri = Keyring_Util::admin_url( self::NAME, array( 'action' => 'verify', 'kr_nonce' => $kr_nonce, 'nonce' => $nonce, ) );
 
 		$this->requires_token( true );
+
+		add_filter( 'keyring_facebook_request_token_params', array( $this, 'filter_request_token' ) );
 	}
 
-	function request_token() {
-		// Redirect to FB to handle logging in and authorizing
-		$params = array(
-			'client_id' => $this->key,
-			'redirect_uri' => $this->redirect_uri,
-			'scope' => implode( ',', apply_filters( 'keyring_facebook_scope', array( 'publish_stream' ) ) ),
-		);
-		wp_redirect( 'https://www.facebook.com/dialog/oauth?' . http_build_query( $params ) );
-		exit;
+	/**
+	 * Add scope to the outbound URL, and allow developers to modify it
+	 * @param  array $params Core request parameters
+	 * @return Array containing originals, plus the scope parameter
+	 */
+	function filter_request_token( $params ) {
+		if ( $scope = implode( ',', apply_filters( 'keyring_facebook_scope', array() ) ) )
+			$params['scope'] = $scope;
+		return $params;
 	}
 
 	/**
@@ -53,21 +63,29 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 	}
 
 	function build_token_meta( $token ) {
-		$token = new Keyring_Token( $this->get_name(), $token['access_token'], array() );
-		$this->set_token( $token );
-		$me = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
-		if ( !Keyring_Util::is_error( $me ) ) {
-			return array(
-				'username' => $me->username,
-				'user_id'  => $me->id,
-				'name'     => $me->name,
-				'picture'  => 'https://graph.facebook.com/' . $me->id . '/picture?type=large',
+		$this->set_token(
+			new Keyring_Access_Token(
+				$this->get_name(),
+				$token['access_token'],
+				array()
+			)
+		);
+		$response = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
+		if ( Keyring_Util::is_error( $response ) ) {
+			$meta = array();
+		} else {
+			$meta = array(
+				'username' => $response->username,
+				'user_id'  => $response->id,
+				'name'     => $response->name,
+				'picture'  => "https://graph.facebook.com/{$response->id}/picture?type=large",
 			);
 		}
-		return array();
+
+		return apply_filters( 'keyring_access_token_meta', $meta, 'facebook', $token, $response, $this );
 	}
 
-	function get_display( Keyring_Token $token ) {
+	function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
 	}
 }
