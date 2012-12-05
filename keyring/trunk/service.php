@@ -43,19 +43,20 @@ abstract class Keyring_Service {
 	/**
 	 * Get a displayable string for the passed token, for this service
 	 *
-	 * @param obj $token Keyring_Token object
+	 * @param obj $token Keyring_Access_Token object
 	 * @return String for display, describing $token
 	 */
-	abstract function get_display( Keyring_Token $token );
+	abstract function get_display( Keyring_Access_Token $token );
 
 	/**
-	 * Get an array of meta data to store with this token,
+	 * Get an array of meta data to store with this token, based on parsing the access token
+	 * details passed back from the remote service.
 	 *
 	 * @param Mixed $token
 	 * @return Array containing keyed values to store along with this token
 	 */
-	function build_token_meta( $token ) {
-		return array();
+	function build_token_meta( Keyring_Access_Token $token ) {
+		return apply_filters( 'keyring_access_token_meta', array(), $this->get_name(), $token, null, $this );
 	}
 
 	function __construct() {
@@ -125,8 +126,10 @@ abstract class Keyring_Service {
 	}
 
 	function basic_ui() {
-		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-manage-' . $this->get_name() ) )
-			wp_die( __( 'Invalid/missing management nonce.', 'keyring' ) );
+		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-manage-' . $this->get_name() ) ) {
+			Keyring::error( __( 'Invalid/missing management nonce.', 'keyring' ) );
+			exit;
+		}
 
 		// Common Header
 		echo '<div class="wrap">';
@@ -139,7 +142,8 @@ abstract class Keyring_Service {
 		if ( isset( $_POST['api_key'] ) && isset( $_POST['api_secret'] ) ) {
 			// Store credentials against this service
 			$this->update_credentials( array(
-				'key' => stripslashes( $_POST['api_key'] ),
+				'app_id' => stripslashes( $_POST['app_id'] ),
+				'key'    => stripslashes( $_POST['api_key'] ),
 				'secret' => stripslashes( $_POST['api_secret'] )
 			) );
 			echo '<div class="updated"><p>' . __( 'Credentials saved.', 'keyring' ) . '</p></div>';
@@ -147,7 +151,8 @@ abstract class Keyring_Service {
 
 		$api_key = $api_secret = '';
 		if ( $creds = $this->get_credentials() ) {
-			$api_key = $creds['key'];
+			$app_id     = $creds['app_id'];
+			$api_key    = $creds['key'];
 			$api_secret = $creds['secret'];
 		}
 
@@ -160,6 +165,8 @@ abstract class Keyring_Service {
 		wp_nonce_field( 'keyring-manage', 'kr_nonce', false );
 		wp_nonce_field( 'keyring-manage-' . $this->get_name(), 'nonce', false );
 		echo '<table class="form-table">';
+		echo '<tr><th scope="row">' . __( 'App ID (optional)', 'keyring' ) . '</th>';
+		echo '<td><input type="text" name="app_id" value="' . esc_attr( $app_id ) . '" id="app_id" class="regular-text"></td></tr>';
 		echo '<tr><th scope="row">' . __( 'API Key', 'keyring' ) . '</th>';
 		echo '<td><input type="text" name="api_key" value="' . esc_attr( $api_key ) . '" id="api_key" class="regular-text"></td></tr>';
 		echo '<tr><th scope="row">' . __( 'API Secret', 'keyring' ) . '</th>';
@@ -170,6 +177,11 @@ abstract class Keyring_Service {
 		echo '<a href="' . esc_url( Keyring_Util::admin_url() ) . '" class="submitdelete" style="margin-left:2em;">' . __( 'Cancel', 'keyring' ) . '</a>';
 		echo '</p>';
 		echo '</form>';
+		?><script type="text/javascript" charset="utf-8">
+			jQuery( document ).ready( function() {
+				jQuery( '#app_id' ).focus();
+			} );
+		</script><?php
 		echo '</div>';
 	}
 
@@ -179,7 +191,7 @@ abstract class Keyring_Service {
 	 * @return Array containing credentials or false if none
 	 */
 	function get_credentials() {
-		$all = get_option( 'keyring_credentials' );
+		$all = apply_filters( 'keyring_credentials', get_option( 'keyring_credentials' ) );
 		if ( !empty( $all[ $this->get_name() ] ) )
 			return $all[ $this->get_name() ];
 		return false;
@@ -192,47 +204,37 @@ abstract class Keyring_Service {
 	 * @param array $credentials
 	 */
 	function update_credentials( array $credentials ) {
-		$all = get_option( 'keyring_credentials' );
+		$all = apply_filters( 'keyring_credentials', get_option( 'keyring_credentials' ) );
 		$all[ $this->get_name() ] = $credentials;
 		return update_option( 'keyring_credentials', $all );
 	}
 
-	function verified( $id ) {
+	function verified( $id, $request_token = null ) {
 		$c = get_called_class();
 
 		// If something else needs to be done, do it
-		do_action( 'keyring_connection_verified', $c::NAME, $id );
+		do_action( 'keyring_connection_verified', $c::NAME, $id, $request_token );
 
 		// Back to Keyring admin, with ?service=SERVICE&created=UNIQUE_ID&kr_nonce=NONCE
 		$kr_nonce = wp_create_nonce( 'keyring-created' );
 		$url = apply_filters( 'keyring_verified_redirect', Keyring_Util::admin_url( $c::NAME, array( 'action' => 'created', 'id' => $id, 'kr_nonce' => $kr_nonce ) ), $c::NAME );
-		Keyring_Util::debug( $url );
+		Keyring_Util::debug( 'Verified connection, redirect to ' . $url );
 		wp_safe_redirect( $url );
 		exit;
 	}
 
 	function is_connected() {
 		$c = get_called_class();
-		$store = Keyring::get_token_store();
-		return $store->count( $c::NAME );
+		return Keyring::get_token_store()->count( array( 'service' => $c::NAME ) );
 	}
 
-	function store_token( $token, $meta ) {
-		$meta['_classname'] = get_called_class();
-		$id = $this->store->insert( $this->get_name(), $token, $meta );
-		if ( !$id ) {
-			return $id;
-		}
-
-		$get_token = $this->store->get_token( $this->get_name(), $id, $meta );
-		if ( $get_token ) {
-			$this->set_token( $get_token );
-		}
-
+	function store_token( $token ) {
+		$token->meta['_classname'] = get_called_class();
+		$id = $this->store->insert( $token );
 		return $id;
 	}
 
-	function set_token( Keyring_Token $token ) {
+	function set_token( Keyring_Access_Token $token ) {
 		$this->token = $token;
 	}
 
@@ -246,7 +248,7 @@ abstract class Keyring_Service {
 
 	function get_tokens( $id = false ) {
 		$c = get_called_class();
-		return $this->store->get_tokens( $c::NAME );
+		return $this->store->get_tokens( array( 'service' => $c::NAME, 'type' => 'access' ) );
 	}
 
 	function token_select_box( $name, $create = false ) {

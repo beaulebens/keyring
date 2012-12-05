@@ -16,18 +16,27 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
-		add_action( 'keyring_foursquare_manage_ui', array( $this, 'basic_ui' ) );
+		if ( ! KEYRING__HEADLESS_MODE )
+			add_action( 'keyring_foursquare_manage_ui', array( $this, 'basic_ui' ) );
 
 		$this->set_endpoint( 'authorize',    'https://foursquare.com/oauth2/authenticate', 'GET' );
 		$this->set_endpoint( 'access_token', 'https://foursquare.com/oauth2/access_token', 'GET' );
 		$this->set_endpoint( 'self',         'https://api.foursquare.com/v2/users/self',   'GET' );
 
-		if ( defined( 'KEYRING__FOURSQUARE_KEY' ) && defined( 'KEYRING__FOURSQUARE_SECRET' ) ) {
-			$this->key = KEYRING__FOURSQUARE_KEY;
-			$this->secret = KEYRING__FOURSQUARE_SECRET;
+		if (
+			defined( 'KEYRING__FOURSQUARE_ID' )
+		&&
+			defined( 'KEYRING__FOURSQUARE_KEY' )
+		&&
+			defined( 'KEYRING__FOURSQUARE_SECRET' )
+		) {
+			$this->app_id  = KEYRING__FOURSQUARE_ID;
+			$this->key     = KEYRING__FOURSQUARE_KEY;
+			$this->secret  = KEYRING__FOURSQUARE_SECRET;
 		} else if ( $creds = $this->get_credentials() ) {
-			$this->key = $creds['key'];
-			$this->secret = $creds['secret'];
+			$this->app_id  = $creds['app_id'];
+			$this->key     = $creds['key'];
+			$this->secret  = $creds['secret'];
 		}
 
 		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
@@ -35,11 +44,12 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 	}
 
 	function build_token_meta( $token ) {
-		$meta = array();
-		$token = new Keyring_Token( $this->get_name(), $token['access_token'], array() );
+		$token = new Keyring_Access_Token( $this->get_name(), $token['access_token'], array() );
 		$this->set_token( $token );
 		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
-		if ( !Keyring_Util::is_error( $res ) ) {
+		if ( Keyring_Util::is_error( $res ) ) {
+			$meta = array();
+		} else {
 			$meta = array(
 				'user_id'    => $res->response->user->id,
 				'first_name' => $res->response->user->firstName,
@@ -47,10 +57,11 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 				'picture'    => $res->response->user->photo->prefix . '300x300' . $res->response->user->photo->suffix,
 			);
 		}
-		return $meta;
+
+		return apply_filters( 'keyring_access_token_meta', $meta, 'foursquare', $token, $res, $this );
 	}
 
-	function get_display( Keyring_Token $token ) {
+	function get_display( Keyring_Access_Token $token ) {
 		$meta = $token->get_meta();
 		return trim( $meta['first_name'] . ' ' . $meta['last_name'] );
 	}

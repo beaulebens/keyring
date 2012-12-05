@@ -39,10 +39,10 @@ class Keyring_Service_Example extends Keyring_Service {
 	 * You can define how a token presents itself to the user here. For example for Twitter,
 	 * we might show "@" . $screen_name.
 	 *
-	 * @param Keyring_Token $token
+	 * @param Keyring_Access_Token $token
 	 * @return String for use in UIs etc that helps identify this specific token
 	 */
-	function get_display( Keyring_Token $token ) {
+	function get_display( Keyring_Access_Token $token ) {
 		return $token->token;
 	}
 
@@ -76,7 +76,6 @@ class Keyring_Service_Example extends Keyring_Service {
 	 * This method will be used to make requests against this service. This is where
 	 * you should handle injecting tokens/headers/etc required for authentication.
 	 *
-	 * @param Keyring_Token $token
 	 * @param string $url
 	 * @param array $params additional parameters/headers for the request. Passed to WP_Http
 	 * @return Response body as a string, or a Keyring_Error with the full WP_Http response object as the "message"

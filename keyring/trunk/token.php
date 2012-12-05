@@ -5,6 +5,8 @@
  * amounts of information stuffed in their meta values. Store a meta value
  * called "_classname" which contains the name of a Keyring_Service class to
  * use to "re-hydrate" the service this token is associated with.
+ * @see Keyring_Request_Token
+ * @see Keyring_Access_Token
  *
  * @package Keyring
  */
@@ -15,12 +17,18 @@ class Keyring_Token {
 	var $service   = false; // Will contain a Keyring_Service object
 	var $unique_id = false;
 
+	/**
+	 * Create a Keyring_Token instance.
+	 * @param string  $service Shortname for the service this token is for
+	 * @param mixed  $token The actual auth token (OAuth, string, etc)
+	 * @param array   $meta Additional information related to this token
+	 * @param mixed $uniq A unique identifier for this token (if available)
+	 */
 	function __construct( $service, $token, $meta = array(), $uniq = false ) {
 		$this->name      = strtolower( $service ); // Name of the service this token is for
 		$this->token     = $token;
 		$this->unique_id = $uniq;
-		foreach ( (array) $meta as $key => $val )
-			$this->meta[ $key ] = $val;
+		$this->meta      = $meta;
 		$this->get_service();
 	}
 
@@ -45,12 +53,14 @@ class Keyring_Token {
 			$class = $this->get_meta( '_classname', true );
 			if ( $class && class_exists( $class ) ) {
 				$this->service = call_user_func( array( $class, 'init' ) );
+			} else {
+				$this->service = Keyring::get_service_by_name( $this->get_name() );
 			}
 		}
 		return $this->service;
 	}
 
-	function get_service_name() {
+	function get_name() {
 		return $this->name;
 	}
 
@@ -95,5 +105,37 @@ class Keyring_Token {
 
 		// Not expired
 		return false;
+	}
+}
+
+/**
+ * During the first phase of the auth flow, we normally want to (or are required to)
+ * store some details before sending the user off to a remote service to grant access.
+ * Use a request token to store those details locally, then we can retrieve them when
+ * we get back to finish the auth flow.
+ */
+class Keyring_Request_Token extends Keyring_Token {
+	function __construct( $service, $token, $meta = array(), $uniq = false ) {
+		$meta['type'] = 'request';
+		return parent::__construct( $service, $token, $meta, $uniq );
+	}
+
+	function type() {
+		return 'request';
+	}
+}
+
+/**
+ * Access tokens are what are 'permanently' stored, containing the information required
+ * to make secure connections/requests on behalf of the user of a remote service.
+ */
+class Keyring_Access_Token extends Keyring_Token {
+	function __construct( $service, $token, $meta = array(), $uniq = false ) {
+		$meta['type'] = 'access';
+		return parent::__construct( $service, $token, $meta, $uniq );
+	}
+
+	function type() {
+		return 'access';
 	}
 }

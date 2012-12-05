@@ -16,9 +16,9 @@ Keyring provides a very hookable, completely customizable framework for connecti
 
 Out of the box, Keyring currently comes with base Service definitions for webservices which use:
 
+* HTTP Basic
 * OAuth1
 * OAuth2
-* HTTP Basic
 
 And includes an example service implementation (services/extended/example.php) plus specific definitions for:
 
@@ -29,6 +29,7 @@ And includes an example service implementation (services/extended/example.php) p
 * [Google Contacts](http://google.com/)
 * [Instagram](http://instagram.com/)
 * [LinkedIn](http://linkedin.com/)
+* [RunKeeper](http://runkeeper.com/)
 * [Tumblr](http://tumblr.com/)
 * [Twitter](http://twitter.com/)
 * [Yahoo! Updates](http://yahoo.com/)
@@ -81,5 +82,22 @@ Keyring just provides a framework for handling connections to external services.
 Add files to includes/services/extended/ that either implement one of the includes/services/core/ service foundations, or start from scratch. Follow one of the existing service definitions for a template, and see service.php in the root of Keyring for some detail on methods you need to define, and optional ones that might make your life easier.
 
 == Changelog ==
+= 1.2 =
+* WARNING: BREAKING CHANGES
+* Huge overhaul of codebase to support Request tokens, passing reference via 'state' param (BREAKING)
+* Shuffled around how tokens are managed so that more places explicitly expect a Keyring_Token (BREAKING)
+* Force serialization of stored tokens when using SingleStore (BREAKING)
+* Big cleanup/changes to how token storage works, and how Keyring_Store looks (BREAKING)
+* Standardized handling of meta with tokens (BREAKING)
+* Added RunKeeper Service definition
+* Added a bunch of filters and tried to standardize them everywhere
+* Improve some nonce checking
+* Improved debugging information for different service types
+* Introduced app_ids for services that support/require them
+* Removed all wp_die()s in favor of Keyring::error(); exit;
+* Introduced test_connection() methods, props pento
+* Whitespace/alignment cleanup
+* Switched to using stable-tagging system in the WP.org repo
+
 = 1.1 =
 * First tagged version

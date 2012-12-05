@@ -14,7 +14,7 @@ class Keyring_Service_Delicious extends Keyring_Service_HTTP_Basic {
 		return simplexml_load_string( $data );
 	}
 
-	function get_display( Keyring_Token $token ) {
+	function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'username' );
 	}
 }

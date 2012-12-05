@@ -12,18 +12,27 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
-		add_action( 'keyring_flickr_manage_ui', array( $this, 'basic_ui' ) );
+		if ( ! KEYRING__HEADLESS_MODE )
+			add_action( 'keyring_flickr_manage_ui', array( $this, 'basic_ui' ) );
 
 		$this->set_endpoint( 'request_token', 'http://www.flickr.com/services/oauth/request_token', 'GET' );
 		$this->set_endpoint( 'authorize',     'http://www.flickr.com/services/oauth/authorize',     'GET' );
 		$this->set_endpoint( 'access_token',  'http://www.flickr.com/services/oauth/access_token',  'GET' );
 
-		if ( defined( 'KEYRING__FLICKR_KEY' ) && defined( 'KEYRING__FLICKR_SECRET' ) ) {
-			$this->key = KEYRING__FLICKR_KEY;
-			$this->secret = KEYRING__FLICKR_SECRET;
+		if (
+			defined( 'KEYRING__FLICKR_ID' )
+		&&
+			defined( 'KEYRING__FLICKR_KEY' )
+		&&
+			defined( 'KEYRING__FLICKR_SECRET' )
+		) {
+			$this->app_id  = KEYRING__FLICKR_ID;
+			$this->key     = KEYRING__FLICKR_KEY;
+			$this->secret  = KEYRING__FLICKR_SECRET;
 		} else if ( $creds = $this->get_credentials() ) {
-			$this->key = $creds['key'];
-			$this->secret = $creds['secret'];
+			$this->app_id  = $creds['app_id'];
+			$this->key     = $creds['key'];
+			$this->secret  = $creds['secret'];
 		}
 
 		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
@@ -35,7 +44,7 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 	function build_token_meta( $token ) {
 		// Need to make a request to get full information
 		$this->set_token(
-			new Keyring_Token(
+			new Keyring_Access_Token(
 				$this->get_name(),
 				new OAuthToken(
 					$token['oauth_token'],
@@ -51,19 +60,22 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 		);
 		$url = $url . http_build_query( $params );
 
-		$profile = $this->request( $url, array( 'method' => 'GET' ) );
-		if ( Keyring_Util::is_error( $profile ) )
-			return array();
+		$response = $this->request( $url, array( 'method' => 'GET' ) );
+		if ( Keyring_Util::is_error( $response ) ) {
+			$meta = array();
+		} else {
+			$meta = array(
+				'user_id'  => $token['user_nsid'],
+				'username' => $token['username'],
+				'name'     => $token['fullname'],
+				'picture'  => "http://farm{$response->person->iconfarm}.staticflickr.com/{$response->person->iconserver}/buddyicons/{$token['user_nsid']}.jpg",
+			);
+		}
 
-		return array(
-			'user_id'  => $token['user_nsid'],
-			'username' => $token['username'],
-			'name'     => $token['fullname'],
-			'picture'  => 'http://farm' . $profile->person->iconfarm . '.staticflickr.com/' . $profile->person->iconserver . '/buddyicons/' . $token['user_nsid']. '.jpg',
-		);
+		return apply_filters( 'keyring_access_token_meta', $meta, 'flickr', $token, $response, $this );
 	}
 
-	function get_display( Keyring_Token $token ) {
+	function get_display( Keyring_Access_Token $token ) {
 		$return = '';
 		$meta = $token->get_meta();
 		if ( !empty( $meta['name'] ) )
@@ -83,7 +95,7 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 		// http://www.flickr.com/services/api/response.json.html
 		$url = add_query_arg(
 			array(
-				'format' => 'json', // Always return JSON
+				'format'         => 'json', // Always return JSON
 				'nojsoncallback' => 1, // Don't wrap it in a callback
 			),
 			$url );
