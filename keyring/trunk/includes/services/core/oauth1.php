@@ -61,7 +61,8 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 					'blog_id' => get_current_blog_id(),
 				),
 				$this->get_name(),
-				array() // no token
+				array(), // no token
+				$this
 			)
 		);
 		$request_token     = apply_filters( 'keyring_request_token', $request_token, $this );
@@ -149,11 +150,12 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 					'keyring_request_token_meta',
 					$meta,
 					$this->get_name(),
-					$token
+					$token,
+					$this
 				),
 				$request_token_id // Overwrite the previous one
 			);
-			$request_token = apply_filters( 'keyring_request_token', $request_token );
+			$request_token = apply_filters( 'keyring_request_token', $request_token, $this );
 			$this->store->update( $request_token );
 		} else {
 			Keyring::error(
@@ -195,7 +197,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		if ( isset( $_GET['state'] ) ) {
 			global $keyring_request_token;
 			$state = (int) $_GET['state'];
-			$keyring_request_token = $this->store->get_token( array( 'id' => $state ) );
+			$keyring_request_token = $this->store->get_token( array( 'id' => $state, 'type' => 'request' ) );
 			Keyring_Util::debug( 'OAuth1 Loaded Request Token ' . $_GET['state'] );
 			Keyring_Util::debug( $keyring_request_token );
 
