@@ -98,7 +98,6 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 	}
 
 	function test_connection() {
-		$this->refresh_token(); // @todo?
 		$guid = $this->token->get_meta( 'external_id' );
 
 		$res = $this->request( 'http://social.yahooapis.com/v1/user/' . $guid . '/profile?format=json' );

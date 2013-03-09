@@ -98,17 +98,17 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 
 		$token = new Keyring_Access_Token( $this->get_name(), new OAuthToken( $token['access_token'], '' ), array() );
 		$this->set_token( $token );
-		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
-		if ( !Keyring_Util::is_error( $res ) ) {
+		$response = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
+		if ( !Keyring_Util::is_error( $response ) ) {
 			$meta = array(
-				'user_id'   => $res->id,
-				'name'      => $res->name,
-				'profile'   => $res->link,
-				'picture'   => $res->picture,
+				'user_id'   => $response->id,
+				'name'      => $response->name,
+				'profile'   => $response->link,
+				'picture'   => $response->picture,
 			);
 		}
 
-		return apply_filters( 'keyring_access_token_meta', 'google-contacts', $token, $meta, $res, $this );
+		return apply_filters( 'keyring_access_token_meta', $meta, 'google-contacts', $token, $response, $this );
 	}
 
 	function get_display( Keyring_Access_Token $token ) {
@@ -174,7 +174,7 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 		echo '</table>';
 		echo '<p class="submitbox">';
 		echo '<input type="submit" name="submit" value="' . __( 'Save Changes', 'keyring' ) . '" id="submit" class="button-primary">';
-		echo '<a href="' . esc_url( Keyring_Util::admin_url() ) . '" class="submitdelete" style="margin-left:2em;">' . __( 'Cancel', 'keyring' ) . '</a>';
+		echo '<a href="' . esc_url( $_SERVER['HTTP_REFERER'] ) . '" class="submitdelete" style="margin-left:2em;">' . __( 'Cancel', 'keyring' ) . '</a>';
 		echo '</p>';
 		echo '</form>';
 		echo '</div>';

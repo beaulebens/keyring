@@ -3,7 +3,7 @@
 Plugin Name: Keyring
 Plugin URI: http://dentedreality.com.au/projects/wp-keyring/
 Description: Keyring helps you manage your keys. It provides a generic, very hookable framework for connecting to remote systems and managing your access tokens, username/password combos etc for those services. On its own it doesn't do much, but it enables other plugins to do things that require authorization to act on your behalf.
-Version: 1.2alpha
+Version: 1.3
 Author: Beau Lebens
 Author URI: http://dentedreality.com.au
 */
@@ -25,7 +25,7 @@ define( 'KEYRING__DEBUG_WARN',   2 );
 define( 'KEYRING__DEBUG_ERROR',  3 );
 
 // Indicates Keyring is installed/active so that other plugins can detect it
-define( 'KEYRING__VERSION', 1.2 );
+define( 'KEYRING__VERSION', 1.3 );
 
 /**
  * Core Keyring class that handles UI and the general flow of requesting access tokens etc
@@ -51,13 +51,24 @@ class Keyring {
 		$this->admin_page = apply_filters( 'keyring_admin_page', 'keyring' );
 	}
 
-	static function &init() {
+	static function &init( $force_load = false ) {
 		static $instance = false;
 
 		if ( !$instance ) {
 			if ( ! KEYRING__HEADLESS_MODE )
 				load_plugin_textdomain( 'keyring', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 			$instance = new Keyring;
+
+			// Keyring is being loaded 'late', so we need to do some extra set-up
+			if ( did_action( 'init' ) || $force_load ) {
+				$instance->plugins_loaded();
+				do_action( 'keyring_load_services' );
+			}
+		} else {
+			if ( $force_load ) {
+				$instance->plugins_loaded();
+				do_action( 'keyring_load_services' );
+			}
 		}
 
 		return $instance;
@@ -178,7 +189,9 @@ class Keyring {
 	static function error( $str, $info = array() ) {
 		$keyring = Keyring::init();
 		$keyring->errors[] = $str;
-		do_action( 'keyring_error', $str, $info, $this );
+		do_action( 'keyring_error', $str, $info, isset( $this ) ? $this : null );
+		wp_die( $str, __( 'Keyring Error', 'keyring' ) );
+		exit;
 	}
 
 	function has_errors() {
@@ -269,7 +282,7 @@ class Keyring_Util {
 	static function token_select_box( $tokens, $name, $create = false ) {
 		?><select name="<?php echo esc_attr( $name ); ?>" id="<?php echo esc_attr( $name ); ?>">
 		<?php if ( $create ) : ?>
-			<option value="new"><?php _e( 'Create a new connection&hellips;', 'keyring' ); ?></option>
+			<option value="new"><?php _e( 'Create a new connection&hellip;', 'keyring' ); ?></option>
 		<?php endif; ?>
 		<?php foreach ( (array) $tokens as $token ) : ?>
 			<option value="<?php echo $token->get_uniq_id(); ?>"><?php echo $token->get_display(); ?></option>

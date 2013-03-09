@@ -42,7 +42,8 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 					'for' => isset( $_REQUEST['for'] ) ? (string) $_REQUEST['for'] : false
 				),
 				$this->get_name(),
-				array() // no token
+				array(), // no token
+				$this
 			)
 		);
 		$request_token     = apply_filters( 'keyring_request_token', $request_token, $this );
@@ -93,7 +94,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		}
 
 		// Remove request token, don't need it any more.
-		$this->store->delete( array( 'id' => $state ) );
+		$this->store->delete( array( 'id' => $state, 'type' => 'request' ) );
 
 		$url = $this->access_token_url;
 		if ( !stristr( $url, '?' ) )
@@ -129,12 +130,12 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 				$token['access_token'],
 				$this->build_token_meta( $token )
 			);
-			$access_token = apply_filters( 'keyring_access_token', $access_token );
+			$access_token = apply_filters( 'keyring_access_token', $access_token, $token );
 
 			Keyring_Util::debug( 'OAuth2 Access Token for storage' );
 			Keyring_Util::debug( $access_token );
 			$id = $this->store_token( $access_token );
-			$this->verified( $id );
+			$this->verified( $id, $keyring_request_token );
 			exit;
 		}
 		Keyring::error(
