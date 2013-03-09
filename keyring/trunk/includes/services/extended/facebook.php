@@ -88,6 +88,14 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 	function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
 	}
+
+	function test_connection() {
+		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
+		if ( !Keyring_Util::is_error( $res ) )
+			return true;
+
+		return $res;
+	}
 }
 
 add_action( 'keyring_load_services', array( 'Keyring_Service_Facebook', 'init' ) );

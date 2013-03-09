@@ -99,7 +99,7 @@ class Keyring_Admin_UI {
 				exit;
 			}
 
-			if ( $this->keyring->get_token_store()->delete( array( 'id' => (int) $_REQUEST['token'] ) ) )
+			if ( $this->keyring->get_token_store()->delete( array( 'id' => (int) $_REQUEST['token'], 'type' => 'access' ) ) )
 				Keyring::message( __( 'That token has been deleted.', 'keyring' ) );
 			else
 				Keyring::error( __( 'Could not delete that token!', 'keyring' ) );
@@ -125,20 +125,10 @@ class Keyring_Admin_UI {
 		switch ( $action ) {
 		case 'tokens' :
 			$this->admin_page_header( 'tokens' );
-			$tokens = $this->keyring->get_token_store()->get_tokens();
-			if ( count( $tokens ) ) {
-				echo '<ul>';
-				foreach ( $tokens as $token ) {
-					$kr_nonce = wp_create_nonce( 'keyring-delete' );
-					$delete_nonce = wp_create_nonce( 'keyring-delete-' . $token->get_service()->get_name() . '-' . $token->get_uniq_id() );
-					echo '<li><strong>' . esc_html( $token->get_display() ) . '</strong> (' . esc_html( $token->get_service()->get_label() ) . ') ';
-					echo '[<a href="' . Keyring_Util::admin_url( false, array( 'action' => 'delete', 'service' => $token->get_service()->get_name(), 'token' => $token->get_uniq_id(), 'kr_nonce' => $kr_nonce, 'nonce' => $delete_nonce ) ) . '" title="' . esc_attr( __( 'Delete', 'keyring' ) ) . '">&times;</a>]';
-					echo '<br /><pre>' . print_r( $token->get_meta(), true ) . '</pre></li>';
-				}
-				echo '</ul>';
-			} else {
-				echo '<p>' . sprintf( __( 'You haven\'t created any secure connections yet. <a href="%s">Create a connection</a>.', 'keyring' ), esc_url( Keyring_Util::admin_url( false, array( 'action' => 'services' ) ) ) ) . '</p>';
-			}
+
+			$list_table = new Keyring_Connections_List_Table();
+			$list_table->display();
+
 			$this->admin_page_footer();
 			break;
 
@@ -166,5 +156,74 @@ class Keyring_Admin_UI {
 			$this->admin_page_footer();
 			break;
 		}
+	}
+}
+
+/** WordPress List Table Administration API and base class */
+require_once ABSPATH . 'wp-admin/includes/class-wp-list-table.php';
+
+class Keyring_Connections_List_Table extends WP_List_Table {
+	var $keyring = false;
+	function __construct() {
+		$this->keyring = Keyring::init();
+
+		parent::__construct( array(
+			'singular' => 'connection',
+			'plural'   => 'connections',
+			'screen'   => $this->keyring->admin_page,
+		) );
+
+		$this->items = Keyring::get_token_store()->get_tokens();
+	}
+
+	function no_items() {
+		echo '<p>' . sprintf( __( 'You haven\'t added any connections yet. <a href="%s">Add a New Connection</a>.', 'keyring' ), esc_url( Keyring_Util::admin_url( false, array( 'action' => 'services' ) ) ) ) . '</p>';
+	}
+
+	function get_columns() {
+		return array(
+			'service'  => __( 'Service', 'keyring' ),
+			'avatar'   => __( 'Avatar', 'keyring' ),
+			'id'       => __( 'External ID', 'keyring' ),
+			'name'     => __( 'Name', 'keyring' ),
+			'actions'  => '&nbsp;'
+		);
+	}
+
+	function column_service( $row ) {
+		echo $row->get_service()->get_label();
+	}
+
+	function column_avatar( $row ) {
+		$picture = $row->get_meta( 'picture' );
+		if ( $picture ) {
+			echo '<img src="' . esc_attr( $picture ) . '" width="40" height="40" border="1" alt="' . __( 'Avatar', 'keyring' ) . '" />';
+		} else {
+			echo '-';
+		}
+	}
+
+	function column_id( $row ) {
+		echo $row->get_meta( 'user_id' );
+	}
+
+	function column_name( $row ) {
+		// Make a few attempts to get something to display here
+		$name = $row->get_meta( 'name' );
+		if ( !$name )
+			$name = $row->get_meta( 'username' );
+		if ( !$name )
+			$name = trim( $row->get_meta( 'first_name' ) . ' ' . $row->get_meta( 'last_name' ) );
+
+		if ( $name )
+			echo $name;
+		else
+			echo '-';
+	}
+
+	function column_actions( $row ) {
+		$kr_nonce = wp_create_nonce( 'keyring-delete' );
+		$delete_nonce = wp_create_nonce( 'keyring-delete-' . $row->get_service()->get_name() . '-' . $row->get_uniq_id() );
+		echo '<a href="' . Keyring_Util::admin_url( false, array( 'action' => 'delete', 'service' => $row->get_service()->get_name(), 'token' => $row->get_uniq_id(), 'kr_nonce' => $kr_nonce, 'nonce' => $delete_nonce ) ) . '" title="' . esc_attr( __( 'Delete', 'keyring' ) ) . '" class="delete">Delete</a>';
 	}
 }

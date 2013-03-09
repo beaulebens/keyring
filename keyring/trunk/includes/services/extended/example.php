@@ -56,7 +56,7 @@ class Keyring_Service_Example extends Keyring_Service {
 		echo '<p>Clicking the button below will generate a random token and store it as an example.</p>';
 		echo '<p class="submitbox">';
 		echo '<a href="' . esc_url( Keyring_Util::admin_url( 'example', array( 'action' => 'verify' ) ) ) . '" class="button-primary">' . __( 'Continue', 'keyring' ) . '</a>';
-		echo '<a href="' . esc_url( Keyring_Util::admin_url() ) . '" class="submitdelete" style="margin-left:2em;">Abort</a>';
+		echo '<a href="' . esc_attr( $_SERVER['HTTP_REFERER'] ) . '" class="submitdelete" style="margin-left:2em;">Abort</a>';
 		echo '</p>';
 		Keyring::admin_page_footer();
 	}

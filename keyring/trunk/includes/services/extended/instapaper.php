@@ -1,31 +1,52 @@
 <?php
 
 /**
- * A simple Service definition for services that just use HTTP Basic for
- * authentication. You will need to extend this and supply a verify endpoint
- * which is where the user/pass will be tested against (for a 401 response).
- *
- * @package Keyring
+ * Instapaper uses xAuth, just to be difficult.
  */
-class Keyring_Service_HTTP_Basic extends Keyring_Service {
-	protected $username      = null;
-	protected $password      = null;
-	protected $verify_url    = null;
-	protected $verify_method = null;
-	protected $token         = null;
+
+class Keyring_Service_Instapaper extends Keyring_Service_OAuth1 {
+	const NAME  = 'instapaper';
+	const LABEL = 'Instapaper';
 
 	function __construct() {
 		parent::__construct();
 
-		if ( ! KEYRING__HEADLESS_MODE )
-			add_action( 'keyring_' . $this->get_name() . '_request_ui', array( $this, 'request_ui' ) );
+		// Enable "basic" UI for entering key/secret, and the request UI for user/pass
+		if ( ! KEYRING__HEADLESS_MODE ) {
+			add_action( 'keyring_instapaper_manage_ui', array( $this, 'basic_ui' ) );
+			add_action( 'keyring_instapaper_request_ui', array( $this, 'request_ui' ) );
+		}
+
+		$this->authorization_header = true;
+
+		$this->set_endpoint( 'access_token', 'https://www.instapaper.com/api/1/oauth/access_token',         'POST' );
+		$this->set_endpoint( 'verify',       'https://www.instapaper.com/api/1/account/verify_credentials', 'POST' );
+
+		if (
+			defined( 'KEYRING__INSTAPAPER_ID' )
+		&&
+			defined( 'KEYRING__INSTAPAPER_KEY' )
+		&&
+			defined( 'KEYRING__INSTAPAPER_SECRET' )
+		) {
+			$this->app_id  = KEYRING__INSTAPAPER_ID;
+			$this->key     = KEYRING__INSTAPAPER_KEY;
+			$this->secret  = KEYRING__INSTAPAPER_SECRET;
+		} else if ( $creds = $this->get_credentials() ) {
+			$this->app_id  = $creds['app_id'];
+			$this->key     = $creds['key'];
+			$this->secret  = $creds['secret'];
+		}
+
+		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
+		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
+
+		$this->requires_token( true );
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
-		$meta = $token->get_meta();
-		return $meta['username'];
-	}
-
+	/**
+	 * Mostly duplicated from HTTP Basic
+	 */
 	function request_ui() {
 		// Common Header
 		echo '<div class="wrap">';
@@ -62,7 +83,7 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		);
 		$request_token     = apply_filters( 'keyring_request_token', $request_token, $this );
 		$request_token_id  = $this->store_token( $request_token );
-		Keyring_Util::debug( 'HTTP Basic Stored Request token ' . $request_token_id );
+		Keyring_Util::debug( 'xAuth/Instapaper Stored Request token ' . $request_token_id );
 
 		echo apply_filters( 'keyring_' . $this->get_name() . '_request_ui_intro', '' );
 
@@ -75,14 +96,14 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		wp_nonce_field( 'keyring-verify', 'kr_nonce', false );
 		wp_nonce_field( 'keyring-verify-' . $this->get_name(), 'nonce', false );
 		echo '<table class="form-table">';
-		echo '<tr><th scope="row">' . __( 'Username', 'keyring' ) . '</th>';
+		echo '<tr><th scope="row">' . __( 'Email address', 'keyring' ) . '</th>';
 		echo '<td><input type="text" name="username" value="" id="username" class="regular-text"></td></tr>';
 		echo '<tr><th scope="row">' . __( 'Password', 'keyring' ) . '</th>';
 		echo '<td><input type="password" name="password" value="" id="password" class="regular-text"></td></tr>';
 		echo '</table>';
 		echo '<p class="submitbox">';
 		echo '<input type="submit" name="submit" value="' . __( 'Verify Details', 'keyring' ) . '" id="submit" class="button-primary">';
-		echo '<a href="' . esc_url( $_SERVER['HTTP_REFERER'] ) . '" class="submitdelete" style="margin-left:2em;">' . __( 'Cancel', 'keyring' ) . '</a>';
+		echo '<a href="' . esc_attr( $_SERVER['HTTP_REFERER'] ) . '" class="submitdelete" id="logincancel" style="margin-left:2em;">' . __( 'Cancel', 'keyring' ) . '</a>';
 		echo '</p>';
 		echo '</form>';
 		echo '</div>';
@@ -93,9 +114,7 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		</script><?php
 	}
 
-	function request_token() {
-		return;
-	}
+	function request_token() { }
 
 	function verify_token() {
 		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-verify-' . $this->get_name() ) ) {
@@ -108,11 +127,11 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 			global $keyring_request_token;
 			$state = (int) $_REQUEST['state'];
 			$keyring_request_token = $this->store->get_token( array( 'id' => $state, 'type' => 'request' ) );
-			Keyring_Util::debug( 'HTTP Basic Loaded Request Token ' . $_REQUEST['state'] );
+			Keyring_Util::debug( 'xAuth/Instapaper Loaded Request Token ' . $_REQUEST['state'] );
 			Keyring_Util::debug( $keyring_request_token );
 
 			// Remove request token, don't need it any more.
-			$this->store->delete( array( 'id' => $state , 'type' => 'request') );
+			$this->store->delete( array( 'id' => $state, 'type' => 'request' ) );
 		}
 
 		if ( !strlen( $_POST['username'] ) ) {
@@ -129,12 +148,16 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 			exit;
 		}
 
-		$token = new Keyring_Access_Token(
-			$this->get_name(),
-			base64_encode( $_POST['username'] . ':' . $_POST['password'] )
+		$body = array(
+			'x_auth_mode'     => 'client_auth',
+			'x_auth_password' => $_POST['password'],
+			'x_auth_username' => $_POST['username'],
 		);
-		$this->set_token( $token );
-		$res = $this->request( $this->verify_url, array( 'method' => $this->verify_method ) );
+		ksort( $body );
+		$this->set_token( new Keyring_Access_Token( $this->get_name(), null, array() ) );
+		$res = $this->request( $this->access_token_url, array( 'method' => $this->access_token_method, 'raw_response' => true, 'body' => $body ) );
+		Keyring_Util::debug( 'OAuth1 Access Token Response' );
+		Keyring_Util::debug( $res );
 
 		// We will get a 401 if they entered an incorrect user/pass combo. ::request
 		// will then return a Keyring_Error
@@ -142,8 +165,8 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 			$url = Keyring_Util::admin_url(
 				$this->get_name(),
 				array(
-					'action' => 'request',
-					'error' => '401',
+					'action'   => 'request',
+					'error'    => '401',
 					'kr_nonce' => wp_create_nonce( 'keyring-request' )
 				)
 			);
@@ -152,65 +175,64 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 			exit;
 		}
 
+		parse_str( $res, $token );
+
 		$meta = array_merge( array( 'username' => $_POST['username'] ), $this->build_token_meta( $token ) );
 
 		$access_token = new Keyring_Access_Token(
 			$this->get_name(),
-			$token,
+			new OAuthToken( $token['oauth_token'], $token['oauth_token_secret'] ),
 			$meta
 		);
-		$access_token = apply_filters( 'keyring_access_token', $access_token, array() );
+		$access_token = apply_filters( 'keyring_access_token', $access_token );
 
 		// If we didn't get a 401, then we'll assume it's OK
 		$id = $this->store_token( $access_token );
 		$this->verified( $id, $keyring_request_token );
 	}
 
-	function request( $url, array $params = array() ) {
-		if ( $this->requires_token() && empty( $this->token ) )
-			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
+	function parse_response( $response ) {
+		return json_decode( $response );
+	}
 
-		if ( $this->requires_token() )
-			$params['headers'] = array( 'Authorization' => 'Basic ' . $this->token );
+	function build_token_meta( $token ) {
+		// Set the token so that we can make requests using it
+		$this->set_token(
+			new Keyring_Access_Token(
+				$this->get_name(),
+				new OAuthToken(
+					$token['oauth_token'],
+					$token['oauth_token_secret']
+				)
+			)
+		);
 
-		$method = 'GET';
-		if ( isset( $params['method'] ) ) {
-			$method = strtoupper( $params['method'] );
-			unset( $params['method'] );
-		}
-
-		$raw_response = false;
-		if ( isset( $params['raw_response'] ) ) {
-			$raw_response = (bool) $params['raw_response'];
-			unset( $params['raw_response'] );
-		}
-
-		Keyring_Util::debug( "HTTP Basic $method $url" );
-		Keyring_Util::debug( $params );
-
-		switch ( strtoupper( $method ) ) {
-		case 'GET':
-			$res = wp_remote_get( $url, $params );
-			break;
-
-		case 'POST':
-			$res = wp_remote_post( $url, $params );
-			break;
-
-		default:
-			Keyring::error( __( 'Unsupported method specified for verify_token.', 'keyring' ) );
-			exit;
-		}
-
-		Keyring_Util::debug( $res );
-
-		if ( 200 == wp_remote_retrieve_response_code( $res ) || 201 == wp_remote_retrieve_response_code( $res ) ) {
-			if ( $raw_response )
-				return wp_remote_retrieve_body( $res );
-			else
-				return $this->parse_response( wp_remote_retrieve_body( $res ) );
+		$response = $this->request( $this->verify_url, array( 'method' => $this->verify_method ) );
+		if ( Keyring_Util::is_error( $response ) ) {
+			$meta = array();
 		} else {
-			return new Keyring_Error( 'keyring-request-error', $res );
+			$meta = array(
+				'user_id'    => $response[0]->user_id,
+				'username'   => $response[0]->username,
+				'name'       => $response[0]->username,
+				'_classname' => get_called_class(),
+			);
 		}
+
+		return apply_filters( 'keyring_access_token_meta', $meta, 'instapaper', $token, $response, $this );
+	}
+
+	function get_display( Keyring_Access_Token $token ) {
+		return $token->get_meta( 'username' );
+	}
+
+	function test_connection() {
+			$response = $this->request( $this->verify_url, array( 'method' => $this->verify_method ) );
+			if ( !Keyring_Util::is_error( $response ) )
+				return true;
+
+			return $response;
 	}
 }
+
+add_action( 'keyring_load_services', array( 'Keyring_Service_Instapaper', 'init' ) );
