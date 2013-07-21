@@ -78,7 +78,7 @@ class Keyring {
 		return $instance;
 	}
 
-	function plugins_loaded() {
+	static function plugins_loaded() {
 		// Load stores early so we can confirm they're loaded correctly
 		require_once dirname( __FILE__ ) . '/store.php';
 		do_action( 'keyring_load_token_stores' );
@@ -110,7 +110,7 @@ class Keyring {
 	 * here for almost everything Keyring does, so you can use it to intercept
 	 * almost everything. Based entirely on $_REQUEST[page|action|service]
 	 */
-	function request_handlers() {
+	static function request_handlers() {
 		global $current_user;
 
 		if ( defined( 'KEYRING__FORCE_USER' ) && KEYRING__FORCE_USER && in_array( $_REQUEST['action'], array( 'request', 'verify' ) ) ) {

@@ -57,7 +57,7 @@ abstract class Keyring_Service {
 	 * @param Mixed $token
 	 * @return Array containing keyed values to store along with this token
 	 */
-	function build_token_meta( Keyring_Access_Token $token ) {
+	function build_token_meta( $token ) {
 		return apply_filters( 'keyring_access_token_meta', array(), $this->get_name(), $token, null, $this );
 	}
 

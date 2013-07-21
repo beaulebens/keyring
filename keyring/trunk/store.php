@@ -12,7 +12,7 @@ abstract class Keyring_Store {
 	/**
 	 * Any set up required to initiate this storage engine.
 	 */
-	abstract static function &init();
+	static function &init() {}
 
 	/**
 	 * Insert a new token into this storage engine.
