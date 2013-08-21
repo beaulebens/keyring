@@ -208,7 +208,7 @@ abstract class Keyring_Service {
 			$creds = $this->_get_credentials();
 
 			if ( !is_null( $creds ) )
-				return $creds;
+				return apply_filters( 'keyring_credentials', $creds, $this->get_name() );
 		}
 
 		// Then check for generic constants
@@ -221,17 +221,20 @@ abstract class Keyring_Service {
 		&&
 			defined( 'KEYRING__' . $name . '_SECRET' )
 		) {
-			return array(
+			$creds = array(
 				'app_id' => constant( 'KEYRING__' . $name . '_ID' ),
 				'key'    => constant( 'KEYRING__' . $name . '_KEY' ),
 				'secret' => constant( 'KEYRING__' . $name . '_SECRET' ),
 			);
+			return apply_filters( 'keyring_credentials', $creds, $this->get_name() );
 		}
 
 		// Last check in the database for a shared store of credentials
 		$all = apply_filters( 'keyring_credentials', get_option( 'keyring_credentials' ) );
-		if ( !empty( $all[ $this->get_name() ] ) )
-			return $all[ $this->get_name() ];
+		if ( !empty( $all[ $this->get_name() ] ) ) {
+			$creds = $all[ $this->get_name() ];
+			return apply_filters( 'keyring_credentials', $creds, $this->get_name() );
+		}
 
 		return false;
 	}
