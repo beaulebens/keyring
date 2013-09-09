@@ -57,7 +57,7 @@ class Keyring_Service_RunKeeper extends Keyring_Service_OAuth2 {
 			$meta = array( 'user_id' => (int) $response->userID );
 
 			// Now get the rest of their profile
-			$profile = $this->request( $this->profile_url, array( 'profilethod' => $this->profile_method ) );
+			$profile = $this->request( $this->profile_url, array( 'method' => $this->profile_method ) );
 			if ( !Keyring_Util::is_error( $profile ) ) {
 				$meta['username'] = substr( $profile->profile, strrpos( $profile->profile, '/' ) + 1 );
 				$meta['name']     = $profile->name;
