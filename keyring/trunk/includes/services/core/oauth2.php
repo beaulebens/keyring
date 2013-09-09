@@ -196,13 +196,6 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			unset( $params['method'] );
 		}
 
-		$query = '';
-		$parsed = parse_url( $url );
-		if ( !empty( $parsed['query'] ) && 'POST' == $method ) {
-			$url = str_replace( $parsed['query'], '', $url );
-			$query = $parsed['query'];
-		}
-
 		Keyring_Util::debug( 'OAuth2 Params' );
 		Keyring_Util::debug( $params );
 
@@ -212,13 +205,14 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			break;
 
 		case 'POST':
-			$params = array_merge( array( 'body' => $query, 'sslverify' => false ), $params );
+			$params = array_merge( array( 'sslverify' => false ), $params );
 			$res = wp_remote_post( $url, $params );
 			break;
 
 		default:
-			Keyring::error( __( 'Unsupported method specified for request_token.', 'keyring' ) );
-			exit;
+			$params = array_merge( array( 'method' => $method, 'sslverify' => false ), $params );
+			$res = wp_remote_request( $url, $params );
+			break;
 		}
 
 		Keyring_Util::debug( 'OAuth2 Response' );
