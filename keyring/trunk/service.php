@@ -230,13 +230,13 @@ abstract class Keyring_Service {
 		}
 
 		// Last check in the database for a shared store of credentials
-		$all = apply_filters( 'keyring_credentials', get_option( 'keyring_credentials' ) );
+		$creds = false;
+		$all   = apply_filters( 'keyring_credentials', get_option( 'keyring_credentials' ) );
 		if ( !empty( $all[ $this->get_name() ] ) ) {
 			$creds = $all[ $this->get_name() ];
-			return apply_filters( 'keyring_credentials', $creds, $this->get_name() );
 		}
 
-		return false;
+		return apply_filters( 'keyring_credentials', $creds, $this->get_name() );
 	}
 
 	/**
