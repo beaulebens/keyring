@@ -21,7 +21,7 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth1 {
 		}
 
 		$this->set_endpoint( 'request_token', 'https://api.linkedin.com/uas/oauth/requestToken', 'POST' );
-		$this->set_endpoint( 'authorize',     'https://api.linkedin.com/uas/oauth/authorize',    'GET'  );
+		$this->set_endpoint( 'authorize',     'https://api.linkedin.com/uas/oauth/authenticate', 'GET'  );
 		$this->set_endpoint( 'access_token',  'https://api.linkedin.com/uas/oauth/accessToken',  'GET'  );
 
 		$creds = $this->get_credentials();
@@ -31,6 +31,8 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth1 {
 
 		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
+
+		add_filter( 'keyring_linkedin_request_scope', array( $this, 'member_permissions' ) );
 	}
 
 	function basic_ui_intro() {
@@ -43,6 +45,11 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth1 {
 			return simplexml_load_string( $response );
 		else
 			return json_decode( $response );
+	}
+
+	function member_permissions( $permissions = '' ) {
+		$permissions = 'rw_nus+r_basicprofile';
+		return $permissions;
 	}
 
 	function build_token_meta( $token ) {
