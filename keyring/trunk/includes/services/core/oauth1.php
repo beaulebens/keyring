@@ -75,32 +75,26 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		);
 		$request_token     = apply_filters( 'keyring_request_token', $request_token, $this );
 		$request_token_id  = $this->store_token( $request_token );
+		$scope             = apply_filters( 'keyring_' . $this->get_name() . '_request_scope', false );
+
 		Keyring_Util::debug( 'OAuth1 Stored Request token ' . $request_token_id );
-		$request_token_url = add_query_arg(
-			'oauth_callback',
-			urlencode(
-				add_query_arg(
-					'state',
-					$request_token_id,
-					$this->callback_url
-				)
+		$request_token_url = add_query_arg( array(
+				'oauth_callback' =>
+					urlencode(
+						add_query_arg(
+							array(
+								'state' => $request_token_id,
+							),
+							$this->callback_url
+						)
+					),
+				'scope' => $scope,
 			),
 			$this->request_token_url
 		);
 
 		// Set up OAuth request
-		$req = OAuthRequest::from_consumer_and_token(
-			$this->consumer,
-			null,
-			$this->request_token_method,
-			$request_token_url,
-			null
-		);
-		$req->sign_request(
-			$this->signature_method,
-			$this->consumer,
-			null
-		);
+		$req = $this->prepare_request( null, $this->request_token_method, $request_token_url, null );
 
 		$query = '';
 		$parsed = parse_url( (string) $req );
@@ -289,18 +283,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			}
 		}
 
-		$req = OAuthRequest::from_consumer_and_token(
-			$this->consumer,
-			$token,
-			$method,
-			$url,
-			$sign_vars
-		);
-		$req->sign_request(
-			$this->signature_method,
-			$this->consumer,
-			$token
-		);
+		$req = $this->prepare_request( $token, $method, $url, $sign_vars );
 		$request_url = (string) $req;
 
 		if ( $this->token && $this->authorization_header ) {
@@ -360,6 +343,22 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		} else {
 			return new Keyring_Error( 'keyring-request-error', $res );
 		}
+	}
+
+	function prepare_request( $token, $method, $url, $sign_vars = false ) {
+		$req = OAuthRequest::from_consumer_and_token(
+			$this->consumer,
+			$token,
+			$method,
+			$url,
+			$sign_vars
+		);
+		$req->sign_request(
+			$this->signature_method,
+			$this->consumer,
+			$token
+		);
+		return $req;
 	}
 
 	function get_display( Keyring_Access_Token $token ) {
