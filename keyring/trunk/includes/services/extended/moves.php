@@ -38,7 +38,7 @@ class Keyring_Service_Moves extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'authorize',    'https://api.moves-app.com/oauth/v1/authorize',    'GET'  );
 		$this->set_endpoint( 'access_token', 'https://api.moves-app.com/oauth/v1/access_token', 'POST' );
 		$this->set_endpoint( 'verify_token', 'https://api.moves-app.com/oauth/v1/tokeninfo',    'GET' );
-		$this->set_endpoint( 'profile',      'https://api.moves-app.com/api/v1/user/profile',   'GET'  );
+		$this->set_endpoint( 'profile',      'https://api.moves-app.com/api/1.1/user/profile',   'GET'  );
 
 		$creds = $this->get_credentials();
 		$this->app_id  = $creds['app_id'];
