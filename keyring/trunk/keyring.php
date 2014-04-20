@@ -38,6 +38,7 @@ class Keyring {
 	protected $store               = false;
 	protected $errors              = array();
 	protected $messages            = array();
+	protected $token_store         = '';
 	var $admin_page                = 'keyring';
 
 	function __construct() {
@@ -83,7 +84,9 @@ class Keyring {
 		// Load stores early so we can confirm they're loaded correctly
 		require_once dirname( __FILE__ ) . '/store.php';
 		do_action( 'keyring_load_token_stores' );
-		if ( !defined( 'KEYRING__TOKEN_STORE' ) || !class_exists( KEYRING__TOKEN_STORE ) || !in_array( 'Keyring_Store', class_parents( KEYRING__TOKEN_STORE ) ) )
+		$keyring = Keyring::init();
+		$keyring->token_store = apply_filters( 'keyring_token_store', defined( 'KEYRING__TOKEN_STORE' ) ? KEYRING__TOKEN_STORE : false );
+		if ( !class_exists( $keyring->token_store ) || !in_array( 'Keyring_Store', class_parents( $keyring->token_store ) ) )
 			wp_die( sprintf( __( 'Invalid <code>KEYRING__TOKEN_STORE</code> specified. Please make sure <code>KEYRING__TOKEN_STORE</code> is set to a valid classname for handling token storage in <code>%s</code> (or <code>wp-config.php</code>)', 'keyring' ), __FILE__ ) );
 
 		// Load base token and service definitions + core services
@@ -174,7 +177,7 @@ class Keyring {
 		$keyring = Keyring::init();
 
 		if ( !$keyring->store )
-			$keyring->store = call_user_func( array( KEYRING__TOKEN_STORE, 'init' ) );
+			$keyring->store = call_user_func( array( $keyring->token_store, 'init' ) );
 
 		return $keyring->store;
 	}
