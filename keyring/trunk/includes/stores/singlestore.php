@@ -39,7 +39,7 @@ class Keyring_SingleStore extends Keyring_Store {
 			'post_type'   => 'kr_' . $token->type() . '_token',
 			'meta_key'    => 'service',
 			'meta_value'  => $token->get_name(),
-			'author_id'   => get_current_user_id(),
+			'author'      => get_current_user_id(),
 			's'           => serialize( $token->token ), // Search the post content for this token
 			'exact'       => true, // Require exact content match
 		) );
@@ -105,7 +105,7 @@ class Keyring_SingleStore extends Keyring_Store {
 		$query = array(
 			'numberposts' => -1, // all
 			'post_type'   => 'kr_' . $args['type'] . '_token',
-			'author_id'   => $args['user_id'],
+			'author'      => $args['user_id'],
 		);
 
 		// Get tokens for a specific service
