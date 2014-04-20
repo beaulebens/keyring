@@ -102,6 +102,7 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 						'action'   => 'verify',
 						'kr_nonce' => $kr_nonce,
 						'nonce'    => $nonce,
+						'state'    => $request['state'],
 						'code'     => $request['code'], // Auth code from successful response (maybe)
 					)
 				)
@@ -176,7 +177,7 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 		echo apply_filters( 'keyring_' . $this->get_name() . '_basic_ui_intro', '' );
 
 		if ( ! $redirect_uri )
-			$redirect_uri = Keyring_Util::admin_url( 'google', array( 'action' => 'verify' ) );
+			$redirect_uri = Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify' ) );
 
 		// Output basic form for collecting key/secret
 		echo '<form method="post" action="">';
