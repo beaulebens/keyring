@@ -105,6 +105,29 @@ class Keyring_Admin_UI {
 				Keyring::message( __( 'Could not delete that connection!', 'keyring' ) );
 		}
 
+		// Handle test request. Will default back to "tokens" later
+		if ( isset( $_REQUEST['action'] ) && 'test' == $_REQUEST['action'] ) {
+			if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-test-' . $_REQUEST['service'] . '-' . $_REQUEST['token'] ) ) {
+				Keyring::error( __( 'Invalid/missing testing nonce.', 'keyring' ) );
+				exit;
+			}
+
+			// If the test_connection() method exists, call it for this service/connection
+			$service = $this->keyring->get_service_by_name( $_REQUEST['service'] );
+			if ( method_exists( $service, 'test_connection' ) ) {
+				$service->set_token( $this->keyring->get_token_store()->get_token( array( 'id' => $_REQUEST['token'], 'type' => 'request' ) ) );
+
+				if ( $service->test_connection() ) {
+					Keyring::message( __( 'This connection is working correctly.', 'keyring' ) );
+				} else {
+					Keyring::message( __( 'This connection is <strong>NOT</strong> working correctly.', 'keyring' ) );
+				}
+			} else {
+				Keyring::message( __( 'This service does not currently support connection testing.', 'keyring' ) );
+			}
+
+		}
+
 		// Set up our defaults
 		$service = '';
 		if ( !empty( $_REQUEST['service'] ) )
@@ -250,8 +273,14 @@ class Keyring_Connections_List_Table extends WP_List_Table {
 	}
 
 	function column_actions( $row ) {
-		$kr_nonce = wp_create_nonce( 'keyring-delete' );
+		$kr_delete_nonce = wp_create_nonce( 'keyring-delete' );
 		$delete_nonce = wp_create_nonce( 'keyring-delete-' . $row->get_service()->get_name() . '-' . $row->get_uniq_id() );
-		echo '<a href="' . Keyring_Util::admin_url( false, array( 'action' => 'delete', 'service' => $row->get_service()->get_name(), 'token' => $row->get_uniq_id(), 'kr_nonce' => $kr_nonce, 'nonce' => $delete_nonce ) ) . '" title="' . esc_attr( __( 'Delete', 'keyring' ) ) . '" class="delete">Delete</a>';
+
+		$kr_test_nonce = wp_create_nonce( 'keyring-test' );
+		$test_nonce = wp_create_nonce( 'keyring-test-' . $row->get_service()->get_name() . '-' . $row->get_uniq_id() );
+
+		echo '<a href="' . Keyring_Util::admin_url( false, array( 'action' => 'delete', 'service' => $row->get_service()->get_name(), 'token' => $row->get_uniq_id(), 'kr_nonce' => $kr_delete_nonce, 'nonce' => $delete_nonce ) ) . '" title="' . esc_attr( __( 'Delete', 'keyring' ) ) . '" class="delete">Delete</a>';
+		echo ' | ';
+		echo '<a href="' . Keyring_Util::admin_url( false, array( 'action' => 'test', 'service' => $row->get_service()->get_name(), 'token' => $row->get_uniq_id(), 'kr_nonce' => $kr_test_nonce, 'nonce' => $test_nonce ) ) . '" title="' . esc_attr( __( 'Test', 'keyring' ) ) . '" class="test">Test</a>';
 	}
 }
