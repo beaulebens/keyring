@@ -95,10 +95,13 @@ Add files to includes/services/extended/ that either implement one of the includ
 = 1.6 =
 * Enhancement BREAKING: Change the way the keyring_admin_url filter is applied so that it's already got all the parameters etc added to it by the time the filter happens. Makes that filter much more flexible. You probably need to add $params to your filter function, and the add_query_arg() those params onto whatever URL you're returning.
 * Bugfix WARNING: Change the filters in get_credentials() to keyring_service_credentials, since keyring_credentials is in use, and slightly different
-* Enhancement: Abstract out prepare_request() for OAuth1 service
+* Enhancement: Allow the token store to be filtered, for divergent implementations on a single installation, props Jamie P
 * Enhancement: Allow filtering of request scope for OAuth1 services
 * Enhancement: Add connection-testing to the default admin UI for most services
+* Enhancement: Abstract out prepare_request() for OAuth1 service
+* Bugfix: Use the correct parameters for filtering results in SingleStore, props Milan D
 * Bugfix: Request correct permissions for LinkedIn, using the new filter
+* Bugfix: Get Google Contacts working properly. Props Simon W for spotting 2 errors.
 * Bugfix: Update authorize/authenticate URL for LinkedIn. Should move entire service to OAuth2 ideally
 * Bugfix: Don't restrict the 'state' parameter to being an int only (per OAuth2 spec), props Jamie P
 * Bugfix: Ensure to always filter the return value (even if false) from get_credentials(), props Jamie P
