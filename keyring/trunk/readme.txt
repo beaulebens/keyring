@@ -3,7 +3,7 @@
 Contributors: beaulebens, mdawaffe, jshreve, automattic
 Tags: authentication, security, oauth, http basic, key, token, authorization, delicious, facebook, flickr, foursquare, google contacts, instagram, instapaper, linkedin, moves, runkeeper, tripit, tumblr, twitter, yahoo, web services
 Requires at least: 3.3
-Tested up to: 3.6
+Tested up to: 3.9
 Stable Tag: 1.5.1
 
 An authentication framework that handles authorization with external web services.
@@ -102,6 +102,9 @@ Add files to includes/services/extended/ that either implement one of the includ
 * Bugfix: Update authorize/authenticate URL for LinkedIn. Should move entire service to OAuth2 ideally
 * Bugfix: Don't restrict the 'state' parameter to being an int only (per OAuth2 spec), props Jamie P
 * Bugfix: Ensure to always filter the return value (even if false) from get_credentials(), props Jamie P
+* Bugfix: Fix the Moves service so that it can get past the auth flow again (new restriction on Redirect URIs)
+* Enhancement: Update the Facebook config instructions to match their UI changes
+* Bugfix: Remove unnecessary %s from Google instructions
 
 = 1.5.1 =
 * Remove example OAuth application included within that library. Unnecessary and contains an XSS vulnerability.
