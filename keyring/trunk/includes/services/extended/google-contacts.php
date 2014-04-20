@@ -61,7 +61,7 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 		echo '<li>' . __( "Click the big blue button labelled <strong>Create an OAuth 2.0 client ID&hellip;</strong>", 'keyring' ) . '</li>';
 		echo '<li>' . __( "You must enter a <strong>Product name</strong>, but you can skip the logo and home page URL", 'keyring' ) . '</li>';
 		echo '<li>' . __( "Leave the Application type set to <strong>Web application</strong>", 'keyring' ) . '</li>';
-		echo '<li>' . __( "Next to <strong>Your site or hostname</strong>, click <strong>(more options)</strong> <code>%s</code>", 'keyring' ) . '</li>';
+		echo '<li>' . __( "Next to <strong>Your site or hostname</strong>, click <strong>(more options)</strong>", 'keyring' ) . '</li>';
 		echo '<li>' . sprintf( __( "In the <strong>Authorized Redirect URIs</strong> box, enter the URL <code>%s</code>", 'keyring' ), Keyring_Util::admin_url( 'google', array( 'action' => 'verify' ) ) ) . '</li>';
 		echo '<li>' . sprintf( __( "For the <strong>Authorized JavaScript Origins</strong>, enter the URL of your domain, e.g. <code>http://%s</code>", 'keyring' ), $_SERVER['HTTP_HOST'] ) . '</li>';
 		echo '<li>' . __( "Click <strong>Create client ID</strong> when you're done", 'keyring' ) . '</li>';
