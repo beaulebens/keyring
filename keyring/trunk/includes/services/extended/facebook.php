@@ -39,9 +39,9 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 		echo '<p>' . __( "If you haven't already, you'll need to set up an app on Facebook:", 'keyring' ) . '</p>';
 		echo '<ol>';
 		echo '<li>' . __( "Click <strong>+ Create New App</strong> at the top-right of <a href='https://developers.facebook.com/apps'>this page</a>", 'keyring' ) . '</li>';
-		echo '<li>' . __( "Enter a name for your app (maybe the name of your website?) and click <strong>Continue</strong> (ignore the other settings)", 'keyring' ) . '</li>';
+		echo '<li>' . __( "Enter a name for your app (maybe the name of your website?) and a Category, click <strong>Continue</strong> (you can skip optional things)", 'keyring' ) . '</li>';
 		echo '<li>' . __( "Enter whatever is in the CAPTCHA and click <strong>Continue</strong>", 'keyring' ) . '</li>';
-		echo '<li>' . sprintf( __( "Put your domain name in the <strong>App Domains</strong> box. That value is probably <code>%s</code>", 'keyring' ), $_SERVER['HTTP_HOST'] ) . '</li>';
+		echo '<li>' . sprintf( __( "Click <strong>Settings</strong> on the left and then <strong>Advanced</strong> at the top of that page. Under <strong>Valid OAuth redirect URIs</strong>, enter your domain name. That value is probably <code>%s</code>", 'keyring' ), $_SERVER['HTTP_HOST'] ) . '</li>';
 		echo '<li>' . sprintf( __( "Click the <strong>Website with Facebook Login</strong> box and enter the URL to your website, which is probably <code>%s</code>", 'keyring' ), get_bloginfo( 'url' ) ) . '</li>';
 		echo '<li>' . __( "Click <strong>Save Changes</strong>", 'keyring' ) . '</li>';
 		echo '</ol>';
