@@ -279,8 +279,10 @@ class Keyring_Connections_List_Table extends WP_List_Table {
 		$kr_test_nonce = wp_create_nonce( 'keyring-test' );
 		$test_nonce = wp_create_nonce( 'keyring-test-' . $row->get_service()->get_name() . '-' . $row->get_uniq_id() );
 
-		echo '<a href="' . Keyring_Util::admin_url( false, array( 'action' => 'delete', 'service' => $row->get_service()->get_name(), 'token' => $row->get_uniq_id(), 'kr_nonce' => $kr_delete_nonce, 'nonce' => $delete_nonce ) ) . '" title="' . esc_attr( __( 'Delete', 'keyring' ) ) . '" class="delete">Delete</a>';
+		echo '<span class="row-actions">';
+		echo '<span class="trash"><a href="' . Keyring_Util::admin_url( false, array( 'action' => 'delete', 'service' => $row->get_service()->get_name(), 'token' => $row->get_uniq_id(), 'kr_nonce' => $kr_delete_nonce, 'nonce' => $delete_nonce ) ) . '" title="' . esc_attr( __( 'Delete', 'keyring' ) ) . '" class="delete">Delete</a></span>';
 		echo ' | ';
 		echo '<a href="' . Keyring_Util::admin_url( false, array( 'action' => 'test', 'service' => $row->get_service()->get_name(), 'token' => $row->get_uniq_id(), 'kr_nonce' => $kr_test_nonce, 'nonce' => $test_nonce ) ) . '" title="' . esc_attr( __( 'Test', 'keyring' ) ) . '" class="test">Test</a>';
+		echo '</span>';
 	}
 }
