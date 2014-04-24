@@ -21,7 +21,7 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 		$this->authorization_realm  = "twitter.com";
 
 		$this->set_endpoint( 'request_token', 'https://twitter.com/oauth/request_token', 'POST' );
-		$this->set_endpoint( 'authorize',     'https://twitter.com/oauth/authorize',     'GET' );
+		$this->set_endpoint( 'authorize',     'https://twitter.com/oauth/authorize',     'GET'  );
 		$this->set_endpoint( 'access_token',  'https://twitter.com/oauth/access_token',  'POST' );
 		$this->set_endpoint( 'verify',        'https://api.twitter.com/1.1/account/verify_credentials.json', 'GET' );
 
@@ -37,7 +37,7 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 	}
 
 	function basic_ui_intro() {
-		echo '<p>' . sprintf( __( "If you haven't already, you'll need to <a href='https://dev.twitter.com/apps/new'>create an app on Twitter</a> (log in using your normal Twitter account). Make sure you enter something for the <strong>Callback URL</strong>, even though Keyring will override it with the correct value. Just enter your homepage, e.g. <code>%s</code>.", 'keyring' ), get_bloginfo( 'url' ) ) . '</p>';
+		echo '<p>' . sprintf( __( 'If you haven\'t already, you\'ll need to <a href="%1$s">create an app on Twitter</a> (log in using your normal Twitter account). Make sure you enter something for the <strong>Callback URL</strong>, even though Keyring will override it with the correct value. Just enter your homepage, e.g. <code>%2$s</code>.', 'keyring' ), 'https://dev.twitter.com/apps/new', get_bloginfo( 'url' ) ) . '</p>';
 		echo '<p>' . __( "Once you've created an app, copy and paste your <strong>Consumer key</strong> and <strong>Consumer secret</strong> (from under the <strong>OAuth settings</strong> section of your app's details) into the boxes below. You don't need an App ID for Twitter.", 'keyring' ) . '</p>';
 	}
 

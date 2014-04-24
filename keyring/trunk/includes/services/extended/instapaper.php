@@ -35,7 +35,7 @@ class Keyring_Service_Instapaper extends Keyring_Service_OAuth1 {
 	}
 
 	function basic_ui_intro() {
-		echo '<p>' . __( "To use the Instapaper API, you need to get manually approved. <a href='http://www.instapaper.com/main/request_oauth_consumer_token'>Apply here</a>, then wait for a reply email.", 'keyring' ) . '</p>';
+		echo '<p>' . sprintf( __( 'To use the Instapaper API, you need to get manually approved. <a href="%s">Apply here</a>, then wait for a reply email.', 'keyring' ), 'http://www.instapaper.com/main/request_oauth_consumer_token' ) . '</p>';
 		echo '<p>' . __( "Once you get approved, you'll get an email back with your details. Copy the <strong>OAuth consumer key</strong> value into the <strong>API Key</strong> field, and the <strong>OAuth consumer secret</strong> value into the <strong>API Secret</strong> field and click save (you don't need an App ID value for Instapaper).", 'keyring' ) . '</p>';
 	}
 

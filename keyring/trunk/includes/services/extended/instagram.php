@@ -18,9 +18,9 @@ class Keyring_Service_Instagram extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_instagram_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize',    'https://api.instagram.com/oauth/authorize/', 'GET' );
+		$this->set_endpoint( 'authorize',    'https://api.instagram.com/oauth/authorize/',   'GET'  );
 		$this->set_endpoint( 'access_token', 'https://api.instagram.com/oauth/access_token', 'POST' );
-		$this->set_endpoint( 'self',         'https://api.Instagram.com/v2/users/self',   'GET' );
+		$this->set_endpoint( 'self',         'https://api.instagram.com/v2/users/self',      'GET'  );
 
 		$creds = $this->get_credentials();
 		$this->app_id  = $creds['app_id'];
@@ -35,7 +35,7 @@ class Keyring_Service_Instagram extends Keyring_Service_OAuth2 {
 	}
 
 	function basic_ui_intro() {
-		echo '<p>' . sprintf( __( "To get started, <a href='http://instagram.com/developer/clients/register/'>register an OAuth client on Instagram</a>. The most important setting is the <strong>OAuth redirect_uri</strong>, which should be set to <code>%s</code>. You can set the other values to whatever you like.", 'keyring' ), Keyring_Util::admin_url( 'instagram', array( 'action' => 'verify' ) ) ) . '</p>';
+		echo '<p>' . sprintf( __( 'To get started, <a href="%1$s">register an OAuth client on Instagram</a>. The most important setting is the <strong>OAuth redirect_uri</strong>, which should be set to <code>%2$s</code>. You can set the other values to whatever you like.', 'keyring' ), 'http://instagram.com/developer/clients/register/', Keyring_Util::admin_url( 'instagram', array( 'action' => 'verify' ) ) ) . '</p>';
 		echo '<p>' . __( "Once you've saved those changes, copy the <strong>CLIENT ID</strong> value into the <strong>API Key</strong> field, and the <strong>CLIENT SECRET</strong> value into the <strong>API Secret</strong> field and click save (you don't need an App ID value for Instagram).", 'keyring' ) . '</p>';
 	}
 
