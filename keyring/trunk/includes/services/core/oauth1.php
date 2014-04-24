@@ -94,7 +94,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		);
 
 		// Set up OAuth request
-		$req = $this->prepare_request( null, $this->request_token_method, $request_token_url, null );
+		$req = $this->prepare_request( null, $this->request_token_method, $request_token_url, false );
 
 		$query = '';
 		$parsed = parse_url( (string) $req );
