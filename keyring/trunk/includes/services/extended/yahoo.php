@@ -17,8 +17,8 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 			add_filter( 'keyring_yahoo_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'request_token', 'https://api.login.yahoo.com/oauth/v2/get_request_token', 'GET' );
-		$this->set_endpoint( 'authorize',     'https://api.login.yahoo.com/oauth/v2/request_auth',      'GET' );
+		$this->set_endpoint( 'request_token', 'https://api.login.yahoo.com/oauth/v2/get_request_token', 'GET'  );
+		$this->set_endpoint( 'authorize',     'https://api.login.yahoo.com/oauth/v2/request_auth',      'GET'  );
 		$this->set_endpoint( 'access_token',  'https://api.login.yahoo.com/oauth/v2/get_token',         'POST' );
 
 		$creds = $this->get_credentials();
@@ -31,7 +31,7 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 	}
 
 	function basic_ui_intro() {
-		echo '<p>' . sprintf( __( "To connect to Yahoo!, you need to <a href='https://developer.apps.yahoo.com/dashboard/createKey.html'>Create a new project</a>. Make sure you set the <strong>Access Scope</strong> to <strong>This app requires access to private user data</strong>. When you select that, you will be asked for an <strong>Application Domain</strong>, which should probably be set to <code>http://%s</code>. Which APIs you request access for will depend on how Keyring will be used on this site. Common ones will be <strong>Contacts</strong>, <strong>Social Directory</strong>, <strong>Status</strong>, and <strong>Updates</strong>.", 'keyring' ), $_SERVER['HTTP_HOST'] ) . '</p>';
+		echo '<p>' . sprintf( __( 'To connect to Yahoo!, you need to <a href="%1$s">Create a new project</a>. Make sure you set the <strong>Access Scope</strong> to <strong>This app requires access to private user data</strong>. When you select that, you will be asked for an <strong>Application Domain</strong>, which should probably be set to <code>http://%2$s</code>. Which APIs you request access for will depend on how Keyring will be used on this site. Common ones will be <strong>Contacts</strong>, <strong>Social Directory</strong>, <strong>Status</strong>, and <strong>Updates</strong>.', 'keyring' ), 'https://developer.apps.yahoo.com/dashboard/createKey.html', $_SERVER['HTTP_HOST'] ) . '</p>';
 		echo '<p>' . __( "Once you've created your project, copy and paste your <strong>Consumer key</strong> and <strong>Consumer secret</strong> (from under the <strong>Authentication Information: OAuth</strong> section of your app's details) into the boxes below. You don't need an App ID for Yahoo!.", 'keyring' ) . '</p>';
 	}
 

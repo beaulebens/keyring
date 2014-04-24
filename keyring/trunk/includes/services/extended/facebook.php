@@ -17,7 +17,7 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_facebook_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize',     'https://www.facebook.com/dialog/oauth',        'GET' );
+		$this->set_endpoint( 'authorize',    'https://www.facebook.com/dialog/oauth',         'GET' );
 		$this->set_endpoint( 'access_token', 'https://graph.facebook.com/oauth/access_token', 'GET' );
 		$this->set_endpoint( 'self',         'https://graph.facebook.com/me',                 'GET' );
 
@@ -38,7 +38,7 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 	function basic_ui_intro() {
 		echo '<p>' . __( "If you haven't already, you'll need to set up an app on Facebook:", 'keyring' ) . '</p>';
 		echo '<ol>';
-		echo '<li>' . __( "Click <strong>+ Create New App</strong> at the top-right of <a href='https://developers.facebook.com/apps'>this page</a>", 'keyring' ) . '</li>';
+		echo '<li>' . sprintf( __( "Click <strong>+ Create New App</strong> at the top-right of <a href='%s'>this page</a>", 'keyring' ), 'https://developers.facebook.com/apps' ) . '</li>';
 		echo '<li>' . __( "Enter a name for your app (maybe the name of your website?) and a Category, click <strong>Continue</strong> (you can skip optional things)", 'keyring' ) . '</li>';
 		echo '<li>' . __( "Enter whatever is in the CAPTCHA and click <strong>Continue</strong>", 'keyring' ) . '</li>';
 		echo '<li>' . sprintf( __( "Click <strong>Settings</strong> on the left and then <strong>Advanced</strong> at the top of that page. Under <strong>Valid OAuth redirect URIs</strong>, enter your domain name. That value is probably <code>%s</code>", 'keyring' ), $_SERVER['HTTP_HOST'] ) . '</li>';

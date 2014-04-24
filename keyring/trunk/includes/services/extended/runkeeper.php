@@ -37,7 +37,7 @@ class Keyring_Service_RunKeeper extends Keyring_Service_OAuth2 {
 	}
 
 	function basic_ui_intro() {
-		echo '<p>' . __( "You'll need to <a href='http://runkeeper.com/partner/applications/registerForm'>register a new application</a> on RunKeeper so that you can connect. Be sure to check the <strong>Read Health Information</strong> option under <strong>Permissions Requests</strong> (and explain why you want to read that data). You will also be required to set an <strong>Estimated Date of Publication</strong>.", 'keyring' ) . '</p>';
+		echo '<p>' . sprintf( __( 'You\'ll need to <a href="%s">register a new application</a> on RunKeeper so that you can connect. Be sure to check the <strong>Read Health Information</strong> option under <strong>Permissions Requests</strong> (and explain why you want to read that data). You will also be required to set an <strong>Estimated Date of Publication</strong>.', 'keyring' ), 'http://runkeeper.com/partner/applications/register' ) . '</p>';
 		echo '<p>' . __( "Once you've registered your application, click the <strong>Application Keys and URLs</strong> next to it, and copy the <strong>Client ID</strong> into the <strong>API Key</strong> field below, and the <strong>Client Secret</strong> value into <strong>API Secret</strong>.", 'keyring' ) . '</p>';
 	}
 

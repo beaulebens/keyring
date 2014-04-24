@@ -36,7 +36,7 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth1 {
 	}
 
 	function basic_ui_intro() {
-		echo '<p>' . __( "To connect to LinkedIn, you'll first need to <a href='https://www.linkedin.com/secure/developer?newapp='>create an app</a>. A lot of the details are required, but they're not actually important to the operation of your app, since Keyring will override any important settings.", 'keyring' ) . '</p>';
+		echo '<p>' . sprintf( __( "To connect to LinkedIn, you'll first need to <a href='%s'>create an app</a>. A lot of the details are required, but they're not actually important to the operation of your app, since Keyring will override any important settings.", 'keyring' ), 'https://www.linkedin.com/secure/developer?newapp=' ) . '</p>';
 		echo '<p>' . __( "Once you've created your app, go down to the <strong>OAuth Keys</strong> section and copy the <strong>API Key</strong> value into the <strong>API Key</strong> field below, and the <strong>Secret Key</strong> value into the <strong>API Secret</strong> field and click save (you don't need an App ID value for LinkedIn).", 'keyring' ) . '</p>';
 	}
 

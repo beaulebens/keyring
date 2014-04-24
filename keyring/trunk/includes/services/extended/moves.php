@@ -59,7 +59,7 @@ class Keyring_Service_Moves extends Keyring_Service_OAuth2 {
 	}
 
 	function basic_ui_intro() {
-		echo '<p>' . __( "Head over and <a href='https://dev.moves-app.com/apps/new'>create a new application</a> on Moves-app which you'll use to connect.", 'keyring' ) . '</p>';
+		echo '<p>' . sprintf( __( 'Head over and <a href="%s">create a new application</a> on Moves-app which you\'ll use to connect.', 'keyring' ), 'https://dev.moves-app.com/apps/new' ) . '</p>';
 		echo '<p>' . sprintf( __( "Once it's created, click the <strong>Development</strong> tab. Your <strong>App ID</strong> and <strong>API Key</strong> are both shown on that page as <strong>Client ID</strong>. Enter your <strong>Client secret</strong> in the <strong>API Secret</strong> box. On that tab there is also a <strong>Redirect URI</strong> box, which you should set to <code>%s</code>.", 'keyring' ), Keyring_Util::admin_url( self::NAME, array( 'action' => 'verify' ) ) ) . '</p>';
 	}
 

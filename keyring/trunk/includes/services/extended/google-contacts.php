@@ -54,7 +54,7 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 	}
 
 	function basic_ui_intro() {
-		echo '<p>' . __( "Google controls access to all of their APIs through their API Console. <a href='https://code.google.com/apis/console'>Go to the console</a> and click the project dropdown just under the logo in the upper left of the screen. Click <strong>Create&hellip;</strong> to create a new project. Enter a name and then click <strong>Create project</strong>. You don't technically need access to any of the additional APIs, but if you want to, then feel free to enable them", 'keyring' ) . '</p>';
+		echo '<p>' . sprintf( __( "Google controls access to all of their APIs through their API Console. <a href='%s'>Go to the console</a> and click the project dropdown just under the logo in the upper left of the screen. Click <strong>Create&hellip;</strong> to create a new project. Enter a name and then click <strong>Create project</strong>. You don't technically need access to any of the additional APIs, but if you want to, then feel free to enable them", 'keyring' ), 'https://code.google.com/apis/console' ) . '</p>';
 		echo '<p>' . __( "Now you need to set up an OAuth Client ID.", 'keyring' ) . '</p>';
 		echo '<ol>';
 		echo '<li>' . __( "Click <strong>API Access</strong> in the menu on the left.", 'keyring' ) . '</li>';

@@ -33,7 +33,7 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 	}
 
 	function basic_ui_intro() {
-		echo '<p>' . __( "To connect to Flickr, you'll need to <a href='http://www.flickr.com/services/apps/create/apply/?'>create an application at Flickr.com</a>. If this is a personal website then you can use a non-commercial key (which will be approved automatically).", 'keyring' ) . '</p>';
+		echo '<p>' . sprintf( __( 'To connect to Flickr, you\'ll need to <a href="%s">create an application at Flickr.com</a>. If this is a personal website then you can use a non-commercial key (which will be approved automatically).', 'keyring' ), 'http://www.flickr.com/services/apps/create/apply/?' ) . '</p>';
 		echo '<p>' . __( "Once you've created your app, enter the API <strong>Key</strong> and <strong>Secret</strong> below (App ID is not required for Flickr apps).", 'keyring' ) . '</p>';
 	}
 

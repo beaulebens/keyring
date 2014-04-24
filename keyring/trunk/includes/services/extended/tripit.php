@@ -37,7 +37,7 @@ class Keyring_Service_TripIt extends Keyring_Service_OAuth1 {
 	}
 
 	function basic_ui_intro() {
-		echo '<p>' . __( "If you haven't created an app on TripIt yet, <a href='https://www.tripit.com/developer/create'>create one now</a>. Make sure you set it to being a 'Web application or widget', and other than that the settings are all up to you.", 'keyring' ) . '</p>';
+		echo '<p>' . sprintf( __( 'If you haven\'t created an app on TripIt yet, <a href="%s">create one now</a>. Make sure you select \'Full API Application\' and \'Web application or widget\'; other than that the settings are all up to you.', 'keyring' ), 'https://www.tripit.com/developer/create' ) . '</p>';
 		echo '<p>' . __( "Once you've created your app, you will see a yellow box at the top of the page, where you can get your <strong>API Key</strong> and <strong>API Secret</strong>, to enter below (you don't need an App ID value for TripIt).", 'keyring' ) . '</p>';
 	}
 
