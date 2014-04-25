@@ -106,9 +106,9 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		// Load up the request token that got us here and globalize it
 		if ( isset( $_REQUEST['state'] ) ) {
 			global $keyring_request_token;
-			$state = $_REQUEST['state'];
+			$state = preg_replace( '/[^\x20-\x7E]/', '', $_GET['state'] );
 			$keyring_request_token = $this->store->get_token( array( 'id' => $state, 'type' => 'request' ) );
-			Keyring_Util::debug( 'HTTP Basic Loaded Request Token ' . $_REQUEST['state'] );
+			Keyring_Util::debug( 'HTTP Basic Loaded Request Token ' . $state );
 			Keyring_Util::debug( $keyring_request_token );
 
 			// Remove request token, don't need it any more.
