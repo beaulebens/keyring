@@ -81,9 +81,9 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 
 		// Load up the request token that got us here and globalize it
 		global $keyring_request_token;
-		$state = $_GET['state'];
+		$state = preg_replace( '/[^\x20-\x7E]/', '', $_GET['state'] );
 		$keyring_request_token = $this->store->get_token( array( 'id' => $state, 'type' => 'request' ) );
-		Keyring_Util::debug( 'OAuth2 Loaded Request Token ' . $_GET['state'] );
+		Keyring_Util::debug( 'OAuth2 Loaded Request Token ' . $state );
 		Keyring_Util::debug( $keyring_request_token );
 
 		if ( !$keyring_request_token ) {
