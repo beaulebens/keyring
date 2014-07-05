@@ -6,6 +6,7 @@ Description: Keyring helps you manage your keys. It provides a generic, very hoo
 Version: 1.6
 Author: Beau Lebens
 Author URI: http://dentedreality.com.au
+License: GPL v2 or newer <https://www.gnu.org/licenses/gpl.txt>
 */
 
 // Define this in your wp-config (and set to true) to enable debugging
