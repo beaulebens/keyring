@@ -17,9 +17,9 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 			add_filter( 'keyring_flickr_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'request_token', 'http://www.flickr.com/services/oauth/request_token', 'GET' );
-		$this->set_endpoint( 'authorize',     'http://www.flickr.com/services/oauth/authorize',     'GET' );
-		$this->set_endpoint( 'access_token',  'http://www.flickr.com/services/oauth/access_token',  'GET' );
+		$this->set_endpoint( 'request_token', 'https://www.flickr.com/services/oauth/request_token', 'GET' );
+		$this->set_endpoint( 'authorize',     'https://www.flickr.com/services/oauth/authorize',     'GET' );
+		$this->set_endpoint( 'access_token',  'https://www.flickr.com/services/oauth/access_token',  'GET' );
 
 		$creds = $this->get_credentials();
 		$this->app_id  = $creds['app_id'];
@@ -48,7 +48,7 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 				)
 			)
 		);
-		$url = "http://api.flickr.com/services/rest/?";
+		$url = "https://api.flickr.com/services/rest/?";
 		$params = array(
 			'method'  => 'flickr.people.getInfo',
 			'api_key' => $this->key,
