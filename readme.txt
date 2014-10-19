@@ -40,6 +40,8 @@ And includes an example service implementation (services/extended/example.php) p
 
 You can very easily write your own Service definitions and then use all the power of Keyring to hook into that authentication flow. See the [Keyring Developer's Guide](http://dentedreality.com.au/projects/wp-keyring/) for more details.
 
+Contributions are welcome either via [SVN patch/diff](https://plugins.svn.wordpress.org/keyring/trunk/), or via [Github pull request](https://github.com/beaulebens/keyring).
+
 
 == Installation ==
 
