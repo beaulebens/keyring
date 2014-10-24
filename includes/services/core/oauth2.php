@@ -59,9 +59,9 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			'state'         => $request_token_id,
 		);
 		$params = apply_filters( 'keyring_' . $this->get_name() . '_request_token_params', $params );
-		Keyring_Util::debug( 'OAuth2 Redirect URL: ' . $url . http_build_query( $params ) );
+		Keyring_Util::debug( 'OAuth2 Redirect URL: ' . $url . _http_build_query( $params, '', '&' ) );
 
-		wp_redirect( $url . http_build_query( $params ) );
+		wp_redirect( $url . _http_build_query( $params, '', '&' ) );
 		exit;
 	}
 
