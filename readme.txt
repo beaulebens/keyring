@@ -3,7 +3,7 @@
 Contributors: beaulebens, mdawaffe, jshreve, jkudish, automattic
 Tags: authentication, security, oauth, http basic, key, token, authorization, delicious, facebook, flickr, foursquare, google contacts, instagram, instapaper, linkedin, moves, runkeeper, tripit, tumblr, twitter, yahoo, web services
 Requires at least: 3.3
-Tested up to: 4.0
+Tested up to: 4.1
 Stable Tag: 1.6.1
 
 An authentication framework that handles authorization with external web services.
