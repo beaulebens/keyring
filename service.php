@@ -152,9 +152,9 @@ abstract class Keyring_Service {
 		if ( isset( $_POST['api_key'] ) && isset( $_POST['api_secret'] ) ) {
 			// Store credentials against this service
 			$this->update_credentials( array(
-				'app_id' => stripslashes( $_POST['app_id'] ),
-				'key'    => stripslashes( $_POST['api_key'] ),
-				'secret' => stripslashes( $_POST['api_secret'] )
+				'app_id' => ( ! empty( $_POST['app_id'] ) ? stripslashes( $_POST['app_id'] ) : '' ),
+				'key'    => ( ! empty( $_POST['api_key'] ) ? stripslashes( $_POST['api_key'] ) : '' ),
+				'secret' => ( ! empty( $_POST['api_secret'] ) ? stripslashes( $_POST['api_secret'] ) : '' )
 			) );
 			echo '<div class="updated"><p>' . __( 'Credentials saved.', 'keyring' ) . '</p></div>';
 		}
@@ -175,12 +175,22 @@ abstract class Keyring_Service {
 		wp_nonce_field( 'keyring-manage', 'kr_nonce', false );
 		wp_nonce_field( 'keyring-manage-' . $this->get_name(), 'nonce', false );
 		echo '<table class="form-table">';
-		echo '<tr><th scope="row">' . __( 'App ID', 'keyring' ) . '</th>';
-		echo '<td><input type="text" name="app_id" value="' . esc_attr( $app_id ) . '" id="app_id" class="regular-text"></td></tr>';
-		echo '<tr><th scope="row">' . __( 'API Key', 'keyring' ) . '</th>';
-		echo '<td><input type="text" name="api_key" value="' . esc_attr( $api_key ) . '" id="api_key" class="regular-text"></td></tr>';
-		echo '<tr><th scope="row">' . __( 'API Secret', 'keyring' ) . '</th>';
-		echo '<td><input type="text" name="api_secret" value="' . esc_attr( $api_secret ) . '" id="api_secret" class="regular-text"></td></tr>';
+
+		$ui_app_id = '<tr><th scope="row">' . __( 'App ID', 'keyring' ) . '</th>';
+		$ui_app_id .= '<td><input type="text" name="app_id" value="' . esc_attr( $app_id ) . '" id="app_id" class="regular-text"></td></tr>';
+
+		echo apply_filters( 'keyring_' . $this->get_name() . '_basic_ui_app_id', $ui_app_id );
+
+		$ui_api_key = '<tr><th scope="row">' . __( 'API Key', 'keyring' ) . '</th>';
+		$ui_api_key .= '<td><input type="text" name="api_key" value="' . esc_attr( $api_key ) . '" id="api_key" class="regular-text"></td></tr>';
+
+		echo apply_filters( 'keyring_' . $this->get_name() . '_basic_ui_api_key', $ui_api_key );
+
+		$ui_api_secret = '<tr><th scope="row">' . __( 'API Secret', 'keyring' ) . '</th>';
+		$ui_api_secret .= '<td><input type="text" name="api_secret" value="' . esc_attr( $api_secret ) . '" id="api_secret" class="regular-text"></td></tr>';
+
+		echo apply_filters( 'keyring_' . $this->get_name() . '_basic_ui_app_secret', $ui_api_secret );
+
 		echo '</table>';
 		echo '<p class="submitbox">';
 		echo '<input type="submit" name="submit" value="' . __( 'Save Changes', 'keyring' ) . '" id="submit" class="button-primary">';
