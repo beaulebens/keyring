@@ -189,7 +189,7 @@ abstract class Keyring_Service {
 		$ui_api_secret = '<tr><th scope="row">' . __( 'API Secret', 'keyring' ) . '</th>';
 		$ui_api_secret .= '<td><input type="text" name="api_secret" value="' . esc_attr( $api_secret ) . '" id="api_secret" class="regular-text"></td></tr>';
 
-		echo apply_filters( 'keyring_' . $this->get_name() . '_basic_ui_app_secret', $ui_api_secret );
+		echo apply_filters( 'keyring_' . $this->get_name() . '_basic_ui_api_secret', $ui_api_secret );
 
 		echo '</table>';
 		echo '<p class="submitbox">';
