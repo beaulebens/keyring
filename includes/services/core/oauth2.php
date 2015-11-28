@@ -219,13 +219,15 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		Keyring_Util::debug( $res );
 
 		$this->set_request_response_code( wp_remote_retrieve_response_code( $res ) );
-		if ( 200 == wp_remote_retrieve_response_code( $res ) || 201 == wp_remote_retrieve_response_code( $res ) )
-			if ( $raw_response )
+		if ( in_array( wp_remote_retrieve_response_code( $res ), array( 200, 201, 202 ) ) {
+			if ( $raw_response ) {
 				return wp_remote_retrieve_body( $res );
-			else
+			} else {
 				return $this->parse_response( wp_remote_retrieve_body( $res ) );
-		else
+			}
+		} else {
 			return new Keyring_Error( 'keyring-request-error', $res );
+		}
 	}
 
 	/**
