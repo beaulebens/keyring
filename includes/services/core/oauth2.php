@@ -122,7 +122,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			$res = wp_remote_get( $url . http_build_query( $params ) );
 			break;
 		case 'POST':
-			$res = wp_remote_post( $url, array( 'body' => $params ) );
+			$res = wp_remote_post( $url, apply_filters( 'keyring_' . $this->get_name() . '_verify_token_post_params', array( 'body' => $params ) ) );
 			break;
 		}
 		Keyring_Util::debug( 'OAuth2 Response' );
