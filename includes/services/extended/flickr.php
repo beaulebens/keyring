@@ -107,6 +107,22 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 	function parse_response( $response ) {
 		return json_decode( $response );
 	}
+
+	function test_connection() {
+		$url = "https://api.flickr.com/services/rest/?";
+		$params = array(
+			'method'  => 'flickr.test.login',
+			'api_key' => $this->key,
+		);
+		$url = $url . http_build_query( $params );
+
+		$response = $this->request( $url );
+		if ( ! Keyring_Util::is_error( $response ) ) {
+			return true;
+		}
+
+		return $response;
+	}
 }
 
 add_action( 'keyring_load_services', array( 'Keyring_Service_Flickr', 'init' ) );
