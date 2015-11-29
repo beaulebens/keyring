@@ -17,9 +17,10 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_facebook_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize',    'https://www.facebook.com/dialog/oauth',         'GET' );
-		$this->set_endpoint( 'access_token', 'https://graph.facebook.com/oauth/access_token', 'GET' );
-		$this->set_endpoint( 'self',         'https://graph.facebook.com/me',                 'GET' );
+		$this->set_endpoint( 'authorize',    'https://www.facebook.com/v2.2/dialog/oauth',         'GET' );
+		$this->set_endpoint( 'access_token', 'https://graph.facebook.com/v2.2/oauth/access_token', 'GET' );
+		$this->set_endpoint( 'self',         'https://graph.facebook.com/v2.2/me',                 'GET' );
+		$this->set_endpoint( 'profile_pic',  'https://graph.facebook.com/v2.2/me/picture/?redirect=false&width=150&height=150', 'GET' );
 
 		$creds = $this->get_credentials();
 		$this->app_id  = $creds['app_id'];
@@ -110,10 +111,9 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 			$meta = array();
 		} else {
 			$meta = array(
-				'username' => $response->username,
 				'user_id'  => $response->id,
 				'name'     => $response->name,
-				'picture'  => "https://graph.facebook.com/{$response->id}/picture?type=large",
+				'picture'  => "https://graph.facebook.com/v2.2/{$response->id}/picture?type=large",
 			);
 		}
 
@@ -126,10 +126,55 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 
 	function test_connection() {
 		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
-		if ( !Keyring_Util::is_error( $res ) )
+		if ( ! Keyring_Util::is_error( $res ) )
 			return true;
 
 		return $res;
+	}
+
+	/**
+	 * Get a list of FB Pages that this user has permissions to manage
+	 * @param  Keyring_Token $connection A connection to FB.
+	 * @return Array containing the raw results for each page, or empty if none.
+	 */
+	function get_fb_pages( $connection = false ) {
+		if ( $connection )
+			$this->set_token( $connection );
+
+		$additional_external_users = array();
+		$fb_accounts = $this->request( 'https://graph.facebook.com/v2.2/me/accounts/' );
+		if ( ! empty( $fb_accounts ) && ! is_wp_error( $fb_accounts ) ) {
+			foreach ( $fb_accounts->data as $fb_account ) {
+				$fb_page = $this->request( 'https://graph.facebook.com/v2.2/' . urlencode( $fb_account->id ) );
+
+				// only continue with this account as a viable option if we can post content to it
+				if ( ! $fb_page->is_published || ! $fb_page->can_post ) {
+					continue;
+				}
+
+				$this_fb_page = array(
+					'id' => $fb_page->id,
+					'name' => $fb_page->name,
+					'access_token' => $fb_account->access_token,
+					'category' => $fb_page->category,
+					'picture' => null,
+				);
+
+				$picture = $this->request( 'https://graph.facebook.com/v2.2/' . urlencode( $fb_account->id ) . '/picture?redirect=false' );
+				if ( !empty( $picture->data ) ) {
+					$this_fb_page['picture'] = esc_url_raw( $picture->data->url );
+				}
+
+				$additional_external_users[] = (object) $this_fb_page;
+			}
+		}
+
+
+		return $additional_external_users;
+	}
+
+	function fetch_additional_external_users() {
+		return $this->get_fb_pages();
 	}
 }
 
