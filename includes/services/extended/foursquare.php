@@ -72,6 +72,15 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 		$url = add_query_arg( array( 'v' => self::API_VERSION ), $url );
 		return parent::request( $url, $params );
 	}
+
+	function test_connection() {
+		$response = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
+		if ( ! Keyring_Util::is_error( $response ) ) {
+			return true;
+		}
+
+		return $response;
+	}
 }
 
 add_action( 'keyring_load_services', array( 'Keyring_Service_Foursquare', 'init' ) );
