@@ -42,6 +42,8 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 		add_filter( 'keyring_fitbit_request_token_params', array( $this, 'request_token_params' ) );
 		add_filter( 'keyring_fitbit_verify_token_params', array( $this, 'verify_token_params' ) );
 		add_filter( 'keyring_fitbit_verify_token_post_params', array( $this, 'verify_token_post_params' ) );
+
+		add_filter( 'keyring_access_token', array( $this, 'fix_access_token_meta' ), 10, 2 );
 	}
 
 	function basic_ui_intro() {
@@ -63,6 +65,18 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 	function verify_token_post_params( $params ) {
 		$params['headers'] = $this->get_basic_auth();
 		return $params;
+	}
+
+	function fix_access_token_meta( $access_token, $token ) {
+		if ( 'fitbit' !== $access_token->get_name() ) {
+			return $access_token;
+		}
+
+		return new Keyring_Access_Token(
+			$this->get_name(),
+			$token['access_token'],
+			array_merge( $access_token->get_meta(), $this->get_token()->get_meta() ) // refresh_token has been updated, and we want to make sure we store it
+		);
 	}
 
 	function get_basic_auth() {
@@ -132,14 +146,16 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 			return;
 		}
 
+		// Refresh our access token
 		$response = wp_remote_post( $this->refresh_url, array(
 			'method'  => $this->refresh_method,
-			'headers' => $this->get_basic_auth(), // For some reason, this requires Basic
+			'headers' => $this->get_basic_auth(),
 			'body'    => array(
 				'grant_type'    => 'refresh_token',
-				'refresh_token' => $meta['refresh_token']
+				'refresh_token' => $meta['refresh_token'],
 			)
 		) );
+
 		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			return false;
 		}
@@ -163,8 +179,6 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 	}
 
 	function test_connection() {
-		$this->refresh_token();
-
 		$response = $this->request( $this->profile_url, array( 'method' => $this->profile_method ) );
 		if ( ! Keyring_Util::is_error( $response ) ) {
 			return true;
