@@ -68,12 +68,11 @@ class Keyring_Admin_UI {
 
 		// Output any errors if we have them, then stop, and link back to home.
 		if ( $this->keyring->has_errors() ) {
-			echo '<div id="keyring-admin-errors" class="updated"><ul>';
+			echo '<div id="keyring-admin-errors" class="error"><ul>';
 			foreach ( $this->keyring->get_errors() as $error ) {
 				echo "<li>" . esc_html( $error ) . "</li>";
 			}
 			echo '</ul></div>';
-			echo '<p class="submit"><a href="' . Keyring_Util::admin_url( $_REQUEST['service'] ) . '" class="button-primary">' . __( 'Start Again', 'keyring' ) . '</a></p>';
 			return;
 		}
 
@@ -117,10 +116,11 @@ class Keyring_Admin_UI {
 			if ( method_exists( $service, 'test_connection' ) ) {
 				$service->set_token( $this->keyring->get_token_store()->get_token( array( 'id' => $_REQUEST['token'], 'type' => 'request' ) ) );
 
-				if ( $service->test_connection() ) {
-					Keyring::message( __( 'This connection is working correctly.', 'keyring' ) );
+				$test = $service->test_connection();
+				if ( true === $test ) {
+					Keyring::message( __( 'This connection appears to be working.', 'keyring' ) );
 				} else {
-					Keyring::message( __( 'This connection is <strong>NOT</strong> working correctly.', 'keyring' ) );
+					Keyring::error( __( 'This connection is NOT working correctly.', 'keyring' ), $test, false );
 				}
 			} else {
 				Keyring::message( __( 'This service does not currently support connection testing.', 'keyring' ) );
