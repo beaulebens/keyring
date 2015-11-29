@@ -114,6 +114,15 @@ class Keyring_Service_Moves extends Keyring_Service_OAuth2 {
 	function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'user_id' );
 	}
+
+	function test_connection() {
+		$response = $this->request( $this->profile_url, array( 'method' => $this->profile_method ) );
+		if ( ! Keyring_Util::is_error( $response ) ) {
+			return true;
+		}
+
+		return $response;
+	}
 }
 
 add_action( 'keyring_load_services', array( 'Keyring_Service_Moves', 'init' ) );
