@@ -21,6 +21,15 @@ class Keyring_Service_Delicious extends Keyring_Service_HTTP_Basic {
 	function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'username' );
 	}
+
+	function test_connection() {
+		$response = $this->request( 'https://api.del.icio.us/v1/posts/all?results=1' );
+		if ( ! Keyring_Util::is_error( $response ) ) {
+			return true;
+		}
+
+		return $response;
+	}
 }
 
 add_action( 'keyring_load_services', array( 'Keyring_Service_Delicious', 'init' ) );
