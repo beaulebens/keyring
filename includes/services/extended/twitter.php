@@ -82,6 +82,15 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 			if ( !Keyring_Util::is_error( $res ) )
 				return true;
 
+			// Twitter may return a rate limiting error if the user accesses the sharing settings or post
+			// page frequently. If so, ignore that error, things are likely aaaa-okay...
+			$keyring_error_message = $res->get_error_message();
+			if ( is_array( $keyring_error_message ) && isset( $keyring_error_message['response']['code'] ) ) {
+				if ( 429 == absint( $keyring_error_message['response']['code'] ) ) {
+					return true;
+				}
+			}
+
 			return $res;
 	}
 }
