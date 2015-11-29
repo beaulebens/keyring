@@ -1,30 +1,32 @@
 === Keyring ===
 
 Contributors: beaulebens, mdawaffe, jshreve, jkudish, automattic
-Tags: authentication, security, oauth, http basic, key, token, authorization, delicious, facebook, flickr, foursquare, google contacts, instagram, instapaper, linkedin, moves, runkeeper, tripit, tumblr, twitter, yahoo, web services
+Tags: authentication, security, oauth, http basic, authorization, facebook, foursquare, instagram, twitter, google
 Requires at least: 3.3
-Tested up to: 4.1
-Stable Tag: 1.6.1
+Tested up to: 4.4
+Stable Tag: 1.6.2
 
-An authentication framework that handles authorization with external web services.
+An authentication framework that handles authorization/communication with most popular web services.
 
 == Description ==
 
-See the [Keyring Developer's Guide](http://dentedreality.com.au/projects/wp-keyring/) for more details.
+**See the [Keyring Developer's Guide](http://dentedreality.com.au/projects/wp-keyring/) for more details.**
 
 Keyring provides a very hookable, completely customizable framework for connecting your WordPress to an external service. It takes care of all the heavy lifting when making authenticated requests, so all you need to do is implement cool features and not worry about these tricky bits.
 
-Out of the box, Keyring currently comes with base Service definitions for webservices which use:
+Out of the box, Keyring currently comes with base Service definitions for:
 
-* HTTP Basic
-* OAuth1
-* OAuth2
+* HTTP Basic,
+* OAuth1, and
+* OAuth2.
 
-And includes an example service implementation (services/extended/example.php) plus ready-to-use definitions for:
+And includes ready-to-use definitions for:
 
+* [500px](http://500px.com/)
 * [Delicious](http://delicious.com/)
 * [Eventbrite](http://eventbrite.com/)
 * [Facebook](http://facebook.com/)
+* [Fitbit](http://fitbit.com/)
 * [Flickr](http://flickr.com/)
 * [Foursquare](http://foursquare.com/)
 * [Google Contacts](http://google.com/)
@@ -40,7 +42,7 @@ And includes an example service implementation (services/extended/example.php) p
 
 You can very easily write your own Service definitions and then use all the power of Keyring to hook into that authentication flow. See the [Keyring Developer's Guide](http://dentedreality.com.au/projects/wp-keyring/) for more details.
 
-Contributions are welcome either via [SVN patch/diff](https://plugins.svn.wordpress.org/keyring/trunk/), or via [Github pull request](https://github.com/beaulebens/keyring).
+Contributions are welcome via [Github pull request](https://github.com/beaulebens/keyring).
 
 
 == Installation ==
@@ -59,7 +61,7 @@ See [Keyring Social Importers](http://wordpress.org/plugins/keyring-social-impor
 
 = Will Keyring work on my WordPress? =
 
-Keyring requires PHP 5.3+ to work, because it makes use of some modern features in PHP like late static binding and abstract classes. Other than that, as long as you meet the minimum required WP version, you should be OK to get started. If you get a cryptic "T_PAAMAYIM_NEKUDOTAYIM" error, you need to upgrade to PHP 5.3+.
+Keyring **requires PHP 5.3+ to work**, because it makes use of some modern features in PHP like late static binding and abstract classes. Other than that, as long as you meet the minimum required WP version, you should be OK to get started. If you get a cryptic "T_PAAMAYIM_NEKUDOTAYIM" error, you need to upgrade to PHP 5.3+. If you get an error about "Parse error: syntax error, unexpected T_FUNCTION in .../wp-content/plugins/keyring/keyring.php on line 50" you also need to upgrade PHP.
 
 Your webserver will also need to be able to make outbound HTTPS requests for some operations with some services to work correctly.
 
@@ -67,18 +69,18 @@ Your webserver will also need to be able to make outbound HTTPS requests for som
 
 Most services within Keyring require some sort of API key/secret before you can connect to them.
 
-1. Go to Tools > Keyring > Add New
-2. Click the name of a service in the bottom section, or 'Manage' next to one of the services in the top section
-3. Enter your API details (you will need to get those from the specific service)
-4. Click 'Save Changes'
-5. Now you should be able to create a new connection to that service
+1. Go to Tools > Keyring > Add New.
+2. Click the name of a service in the bottom section, or 'Manage' next to one of the services in the top section.
+3. Enter your API details (you will need to get those from the specific service, most config screens provide links/details on how to set them up).
+4. Click 'Save Changes'.
+5. Now you should be able to create a new connection to that service from the "Add New" screen.
 
 = How do I connect to 'x' service? =
 
-1. Go to Tools > Keyring > Add New
-2. Click the name of the service in the top section (if it's in the bottom section, then that service has not been configured for API access yet, see above)
-3. Follow through any authentication prompts to connect
-4. You should now be connected, and your connection details should be listed on the Keyring admin page (which you will be redirected to once authentication is complete)
+1. Go to Tools > Keyring > Add New.
+2. Click the name of the service in the top section (if it's in the bottom section, then that service has not been configured for API access yet, see above).
+3. Follow through any authentication prompts to connect.
+4. You should now be connected, and your connection details should be listed on the Keyring admin page (which you will be redirected to once authentication is complete).
 
 = Now what? =
 
@@ -95,6 +97,20 @@ Keyring just provides a framework for handling connections to external services.
 Add files to includes/services/extended/ that either implement one of the includes/services/core/ service foundations, or start from scratch. Follow one of the existing service definitions for a template, and see service.php in the root of Keyring for some detail on methods you need to define, and optional ones that might make your life easier.
 
 == Changelog ==
+= 1.6.2 =
+* Enhancement: New Fitbit service definition
+* Enhancement: New 500px service definition, props https://github.com/petermolnar
+* Enhancement: Allow filtering of POST parameters during token verification for OAuth2 via `keyring_{service}_verify_token_post_params`
+* Enhancement: Allow filtering of service configuration fields, props https://github.com/justinshreve
+* Enhancement: Add `test_connection()` method for all services, so that you can confirm if a token is working via the Admin UI
+* Enhancement: Facebook: use new endpoints, ability to list Pages this token has access to
+* Enhancement: Include token meta in admin UI, make avatars bigger
+* Enhancement: Avoid fatal error on sites with the pecl OAuth library installed, props https://github.com/sanchothefat
+* Enhancement: Use internal WP function to ensure querystrings are correctly encoded in OAuth2 implementation, props https://github.com/cfinke
+* Enhancement: Make Keyring::error() able to record errors without wp_die()ing (optional)
+* Bugfix: Actually detect responses from connection-tests properly, and report them as errors
+* Bugfix: Avoid PHP notice in http-basic
+
 = 1.6.1 =
 * Enhancement: Add Eventbrite as a service, props @jkudish
 
