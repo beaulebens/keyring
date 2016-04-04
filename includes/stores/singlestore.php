@@ -42,6 +42,7 @@ class Keyring_SingleStore extends Keyring_Store {
 			'author'         => get_current_user_id(),
 			's'              => serialize( $token->token ), // Search the post content for this token
 			'exact'          => true, // Require exact content match
+			'sentence'       => true, // Require to search by phrase, otherwise string is split by regex
 		) );
 
 		if ( $found ) {
