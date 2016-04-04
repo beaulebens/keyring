@@ -35,13 +35,13 @@ class Keyring_SingleStore extends Keyring_Store {
 	function insert( $token ) {
 		// Avoid duplicates by checking to see if this exists already
 		$found = get_posts( array(
-			'numberposts' => 1,
-			'post_type'   => 'kr_' . $token->type() . '_token',
-			'meta_key'    => 'service',
-			'meta_value'  => $token->get_name(),
-			'author'      => get_current_user_id(),
-			's'           => serialize( $token->token ), // Search the post content for this token
-			'exact'       => true, // Require exact content match
+			'posts_per_page' => 1,
+			'post_type'      => 'kr_' . $token->type() . '_token',
+			'meta_key'       => 'service',
+			'meta_value'     => $token->get_name(),
+			'author'         => get_current_user_id(),
+			's'              => serialize( $token->token ), // Search the post content for this token
+			'exact'          => true, // Require exact content match
 		) );
 
 		if ( $found ) {
