@@ -247,9 +247,9 @@ class Keyring_Connections_List_Table extends WP_List_Table {
 	}
 
 	function column_avatar( $row ) {
-		$picture = $row->get_meta( 'picture' );
+		$picture = set_url_scheme( $row->get_meta( 'picture' ) );
 		if ( $picture ) {
-			echo '<img src="' . esc_attr( $picture ) . '" width="80" height="80" border="1" alt="' . __( 'Avatar', 'keyring' ) . '" />';
+			echo '<img src="' . esc_url( $picture ) . '" width="80" height="80" border="1" alt="' . __( 'Avatar', 'keyring' ) . '" />';
 		} else {
 			echo '-';
 		}
