@@ -151,11 +151,11 @@ abstract class Keyring_Service {
 		// Handle actually saving credentials
 		if ( isset( $_POST['api_key'] ) && isset( $_POST['api_secret'] ) ) {
 			// Store credentials against this service
-			$this->update_credentials( array(
+			$this->update_credentials( apply_filters( 'keyring_' . $this->get_name() . '_basic_ui_save_credentials', array(
 				'app_id' => ( ! empty( $_POST['app_id'] ) ? stripslashes( $_POST['app_id'] ) : '' ),
 				'key'    => ( ! empty( $_POST['api_key'] ) ? stripslashes( $_POST['api_key'] ) : '' ),
 				'secret' => ( ! empty( $_POST['api_secret'] ) ? stripslashes( $_POST['api_secret'] ) : '' )
-			) );
+			) ) );
 			echo '<div class="updated"><p>' . __( 'Credentials saved.', 'keyring' ) . '</p></div>';
 		}
 
