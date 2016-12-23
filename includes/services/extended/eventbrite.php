@@ -56,7 +56,7 @@ class Keyring_Service_Eventbrite extends Keyring_Service_OAuth2 {
 	}
 
 	function basic_ui_intro() {
-		echo '<p>' . sprintf( __( "To get started, <a href='https://www.eventbrite.com/api/key'>register an OAuth client on Eventbrite</a>. The most important setting is the <strong>OAuth redirect_uri</strong>, which should be set to <code>%s</code>. You can set the other values to whatever you like.", 'keyring' ), esc_url(  Keyring_Util::admin_url( 'eventbrite', array( 'action' => 'verify' ) ) ) ) . '</p>';
+		echo '<p>' . sprintf( __( "To get started, <a href='https://www.eventbrite.com/myaccount/apps/'>register an OAuth client on Eventbrite</a>. The most important setting is the <strong>OAuth redirect_uri</strong>, which should be set to <code>%s</code>. You can set the other values to whatever you like.", 'keyring' ), esc_url(  Keyring_Util::admin_url( 'eventbrite', array( 'action' => 'verify' ) ) ) ) . '</p>';
 		echo '<p>' . __( "Once you've saved those changes, copy the <strong>APPLICATION KEY</strong> value into the <strong>API Key</strong> field, then click the 'Show' link next to the <strong>OAuth client secret</strong>, copy the value into the <strong>API Secret</strong> field and click save (you don't need an App ID value for Eventbrite).", 'keyring' ) . '</p>';
 	}
 
