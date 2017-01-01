@@ -70,7 +70,7 @@ class Keyring_Service_TripIt extends Keyring_Service_OAuth1 {
 			);
 		}
 
-		return apply_filters( 'keyring_access_token_meta', $meta, 'tripit', $token, $response, $this );
+		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $response, $this );
 	}
 
 	function get_display( Keyring_Access_Token $token ) {

@@ -126,7 +126,7 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 			$meta['_classname'] = get_called_class();
 		}
 
-		return apply_filters( 'keyring_access_token_meta', $meta, self::NAME, $token, array(), $this );
+		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, array(), $this );
 	}
 
 	function get_display( Keyring_Access_Token $token ) {
