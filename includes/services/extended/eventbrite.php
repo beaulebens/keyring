@@ -84,7 +84,7 @@ class Keyring_Service_Eventbrite extends Keyring_Service_OAuth2 {
 			}
 		}
 
-		return apply_filters( 'keyring_access_token_meta', $meta, 'eventbrite', $token, null, $this );
+		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, null, $this );
 	}
 
 	function get_display( Keyring_Access_Token $token ) {

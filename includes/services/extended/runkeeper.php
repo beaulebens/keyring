@@ -64,7 +64,7 @@ class Keyring_Service_RunKeeper extends Keyring_Service_OAuth2 {
 				$meta['picture']  = $profile->large_picture;
 			}
 
-			return apply_filters( 'keyring_access_token_meta', $meta, 'runkeeper', $token, $profile, $this );
+			return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $profile, $this );
 		}
 		return array();
 	}

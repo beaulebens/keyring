@@ -60,7 +60,7 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 			);
 		}
 
-		return apply_filters( 'keyring_access_token_meta', $meta, 'foursquare', $token, $res, $this );
+		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $res, $this );
 	}
 
 	function get_display( Keyring_Access_Token $token ) {
