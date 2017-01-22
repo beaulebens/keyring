@@ -52,7 +52,7 @@ class Keyring_Service_Pinterest extends Keyring_Service_OAuth2 {
 
 	function redirect_incoming_verify( $request ) {
 		if ( !isset( $request['kr_nonce'] ) ) {
-			// First request, from Google. Nonce it and move on.
+			// First request, from Pinterest. Nonce it and move on.
 			$kr_nonce = wp_create_nonce( 'keyring-verify' );
 			$nonce = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
 			wp_safe_redirect(
