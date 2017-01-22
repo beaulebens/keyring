@@ -3,7 +3,7 @@
 Plugin Name: Keyring
 Plugin URI: http://dentedreality.com.au/projects/wp-keyring/
 Description: Keyring helps you manage your keys. It provides a generic, very hookable framework for connecting to remote systems and managing your access tokens, username/password combos etc for those services. On its own it doesn't do much, but it enables other plugins to do things that require authorization to act on your behalf.
-Version: 1.6.2
+Version: 1.7
 Author: Beau Lebens
 Author URI: http://dentedreality.com.au
 License: GPL v2 or newer <https://www.gnu.org/licenses/gpl.txt>
@@ -26,7 +26,7 @@ define( 'KEYRING__DEBUG_WARN',   2 );
 define( 'KEYRING__DEBUG_ERROR',  3 );
 
 // Indicates Keyring is installed/active so that other plugins can detect it
-define( 'KEYRING__VERSION', '1.6.2' );
+define( 'KEYRING__VERSION', '1.7' );
 
 /**
  * Core Keyring class that handles UI and the general flow of requesting access tokens etc

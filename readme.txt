@@ -3,8 +3,8 @@
 Contributors: beaulebens, mdawaffe, jshreve, jkudish, automattic
 Tags: authentication, security, oauth, http basic, authorization, facebook, foursquare, instagram, twitter, google
 Requires at least: 3.3
-Tested up to: 4.4
-Stable Tag: 1.6.2
+Tested up to: 4.7.1
+Stable Tag: 1.7
 
 An authentication framework that handles authorization/communication with most popular web services.
 
@@ -22,23 +22,25 @@ Out of the box, Keyring currently comes with base Service definitions for:
 
 And includes ready-to-use definitions for:
 
-* [500px](http://500px.com/)
-* [Delicious](http://delicious.com/)
-* [Eventbrite](http://eventbrite.com/)
-* [Facebook](http://facebook.com/)
-* [Fitbit](http://fitbit.com/)
-* [Flickr](http://flickr.com/)
-* [Foursquare](http://foursquare.com/)
-* [Google Contacts](http://google.com/)
-* [Instagram](http://instagram.com/)
-* [Instapaper](http://instapaper.com/)
-* [LinkedIn](http://linkedin.com/)
-* [Moves](http://moves-app.com/)
-* [RunKeeper](http://runkeeper.com/)
-* [TripIt](http://tripit.com/)
-* [Tumblr](http://tumblr.com/)
-* [Twitter](http://twitter.com/)
-* [Yahoo! Updates](http://yahoo.com/)
+* [500px](https://500px.com/)
+* [Delicious](https://delicious.com/)
+* [Eventbrite](https://eventbrite.com/)
+* [Facebook](https://facebook.com/)
+* [Fitbit](https://fitbit.com/)
+* [Flickr](https://flickr.com/)
+* [Foursquare](https://foursquare.com/)
+* [Google Contacts](https://google.com/)
+* [Instagram](https://instagram.com/)
+* [Instapaper](https://instapaper.com/)
+* [LinkedIn](https://linkedin.com/)
+* [Moves](https://moves-app.com/)
+* [Nest](https://nest.com/)
+* [Pinterest](https://pinterest.com/)
+* [RunKeeper](https://runkeeper.com/)
+* [TripIt](https://tripit.com/)
+* [Tumblr](https://tumblr.com/)
+* [Twitter](https://twitter.com/)
+* [Yahoo! Updates](https://yahoo.com/)
 
 You can very easily write your own Service definitions and then use all the power of Keyring to hook into that authentication flow. See the [Keyring Developer's Guide](http://dentedreality.com.au/projects/wp-keyring/) for more details.
 
@@ -97,6 +99,18 @@ Keyring just provides a framework for handling connections to external services.
 Add files to includes/services/extended/ that either implement one of the includes/services/core/ service foundations, or start from scratch. Follow one of the existing service definitions for a template, and see service.php in the root of Keyring for some detail on methods you need to define, and optional ones that might make your life easier.
 
 == Changelog ==
+
+= 1.7 =
+* Enhancement: Added Pinterest Service definition.
+* Enhancement: Added Nest Service definition.
+* Enhancement: New filter for modifying credentials before saving (`keyring_{service}_basic_ui_save_credentials`).
+* Enhancement: Update all services so that token-meta filters use a dynamic service name, making it much easier to extend existing services. Props @jjj.
+* Bugfix: Use `sentence` parameter when searching for existing tokens, to avoid WordPress doing weird word-splitting. Props @dashaluna.
+* Bugfix: Correct URL for Instagram to load profile details (required for a working connection). Props @dashaluna.
+* Bugfix: Correct the URL for creating a Twitter app. Props @jjj.
+* Bugfix: Handle avatar URLs better within the admin UI. Props @jjj.
+* Bugfix: Correct URL for registering Eventbrite apps.
+
 = 1.6.2 =
 * Enhancement: New Fitbit service definition
 * Enhancement: New 500px service definition, props https://github.com/petermolnar
