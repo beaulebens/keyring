@@ -134,8 +134,14 @@ class Keyring_Admin_UI {
 			$service = $_REQUEST['service'];
 
 		$action = 'tokens';
-		if ( isset( $_REQUEST['action'] ) && in_array( $_REQUEST['action'], array( 'tokens', 'services', 'request', 'verify', 'manage' ) ) )
+		if ( isset( $_REQUEST['action'] ) && in_array( $_REQUEST['action'], array( 'tokens', 'services', 'request', 'verify', 'manage' ) ) ) {
 			$action = $_REQUEST['action'];
+		}
+
+		// Prevent non-admins from accessing any management UI
+		if ( 'manage' == $action && ! current_user_can( 'manage_options' ) ) {
+			$action = 'tokens';
+		}
 
 		// Custom UI optionally hooked in to handle this service/action. Trigger action
 		// and assume it handles everything, so bail out after that.
@@ -176,7 +182,7 @@ class Keyring_Admin_UI {
 						$request_nonce = wp_create_nonce( 'keyring-request-' . $service->get_name() );
 						echo '<li><a href="' . esc_url( Keyring_Util::admin_url( $service->get_name(), array( 'action' => 'request', 'kr_nonce' => $request_kr_nonce, 'nonce' => $request_nonce ) ) ) . '">' . esc_html( $service->get_label() ) . '</a>';
 
-						if ( has_action( 'keyring_' . $service->get_name() . '_manage_ui' ) ) {
+						if ( current_user_can( 'manage_options' ) && has_action( 'keyring_' . $service->get_name() . '_manage_ui' ) ) {
 							$manage_kr_nonce = wp_create_nonce( 'keyring-manage' );
 							$manage_nonce = wp_create_nonce( 'keyring-manage-' . $service->get_name() );
 							echo ' (<a href="' . esc_url( Keyring_Util::admin_url( $service->get_name(), array( 'action' => 'manage', 'kr_nonce' => $manage_kr_nonce, 'nonce' => $manage_nonce ) ) ) . '">' . esc_html( __( 'Manage', 'keyring' ) ) . '</a>)';
@@ -189,7 +195,7 @@ class Keyring_Admin_UI {
 					echo '<p>' . __( 'There are no fully-configured services available to connect to.', 'keyring' ) . '</p>';
 				}
 
-				if ( count( $not_configured ) ) {
+				if ( current_user_can( 'manage_options' ) && count( $not_configured ) ) {
 					echo '<p>' . __( 'The following services need to be configured correctly before you can connect to them.', 'keyring' ) . '</p>';
 					echo '<ul>';
 					foreach ( $not_configured as $service ) {
