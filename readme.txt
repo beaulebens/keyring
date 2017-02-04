@@ -4,7 +4,7 @@ Contributors: beaulebens, mdawaffe, jshreve, jkudish, automattic
 Tags: authentication, security, oauth, http basic, authorization, facebook, foursquare, instagram, twitter, google
 Requires at least: 3.3
 Tested up to: 4.7.1
-Stable Tag: 1.7
+Stable Tag: 1.7.1
 
 An authentication framework that handles authorization/communication with most popular web services.
 
