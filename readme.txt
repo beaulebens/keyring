@@ -100,6 +100,9 @@ Add files to includes/services/extended/ that either implement one of the includ
 
 == Changelog ==
 
+= 1.7.1 =
+* Bugfix: Only allow users with `manage_options` to access management UIs. Props Laura Lee for disclosure.
+
 = 1.7 =
 * Enhancement: Added Pinterest Service definition.
 * Enhancement: Added Nest Service definition.
