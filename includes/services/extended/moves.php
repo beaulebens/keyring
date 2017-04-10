@@ -45,9 +45,6 @@ class Keyring_Service_Moves extends Keyring_Service_OAuth2 {
 		$this->key     = $creds['key'];
 		$this->secret  = $creds['secret'];
 
-		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
-		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
-
 		// Moves requires an exact match on Redirect URI, which means we can't send any nonces
 		$this->callback_url = remove_query_arg( array( 'nonce', 'kr_nonce' ), $this->callback_url );
 		add_action( 'pre_keyring_moves_verify', array( $this, 'redirect_incoming_verify' ) );

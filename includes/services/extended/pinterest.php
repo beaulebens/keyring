@@ -28,9 +28,6 @@ class Keyring_Service_Pinterest extends Keyring_Service_OAuth2 {
 		$this->key     = $creds['key'];
 		$this->secret  = $creds['secret'];
 
-		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
-		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
-
 		// Send auth token in query string
 		$this->authorization_header    = false;
 		$this->authorization_parameter = 'access_token';

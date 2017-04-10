@@ -40,9 +40,6 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 		$this->key          = $creds['key'];
 		$this->secret       = $creds['secret'];
 
-		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
-		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
-
 		$this->authorization_header    = 'Bearer'; // Oh, you
 		$this->authorization_parameter = false;
 
