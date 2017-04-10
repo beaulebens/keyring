@@ -22,13 +22,13 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'self',         'https://graph.facebook.com/v2.2/me',                 'GET' );
 		$this->set_endpoint( 'profile_pic',  'https://graph.facebook.com/v2.2/me/picture/?redirect=false&width=150&height=150', 'GET' );
 
-		$creds = $this->get_credentials();
+		$creds         = $this->get_credentials();
 		$this->app_id  = $creds['app_id'];
 		$this->key     = $creds['key'];
 		$this->secret  = $creds['secret'];
 
-		$kr_nonce = wp_create_nonce( 'keyring-verify' );
-		$nonce    = wp_create_nonce( 'keyring-verify-facebook' );
+		$kr_nonce           = wp_create_nonce( 'keyring-verify' );
+		$nonce              = wp_create_nonce( 'keyring-verify-facebook' );
 		$this->redirect_uri = Keyring_Util::admin_url( self::NAME, array( 'action' => 'verify', 'kr_nonce' => $kr_nonce, 'nonce' => $nonce, ) );
 
 		$this->requires_token( true );
@@ -87,15 +87,6 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 		if ( $scope = implode( ',', apply_filters( 'keyring_facebook_scope', array() ) ) )
 			$params['scope'] = $scope;
 		return $params;
-	}
-
-	/**
-	 * Facebook decided to make things interesting and mix OAuth1 and 2. They return
-	 * their access tokens using query string encoding, so we handle that here.
-	 */
-	function parse_access_token( $token ) {
-		parse_str( $token, $token );
-		return $token;
 	}
 
 	function build_token_meta( $token ) {
