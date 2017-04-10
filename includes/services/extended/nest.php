@@ -29,9 +29,6 @@ class Keyring_Service_Nest extends Keyring_Service_OAuth2 {
 
 		$this->authorization_header = 'Bearer';
 
-		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
-		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
-
 		// Nest ignores our redirect_uri, and just redirects back to a static URI
 		add_action( 'pre_keyring_nest_verify', array( $this, 'redirect_incoming_verify' ) );
 	}
