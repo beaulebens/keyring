@@ -133,7 +133,6 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			Keyring_Util::debug( $token );
 
 			$token = $this->parse_access_token( $token );
-
 			$access_token = new Keyring_Access_Token(
 				$this->get_name(),
 				$token['access_token'],
