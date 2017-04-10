@@ -16,9 +16,9 @@ class Keyring_Service_Eventbrite extends Keyring_Service_OAuth2 {
 
 		add_filter( 'keyring_' . $this->get_name() . '_request_token_params', array( $this, 'add_connection_referrer' ) );
 
-		$this->set_endpoint( 'authorize', self::OAUTH_BASE . 'authorize', 'GET' );
-		$this->set_endpoint( 'access_token', self::OAUTH_BASE . 'token', 'POST' );
-		$this->set_endpoint( 'self', self::API_BASE . 'users/me/', 'GET' );
+		$this->set_endpoint( 'authorize',    self::OAUTH_BASE . 'authorize', 'GET' );
+		$this->set_endpoint( 'access_token', self::OAUTH_BASE . 'token',     'POST' );
+		$this->set_endpoint( 'self',         self::API_BASE . 'users/me/',   'GET' );
 
 		// Enable "basic" UI for entering key/secret
 		if ( ! KEYRING__HEADLESS_MODE ) {
@@ -30,9 +30,6 @@ class Keyring_Service_Eventbrite extends Keyring_Service_OAuth2 {
 		$this->app_id  = $creds['app_id'];
 		$this->key     = $creds['key'];
 		$this->secret  = $creds['secret'];
-
-		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
-		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
 
 		$this->authorization_header    = 'Bearer';
 		$this->authorization_parameter = false;
