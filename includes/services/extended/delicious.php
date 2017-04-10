@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Delicious.com service definition for Keyring. Uses HTTP Basic.
+ * https://delicious.com/developers
+ */
+
 class Keyring_Service_Delicious extends Keyring_Service_HTTP_Basic {
 	const NAME  = 'delicious';
 	const LABEL = 'delicious.com';
