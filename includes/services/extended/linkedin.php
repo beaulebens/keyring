@@ -48,7 +48,7 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth1 {
 	}
 
 	function member_permissions( $permissions = '' ) {
-		$permissions = 'rw_nus+r_basicprofile';
+		$permissions = 'r_basicprofile';
 		return $permissions;
 	}
 
