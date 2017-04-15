@@ -67,7 +67,7 @@ class Keyring_Service_Eventbrite extends Keyring_Service_OAuth2 {
 		);
 		$response = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
 		$meta = array();
-		if ( !Keyring_Util::is_error( $response ) ) {
+		if ( ! Keyring_Util::is_error( $response ) ) {
 			if ( isset( $response->emails->email ) ) {
 				$meta['username'] = $response->emails->email;
 			}
@@ -94,7 +94,7 @@ class Keyring_Service_Eventbrite extends Keyring_Service_OAuth2 {
 
 	function test_connection() {
 		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
-		if ( !Keyring_Util::is_error( $res ) ) {
+		if ( ! Keyring_Util::is_error( $res ) ) {
 			return true;
 		}
 

@@ -90,7 +90,6 @@ class Keyring_Service_Moves extends Keyring_Service_OAuth2 {
 			'user_id'       => $token['user_id'],
 			'refresh_token' => $token['refresh_token'],
 			'expires'       => time() + $token['expires_in'],
-			'_classname'    => get_called_class(),
 		);
 
 		$this->set_token(
@@ -101,7 +100,7 @@ class Keyring_Service_Moves extends Keyring_Service_OAuth2 {
 			)
 		);
 		$response = $this->request( $this->profile_url );
-		if ( !Keyring_Util::is_error( $response ) ) {
+		if ( ! Keyring_Util::is_error( $response ) ) {
 			$meta['first_date'] = $response->profile->firstDate;
 		}
 

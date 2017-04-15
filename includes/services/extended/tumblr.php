@@ -74,8 +74,9 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 
 	function test_connection() {
 			$res = $this->request( 'http://api.tumblr.com/v2/user/info', array( 'method' => 'POST' ) );
-			if ( !Keyring_Util::is_error( $res ) )
+			if ( ! Keyring_Util::is_error( $res ) ) {
 				return true;
+			}
 
 			return $res;
 	}
