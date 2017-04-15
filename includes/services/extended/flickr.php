@@ -48,13 +48,13 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 				)
 			)
 		);
-		$url = "https://api.flickr.com/services/rest/?";
+		$url = 'https://api.flickr.com/services/rest/?';
 		$params = array(
 			'method'  => 'flickr.people.getInfo',
 			'api_key' => $this->key,
 			'user_id' => $token['user_nsid'],
 		);
-		$url = $url . http_build_query( $params );
+		$url .= http_build_query( $params );
 
 		$response = $this->request( $url, array( 'method' => 'GET' ) );
 		if ( Keyring_Util::is_error( $response ) ) {
@@ -74,10 +74,11 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 	function get_display( Keyring_Access_Token $token ) {
 		$return = '';
 		$meta = $token->get_meta();
-		if ( !empty( $meta['name'] ) )
+		if ( ! empty( $meta['name'] ) ) {
 			return $meta['name'];
-		else if ( !empty( $meta['username'] ) )
+		} else if ( ! empty( $meta['username'] ) ) {
 			return $meta['username'];
+		}
 	}
 
 	/**
@@ -114,7 +115,7 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 			'method'  => 'flickr.test.login',
 			'api_key' => $this->key,
 		);
-		$url = $url . http_build_query( $params );
+		$url .= http_build_query( $params );
 
 		$response = $this->request( $url );
 		if ( ! Keyring_Util::is_error( $response ) ) {
