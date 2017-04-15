@@ -2,9 +2,9 @@
 
 Contributors: beaulebens, mdawaffe, jshreve, jkudish, automattic
 Tags: authentication, security, oauth, http basic, authorization, facebook, foursquare, instagram, twitter, google
-Requires at least: 3.3
-Tested up to: 4.7.1
-Stable Tag: 1.7.1
+Requires at least: 4.0
+Tested up to: 4.7.3
+Stable Tag: 1.7.2
 
 An authentication framework that handles authorization/communication with most popular web services.
 
@@ -99,6 +99,10 @@ Keyring just provides a framework for handling connections to external services.
 Add files to includes/services/extended/ that either implement one of the includes/services/core/ service foundations, or start from scratch. Follow one of the existing service definitions for a template, and see service.php in the root of Keyring for some detail on methods you need to define, and optional ones that might make your life easier.
 
 == Changelog ==
+
+= 1.7.2 =
+* Bugfix: LinkedIn scope require modification because connections were failing.
+* Enhancement: Extensive linting/code cleanup, including removing some redundant code.
 
 = 1.7.1 =
 * Bugfix: Only allow users with `manage_options` to access management UIs. Props Laura Lee for disclosure.
