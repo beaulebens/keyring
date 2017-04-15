@@ -4,7 +4,7 @@ Contributors: beaulebens, mdawaffe, jshreve, jkudish, automattic
 Tags: authentication, security, oauth, http basic, authorization, facebook, foursquare, instagram, twitter, google
 Requires at least: 4.0
 Tested up to: 4.7.3
-Stable Tag: 1.7.2
+Stable Tag: 1.8
 
 An authentication framework that handles authorization/communication with most popular web services.
 
@@ -101,7 +101,8 @@ Add files to includes/services/extended/ that either implement one of the includ
 
 == Changelog ==
 
-= 1.7.2 =
+= 1.8 =
+* Enhancement: New Jetpack/WordPress.com service definition.
 * Bugfix: LinkedIn scope require modification because connections were failing.
 * Enhancement: Extensive linting/code cleanup, including removing some redundant code.
 
