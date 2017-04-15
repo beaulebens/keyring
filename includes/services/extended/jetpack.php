@@ -1,13 +1,13 @@
 <?php
 
 /**
- * WordPress.com REST API service definition for Keyring. Clean OAuth2.
+ * Jetpack/WordPress.com REST API service definition for Keyring. Clean OAuth2.
  * https://developer.wordpress.com/apps/
  */
 
-class Keyring_Service_WPCOM extends Keyring_Service_OAuth2 {
-	const NAME  = 'wpcom';
-	const LABEL = 'WordPress.com';
+class Keyring_Service_Jetpack extends Keyring_Service_OAuth2 {
+	const NAME  = 'jetpack';
+	const LABEL = 'Jetpack';
 	const SCOPE = 'global';
 
 	function __construct() {
@@ -15,8 +15,8 @@ class Keyring_Service_WPCOM extends Keyring_Service_OAuth2 {
 
 		// Enable "basic" UI for entering key/secret
 		if ( ! KEYRING__HEADLESS_MODE ) {
-			add_action( 'keyring_wpcom_manage_ui', array( $this, 'basic_ui' ) );
-			add_filter( 'keyring_wpcom_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
+			add_action( 'keyring_jetpack_manage_ui', array( $this, 'basic_ui' ) );
+			add_filter( 'keyring_jetpack_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
 		$this->set_endpoint( 'authorize',    'https://public-api.wordpress.com/oauth2/authorize', 'GET'  );
@@ -32,7 +32,7 @@ class Keyring_Service_WPCOM extends Keyring_Service_OAuth2 {
 
 		// WP.com requires exact-match redirect_uris, which means you can't include a nonce.
 		// Keyring expects nonces, so this dynamically nonces during verification.
-		add_action( 'pre_keyring_wpcom_verify', array( $this, 'redirect_incoming_verify' ) );
+		add_action( 'pre_keyring_jetpack_verify', array( $this, 'redirect_incoming_verify' ) );
 
 		// Need to reset the callback because Google is very strict about where it sends people
 		if ( !empty( $creds['redirect_uri'] ) ) {
@@ -41,17 +41,17 @@ class Keyring_Service_WPCOM extends Keyring_Service_OAuth2 {
 			$this->callback_url = remove_query_arg( array( 'nonce', 'kr_nonce' ), $this->callback_url ); // At least strip nonces, since you can't save them in your app config
 		}
 
-		add_filter( 'keyring_wpcom_request_token_params', array( $this, 'scope' ) );
+		add_filter( 'keyring_jetpack_request_token_params', array( $this, 'scope' ) );
 	}
 
 	function basic_ui_intro() {
 		echo '<p>' . sprintf( __( 'To get started, <a href="%1$s">register an app on WordPress.com</a>. The most important thing is to include a valid <strong>Redirect URL</strong>, which should be set to <code>%2$s</code>. You can set most other values to whatever you like.', 'keyring' ), 'https://developer.wordpress.com/apps/new/', Keyring_Util::admin_url( self::NAME, array( 'action' => 'verify' ) ) ) . '</p>';
-		echo '<p>' . __( "Once you've saved those changes, copy the <strong>Client ID</strong> value into the <strong>Client ID</strong> field, and the <strong>CLIENT SECRET</strong> value into the <strong>API Secret</strong> field and click save.", 'keyring' ) . '</p>';
+		echo '<p>' . __( "Once you've saved those changes, copy the <strong>Client ID</strong> value into the <strong>API Key</strong> field, and the <strong>Client Secret</strong> value into the <strong>API Secret</strong> field and click save. You do not need an App ID.", 'keyring' ) . '</p>';
 	}
 
 	// Get access to all blogs
 	function scope( $permissions = '' ) {
-		$permissions['scope'] = 'global';
+		$permissions['scope'] = self::SCOPE;
 		return $permissions;
 	}
 
@@ -108,4 +108,4 @@ class Keyring_Service_WPCOM extends Keyring_Service_OAuth2 {
 	}
 }
 
-add_action( 'keyring_load_services', array( 'Keyring_Service_WPCOM', 'init' ) );
+add_action( 'keyring_load_services', array( 'Keyring_Service_Jetpack', 'init' ) );
