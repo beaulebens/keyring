@@ -44,7 +44,7 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 
 		$this->set_token(
 			new Keyring_Access_Token(
-				'yahoo',
+				$this->get_name(),
 				new OAuthToken(
 					$token['oauth_token'],
 					$token['oauth_token_secret']
@@ -79,8 +79,9 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 		$guid = $this->token->get_meta( 'external_id' );
 
 		$res = $this->request( 'http://social.yahooapis.com/v1/user/' . $guid . '/profile?format=json' );
-		if ( !Keyring_Util::is_error( $res ) )
+		if ( ! Keyring_Util::is_error( $res ) ) {
 			return true;
+		}
 
 		return $res;
 	}
@@ -88,8 +89,9 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 	function maybe_refresh_token() {
 		global $wpdb;
 
-		if ( empty( $this->token->token ) || empty( $this->token->token->tokenExpires ) )
+		if ( empty( $this->token->token ) || empty( $this->token->token->tokenExpires ) ) {
 			return;
+		}
 
 		if ( $this->token->token->tokenExpires && $this->token->token->tokenExpires < time() ) {
 			$api_url  = 'https://api.login.yahoo.com/oauth/v2/get_token';
@@ -100,7 +102,7 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 				'raw_response' => true,
 			) );
 
-			if ( !Keyring_Util::is_error( $refresh ) ) {
+			if ( ! Keyring_Util::is_error( $refresh ) ) {
 				$token = $this->parse_access_token( $refresh );
 
 				// Fake request token

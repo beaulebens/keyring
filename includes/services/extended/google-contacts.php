@@ -44,10 +44,11 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 		$this->authorization_parameter = false;
 
 		// Need to reset the callback because Google is very strict about where it sends people
-		if ( !empty( $creds['redirect_uri'] ) )
+		if ( !empty( $creds['redirect_uri'] ) ) {
 			$this->callback_url = $creds['redirect_uri']; // Allow user to manually enter a redirect URI
-		else
+		} else {
 			$this->callback_url = remove_query_arg( array( 'nonce', 'kr_nonce' ), $this->callback_url ); // At least strip nonces, since you can't save them in your app config
+		}
 	}
 
 	function basic_ui_intro() {
@@ -110,13 +111,14 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 
 	function build_token_meta( $token ) {
 		$meta = array();
-		if ( !$token )
+		if ( !$token ) {
 			return $meta;
+		}
 
 		$token = new Keyring_Access_Token( $this->get_name(), new OAuthToken( $token['access_token'], '' ), array() );
 		$this->set_token( $token );
 		$response = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
-		if ( !Keyring_Util::is_error( $response ) ) {
+		if ( ! Keyring_Util::is_error( $response ) ) {
 			$meta = array(
 				'user_id'   => $response->id,
 				'name'      => $response->name,
@@ -173,8 +175,9 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 
 		echo apply_filters( 'keyring_' . $this->get_name() . '_basic_ui_intro', '' );
 
-		if ( ! $redirect_uri )
+		if ( ! $redirect_uri ) {
 			$redirect_uri = Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify' ) );
+		}
 
 		// Output basic form for collecting key/secret
 		echo '<form method="post" action="">';
@@ -200,8 +203,9 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 
 	function test_connection() {
 		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
-		if ( !Keyring_Util::is_error( $res ) )
+		if ( ! Keyring_Util::is_error( $res ) ) {
 			return true;
+		}
 
 		return $res;
 	}

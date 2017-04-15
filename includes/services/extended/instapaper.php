@@ -210,7 +210,6 @@ class Keyring_Service_Instapaper extends Keyring_Service_OAuth1 {
 				'user_id'    => $response[0]->user_id,
 				'username'   => $response[0]->username,
 				'name'       => $response[0]->username,
-				'_classname' => get_called_class(),
 			);
 		}
 
@@ -223,8 +222,9 @@ class Keyring_Service_Instapaper extends Keyring_Service_OAuth1 {
 
 	function test_connection() {
 			$response = $this->request( $this->verify_url, array( 'method' => $this->verify_method ) );
-			if ( !Keyring_Util::is_error( $response ) )
+			if ( ! Keyring_Util::is_error( $response ) ) {
 				return true;
+			}
 
 			return $response;
 	}

@@ -66,7 +66,6 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 				'username'   => $token['screen_name'],
 				'name'       => $response->name,
 				'picture'    => str_replace( '_normal.', '.', $response->profile_image_url ),
-				'_classname' => get_called_class(),
 			);
 		}
 
@@ -79,8 +78,9 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 
 	function test_connection() {
 			$res = $this->request( 'https://api.twitter.com/1.1/account/verify_credentials.json' );
-			if ( !Keyring_Util::is_error( $res ) )
+			if ( ! Keyring_Util::is_error( $res ) ) {
 				return true;
+			}
 
 			// Twitter may return a rate limiting error if the user accesses the sharing settings or post
 			// page frequently. If so, ignore that error, things are likely aaaa-okay...

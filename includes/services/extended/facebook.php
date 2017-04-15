@@ -117,8 +117,9 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 
 	function test_connection() {
 		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
-		if ( ! Keyring_Util::is_error( $res ) )
+		if ( ! Keyring_Util::is_error( $res ) ) {
 			return true;
+		}
 
 		return $res;
 	}
@@ -129,8 +130,9 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 	 * @return Array containing the raw results for each page, or empty if none.
 	 */
 	function get_fb_pages( $connection = false ) {
-		if ( $connection )
+		if ( $connection ) {
 			$this->set_token( $connection );
+		}
 
 		$additional_external_users = array();
 		$fb_accounts = $this->request( 'https://graph.facebook.com/v2.2/me/accounts/' );
@@ -144,15 +146,15 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 				}
 
 				$this_fb_page = array(
-					'id' => $fb_page->id,
-					'name' => $fb_page->name,
+					'id'           => $fb_page->id,
+					'name'         => $fb_page->name,
 					'access_token' => $fb_account->access_token,
-					'category' => $fb_page->category,
-					'picture' => null,
+					'category'     => $fb_page->category,
+					'picture'      => null,
 				);
 
 				$picture = $this->request( 'https://graph.facebook.com/v2.2/' . urlencode( $fb_account->id ) . '/picture?redirect=false' );
-				if ( !empty( $picture->data ) ) {
+				if ( ! empty( $picture->data ) ) {
 					$this_fb_page['picture'] = esc_url_raw( $picture->data->url );
 				}
 

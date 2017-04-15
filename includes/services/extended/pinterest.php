@@ -43,7 +43,7 @@ class Keyring_Service_Pinterest extends Keyring_Service_OAuth2 {
 	}
 
 	function request_token_params( $params ) {
-		$params['scope'] = apply_filters( 'keyring_pinterest_scope', self::SCOPE );
+		$params['scope'] = apply_filters( 'keyring_' . $this->get_name() . '_scope', self::SCOPE );
 		return $params;
 	}
 

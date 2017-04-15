@@ -66,7 +66,6 @@ class Keyring_Service_TripIt extends Keyring_Service_OAuth1 {
 				'username'   => $response->Profile->screen_name,
 				'name'       => $response->Profile->public_display_name,
 				'picture'    => $response->Profile->photo_url,
-				'_classname' => get_called_class(),
 			);
 		}
 
@@ -84,8 +83,9 @@ class Keyring_Service_TripIt extends Keyring_Service_OAuth1 {
 
 	function test_connection() {
 		$response = $this->request( $this->verify_url, array( 'method' => $this->verify_method ) );
-		if ( !Keyring_Util::is_error( $response ) )
+		if ( ! Keyring_Util::is_error( $response ) ) {
 			return true;
+		}
 
 		return $response;
 	}

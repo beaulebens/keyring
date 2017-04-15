@@ -41,10 +41,11 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth1 {
 	}
 
 	function parse_response( $response ) {
-		if ( '<?xml' == substr( $response, 0, 5 ) ) // Errors always come back as XML
+		if ( '<?xml' == substr( $response, 0, 5 ) ) { // Errors always come back as XML
 			return simplexml_load_string( $response );
-		else
+		} else {
 			return json_decode( $response );
+		}
 	}
 
 	function member_permissions( $permissions = '' ) {
@@ -86,8 +87,9 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth1 {
 
 	function test_connection() {
 			$res = $this->request( "https://api.linkedin.com/v1/people/~:(id,formatted-name)?format=json" );
-			if ( !Keyring_Util::is_error( $res ) )
+			if ( ! Keyring_Util::is_error( $res ) ) {
 				return true;
+			}
 
 			return $res;
 	}
