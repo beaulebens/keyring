@@ -17,10 +17,10 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_facebook_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize',    'https://www.facebook.com/v2.2/dialog/oauth',         'GET' );
-		$this->set_endpoint( 'access_token', 'https://graph.facebook.com/v2.2/oauth/access_token', 'GET' );
-		$this->set_endpoint( 'self',         'https://graph.facebook.com/v2.2/me',                 'GET' );
-		$this->set_endpoint( 'profile_pic',  'https://graph.facebook.com/v2.2/me/picture/?redirect=false&width=150&height=150', 'GET' );
+		$this->set_endpoint( 'authorize',    'https://www.facebook.com/v2.9/dialog/oauth',         'GET' );
+		$this->set_endpoint( 'access_token', 'https://graph.facebook.com/v2.9/oauth/access_token', 'GET' );
+		$this->set_endpoint( 'self',         'https://graph.facebook.com/v2.9/me',                 'GET' );
+		$this->set_endpoint( 'profile_pic',  'https://graph.facebook.com/v2.9/me/picture/?redirect=false&width=150&height=150', 'GET' );
 
 		$creds         = $this->get_credentials();
 		$this->app_id  = $creds['app_id'];
@@ -104,7 +104,7 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 			$meta = array(
 				'user_id'  => $response->id,
 				'name'     => $response->name,
-				'picture'  => "https://graph.facebook.com/v2.2/{$response->id}/picture?type=large",
+				'picture'  => "https://graph.facebook.com/v2.9/{$response->id}/picture?type=large",
 			);
 		}
 
@@ -135,10 +135,10 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 		}
 
 		$additional_external_users = array();
-		$fb_accounts = $this->request( 'https://graph.facebook.com/v2.2/me/accounts/' );
+		$fb_accounts = $this->request( 'https://graph.facebook.com/v2.9/me/accounts/' );
 		if ( ! empty( $fb_accounts ) && ! is_wp_error( $fb_accounts ) ) {
 			foreach ( $fb_accounts->data as $fb_account ) {
-				$fb_page = $this->request( 'https://graph.facebook.com/v2.2/' . urlencode( $fb_account->id ) );
+				$fb_page = $this->request( 'https://graph.facebook.com/v2.9/' . urlencode( $fb_account->id ) );
 
 				// only continue with this account as a viable option if we can post content to it
 				if ( ! $fb_page->is_published || ! $fb_page->can_post ) {
@@ -153,7 +153,7 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 					'picture'      => null,
 				);
 
-				$picture = $this->request( 'https://graph.facebook.com/v2.2/' . urlencode( $fb_account->id ) . '/picture?redirect=false' );
+				$picture = $this->request( 'https://graph.facebook.com/v2.9/' . urlencode( $fb_account->id ) . '/picture?redirect=false' );
 				if ( ! empty( $picture->data ) ) {
 					$this_fb_page['picture'] = esc_url_raw( $picture->data->url );
 				}
