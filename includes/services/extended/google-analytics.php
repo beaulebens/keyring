@@ -11,7 +11,7 @@
 class Keyring_Service_GoogleAnalytics extends Keyring_Service_OAuth2 {
 	const NAME        = 'google-analytics';
 	const LABEL       = 'Google Analytics';
-	const SCOPE       = 'https://www.googleapis.com/auth/analytics.readonly'; // See https://developers.google.com/identity/protocols/googlescopes#analyticsreportingv4
+	const SCOPE       = 'https://www.googleapis.com/auth/analytics.readonly https://www.googleapis.com/auth/userinfo.profile'; // See https://developers.google.com/identity/protocols/googlescopes
 	const ACCESS_TYPE = 'offline';
 
 	function __construct() {
@@ -23,10 +23,10 @@ class Keyring_Service_GoogleAnalytics extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_google-analytics_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize',    'https://accounts.google.com/o/oauth2/v2/auth',                'GET'  );
-		$this->set_endpoint( 'access_token', 'https://www.googleapis.com/oauth2/v4/token',                  'POST' );
-		$this->set_endpoint( 'refresh',      'https://www.googleapis.com/oauth2/v4/token',                  'POST' );
-		$this->set_endpoint( 'accounts',     'https://www.googleapis.com/analytics/v3/management/accounts', 'GET'  );
+		$this->set_endpoint( 'authorize',    'https://accounts.google.com/o/oauth2/v2/auth',  'GET'  );
+		$this->set_endpoint( 'access_token', 'https://www.googleapis.com/oauth2/v4/token',    'POST' );
+		$this->set_endpoint( 'refresh',      'https://www.googleapis.com/oauth2/v4/token',    'POST' );
+		$this->set_endpoint( 'userinfo',     'https://www.googleapis.com/oauth2/v3/userinfo', 'GET'  );
 
 		$creds = $this->get_credentials();
 		$this->redirect_uri = $creds['redirect_uri'];
@@ -186,7 +186,7 @@ class Keyring_Service_GoogleAnalytics extends Keyring_Service_OAuth2 {
 	}
 
 	function test_connection() {
-		$res = $this->request( $this->accounts_url, array( 'method' => $this->accounts_method ) );
+		$res = $this->request( $this->userinfo_url, array( 'method' => $this->userinfo_method ) );
 		if ( ! Keyring_Util::is_error( $res ) ) {
 			return true;
 		}
