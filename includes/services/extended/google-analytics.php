@@ -112,17 +112,31 @@ class Keyring_Service_GoogleAnalytics extends Keyring_Service_OAuth2 {
 		}
 	}
 
-	function build_token_meta( $token ) {
-		if ( !$token ) {
-			return array();
-		} else {
-			$meta = array(
-				'refresh_token' => $token['refresh_token'],
-				'expires'       => time() + $token['expires_in'],
-			);
+	function build_token_meta( $token ) {		
+		$meta = array(
+			'refresh_token' => $token['refresh_token'],
+			'expires'       => time() + $token['expires_in'],
+		);
+
+		$this->set_token(
+			new Keyring_Access_Token(
+				$this->get_name(),
+				$token['access_token'],
+				array()
+			)
+		);
+		$response = $this->request( $this->userinfo_url, array( 'method' => $this->userinfo_method ) );
+		if ( ! Keyring_Util::is_error( $response ) ) {
+			$meta['user_id'] = $response->sub;
+			$meta['name']    = $response->name;
+			$meta['picture'] = $response->picture;
 		}
-		
+
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, array(), $this );
+	}
+
+	function get_display( Keyring_Access_Token $token ) {
+		return $token->get_meta( 'name' );
 	}
 
 	// Minor modifications from Keyring_Service::basic_ui
