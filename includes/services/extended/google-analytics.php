@@ -139,6 +139,58 @@ class Keyring_Service_GoogleAnalytics extends Keyring_Service_OAuth2 {
 		return $token->get_meta( 'name' );
 	}
 
+	function maybe_refresh_token() {
+		// Request a new token, using the refresh_token
+		$token = $this->get_token();
+		$meta  = $token->get_meta();
+		if ( empty( $meta['refresh_token'] ) ) {
+			return false;
+		}
+
+		// Don't refresh if token is valid
+		if ( ( time() + 20 ) < $meta['expires'] ) {
+			return;
+		}
+
+		$response = wp_remote_post( $this->refresh_url, array( 
+			'method' => $this->refresh_method,
+			'body'   => array(
+				'client_id'     => $this->key,
+				'client_secret' => $this->secret,
+				'refresh_token' => $meta['refresh_token'],
+				'grant_type'    => 'refresh_token',
+			),
+		) );
+
+		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
+			return false;
+		}
+
+		$return = json_decode( wp_remote_retrieve_body( $response ) );
+		$meta['expires'] = time() + $return->expires_in;
+
+		// Build access token
+		$access_token = new Keyring_Access_Token(
+			$this->get_name(),
+			$return->access_token,
+			$meta,
+			$this->token->unique_id
+		);
+
+		// Store the updated access token
+		$access_token = apply_filters( 'keyring_access_token', $access_token, $token );
+		$id = $this->store->update( $access_token );
+
+		// And switch to using it
+		$this->set_token( $access_token );
+	}
+
+	// Need to potentially refresh token before each request
+	function request( $url, array $params = array() ) {
+		$this->maybe_refresh_token();
+		return parent::request( $url, $params );
+	}
+
 	// Minor modifications from Keyring_Service::basic_ui
 	function basic_ui() {
 		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-manage-' . $this->get_name() ) ) {
