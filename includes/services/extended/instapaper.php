@@ -45,7 +45,6 @@ class Keyring_Service_Instapaper extends Keyring_Service_OAuth1 {
 	function request_ui() {
 		// Common Header
 		echo '<div class="wrap">';
-		screen_icon( 'ms-admin' );
 		echo '<h2>' . __( 'Account Details', 'keyring' ) . '</h2>';
 
 		// Handle errors
