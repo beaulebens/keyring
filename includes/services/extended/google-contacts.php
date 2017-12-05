@@ -150,7 +150,6 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_OAuth2 {
 
 		// Common Header
 		echo '<div class="wrap">';
-		screen_icon( 'ms-admin' );
 		echo '<h2>' . __( 'Keyring Service Management', 'keyring' ) . '</h2>';
 		echo '<p><a href="' . Keyring_Util::admin_url( false, array( 'action' => 'services' ) ) . '">' . __( '&larr; Back', 'keyring' ) . '</a></p>';
 		echo '<h3>' . sprintf( __( '%s API Credentials', 'keyring' ), esc_html( $this->get_label() ) ) . '</h3>';

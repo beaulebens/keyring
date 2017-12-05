@@ -50,7 +50,6 @@ class Keyring_Admin_UI {
 	function admin_page_header( $screen = false ) {
 		// Output the actual heading + icon for the page
 		echo '<div class="wrap">';
-		screen_icon( 'ms-admin' );
 		switch ( $screen ) {
 		case 'tokens' :
 			echo '<h2>' . __( 'Keyring: Service Connections', 'keyring' ) . ' <a href="' . Keyring_Util::admin_url( false, array( 'action' => 'services' ) ) . '" class="add-new-h2">' . __( 'Add New', 'keyring' ) . '</a></h2>';
