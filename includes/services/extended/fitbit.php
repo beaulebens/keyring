@@ -29,9 +29,6 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 		$this->key     = $creds['key'];
 		$this->secret  = $creds['secret'];
 
-		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
-		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
-
 		// Fitbit requires an exact match on Redirect URI, which means we can't send any nonces
 		$this->callback_url = remove_query_arg( array( 'nonce', 'kr_nonce' ), $this->callback_url );
 		add_action( 'pre_keyring_fitbit_verify', array( $this, 'redirect_incoming_verify' ) );
@@ -123,7 +120,6 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 			$meta['name']       = $response->user->fullName;
 			$meta['picture']    = $response->user->avatar;
 			$meta['first_date'] = $response->user->memberSince;
-			$meta['_classname'] = get_called_class();
 		}
 
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, array(), $this );
@@ -134,6 +130,7 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 	}
 
 	function refresh_token() {
+		Keyring_Util::debug( 'FitBit::refresh_token()' );
 		// Request a new token, using the refresh_token
 		$token = $this->get_token();
 		$meta  = $token->get_meta();
@@ -155,6 +152,7 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 				'refresh_token' => $meta['refresh_token'],
 			)
 		) );
+		Keyring_Util::debug( $response );
 
 		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			return false;
@@ -162,14 +160,17 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 
 		$return = json_decode( wp_remote_retrieve_body( $response ) );
 		$meta['refresh_token'] = $return->refresh_token;
-		$meta['expires']       = $return->expires_in;
-		$this->set_token(
-			new Keyring_Access_Token(
-				$this->get_name(),
-				$return->access_token,
-				$meta
-			)
+		$meta['expires'] = time() + $return->expires_in;
+		$access_token = new Keyring_Access_Token(
+			$this->get_name(),
+			$return->access_token,
+			$meta,
+			$token->get_uniq_id()
 		);
+
+		// Update store, and switch to new token
+		$this->store->update( $access_token );
+		$this->set_token( $access_token );
 	}
 
 	// Need to potentially refresh token before each request
@@ -179,6 +180,7 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 	}
 
 	function test_connection() {
+		Keyring_Util::debug( 'FitBit::test_connection()' );
 		$response = $this->request( $this->profile_url, array( 'method' => $this->profile_method ) );
 		if ( ! Keyring_Util::is_error( $response ) ) {
 			return true;
