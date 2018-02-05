@@ -101,6 +101,10 @@ Add files to includes/services/extended/ that either implement one of the includ
 
 == Changelog ==
 
+=  =
+* Bugfix: Fitbit tokens now refresh automatically.
+* Enhancement: Remove deprecated calls to `screen_icon()`.
+
 = 1.8 =
 * Enhancement: New Jetpack/WordPress.com service definition.
 * Bugfix: LinkedIn scope require modification because connections were failing.
