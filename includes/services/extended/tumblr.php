@@ -17,9 +17,9 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 			add_filter( 'keyring_tumblr_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'request_token', 'http://www.tumblr.com/oauth/request_token', 'POST' );
-		$this->set_endpoint( 'authorize',     'http://www.tumblr.com/oauth/authorize',     'GET'  );
-		$this->set_endpoint( 'access_token',  'http://www.tumblr.com/oauth/access_token',  'POST' );
+		$this->set_endpoint( 'request_token', 'https://www.tumblr.com/oauth/request_token', 'POST' );
+		$this->set_endpoint( 'authorize',     'https://www.tumblr.com/oauth/authorize',     'GET'  );
+		$this->set_endpoint( 'access_token',  'https://www.tumblr.com/oauth/access_token',  'POST' );
 
 		$creds = $this->get_credentials();
 		$this->app_id  = $creds['app_id'];
@@ -34,7 +34,7 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 	}
 
 	function basic_ui_intro() {
-		echo '<p>' . sprintf( __( 'To get started, <a href="%1$s">register an application with Tumblr</a>. The <strong>Default callback URL</strong> should be set to <code>%2$s</code>, and you can enter whatever you like in the other fields.', 'keyring' ), 'http://www.tumblr.com/oauth/register', Keyring_Util::admin_url( 'tumblr', array( 'action' => 'verify' ) ) ) . '</p>';
+		echo '<p>' . sprintf( __( 'To get started, <a href="%1$s">register an application with Tumblr</a>. The <strong>Default callback URL</strong> should be set to <code>%2$s</code>, and you can enter whatever you like in the other fields.', 'keyring' ), 'https://www.tumblr.com/oauth/register', Keyring_Util::admin_url( 'tumblr', array( 'action' => 'verify' ) ) ) . '</p>';
 		echo '<p>' . __( "Once you've created your app, copy the <strong>OAuth Consumer Key</strong> into the <strong>API Key</strong> field below. Click the <strong>Show secret key</strong> link, and then copy the <strong>Secret Key</strong> value into the <strong>API Secret</strong> field below. You don't need an App ID value for Tumblr.", 'keyring' ) . '</p>';
 	}
 
@@ -54,7 +54,7 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 			)
 		);
 
-		$response = $this->request( 'http://api.tumblr.com/v2/user/info', array( 'method' => 'POST' ) );
+		$response = $this->request( 'https://api.tumblr.com/v2/user/info', array( 'method' => 'POST' ) );
 
 		if ( Keyring_Util::is_error( $response ) ) {
 			$meta = array();
@@ -73,7 +73,7 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 	}
 
 	function test_connection() {
-			$res = $this->request( 'http://api.tumblr.com/v2/user/info', array( 'method' => 'POST' ) );
+			$res = $this->request( 'https://api.tumblr.com/v2/user/info', array( 'method' => 'POST' ) );
 			if ( ! Keyring_Util::is_error( $res ) ) {
 				return true;
 			}
