@@ -38,6 +38,7 @@ And includes ready-to-use definitions for:
 * [Nest](https://nest.com/)
 * [Pinterest](https://pinterest.com/)
 * [RunKeeper](https://runkeeper.com/)
+* [Strava](https://strava.com/)
 * [TripIt](https://tripit.com/)
 * [Tumblr](https://tumblr.com/)
 * [Twitter](https://twitter.com/)
