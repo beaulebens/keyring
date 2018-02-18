@@ -93,7 +93,7 @@ class Keyring_Service_GoogleAnalytics extends Keyring_Service_OAuth2 {
 	}
 
 	function redirect_incoming_verify( $request ) {
-		if ( !isset( $request['kr_nonce'] ) ) {
+		if ( ! isset( $request['kr_nonce'] ) ) {
 			$kr_nonce = wp_create_nonce( 'keyring-verify' );
 			$nonce    = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
 			wp_safe_redirect(
@@ -112,7 +112,7 @@ class Keyring_Service_GoogleAnalytics extends Keyring_Service_OAuth2 {
 		}
 	}
 
-	function build_token_meta( $token ) {		
+	function build_token_meta( $token ) {
 		$meta = array(
 			'refresh_token' => $token['refresh_token'],
 			'expires'       => time() + $token['expires_in'],
@@ -148,11 +148,11 @@ class Keyring_Service_GoogleAnalytics extends Keyring_Service_OAuth2 {
 		}
 
 		// Don't refresh if token is valid
-		if ( ( time() + 20 ) < $meta['expires'] ) {
+		if ( ! $token->is_expired( 20 ) ) {
 			return;
 		}
 
-		$response = wp_remote_post( $this->refresh_url, array( 
+		$response = wp_remote_post( $this->refresh_url, array(
 			'method' => $this->refresh_method,
 			'body'   => array(
 				'client_id'     => $this->key,
@@ -193,14 +193,13 @@ class Keyring_Service_GoogleAnalytics extends Keyring_Service_OAuth2 {
 
 	// Minor modifications from Keyring_Service::basic_ui
 	function basic_ui() {
-		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-manage-' . $this->get_name() ) ) {
+		if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( $_REQUEST['nonce'], 'keyring-manage-' . $this->get_name() ) ) {
 			Keyring::error( __( 'Invalid/missing management nonce.', 'keyring' ) );
 			exit;
 		}
 
 		// Common Header
 		echo '<div class="wrap">';
-		screen_icon( 'ms-admin' );
 		echo '<h2>' . __( 'Keyring Service Management', 'keyring' ) . '</h2>';
 		echo '<p><a href="' . Keyring_Util::admin_url( false, array( 'action' => 'services' ) ) . '">' . __( '&larr; Back', 'keyring' ) . '</a></p>';
 		echo '<h3>' . sprintf( __( '%s API Credentials', 'keyring' ), esc_html( $this->get_label() ) ) . '</h3>';
