@@ -104,6 +104,7 @@ Add files to includes/services/extended/ that either implement one of the includ
 == Changelog ==
 
 =  =
+* Enhancement: Added a Google Analytics Service definition, props @superbia.
 * Enhancement: Added a Strava Service definition, props @mdrovdahl.
 * Enhancement: Remove deprecated calls to `screen_icon()`.
 * Bugfix: Fitbit tokens now refresh automatically.
