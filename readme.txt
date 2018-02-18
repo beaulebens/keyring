@@ -103,6 +103,7 @@ Add files to includes/services/extended/ that either implement one of the includ
 
 =  =
 * Bugfix: Fitbit tokens now refresh automatically.
+* Bugfix: Tumblr now requires HTTPS, so update all request URLs. Props @westi.
 * Enhancement: Remove deprecated calls to `screen_icon()`.
 
 = 1.8 =
