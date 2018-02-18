@@ -3,8 +3,8 @@
 Contributors: beaulebens, mdawaffe, jshreve, jkudish, automattic
 Tags: authentication, security, oauth, http basic, authorization, facebook, foursquare, instagram, twitter, google
 Requires at least: 4.0
-Tested up to: 4.7.3
-Stable Tag: 1.8
+Tested up to: 4.9.4
+Stable Tag: 1.9
 
 An authentication framework that handles authorization/communication with most popular web services.
 
@@ -103,10 +103,11 @@ Add files to includes/services/extended/ that either implement one of the includ
 
 == Changelog ==
 
-=  =
+= 1.9 =
 * Enhancement: Added a Google Analytics Service definition, props @superbia.
 * Enhancement: Added a Strava Service definition, props @mdrovdahl.
-* Enhancement: Remove deprecated calls to `screen_icon()`.
+* Enhancement: Add a "Settings" link to the plugin listing if you're using the bundled Admin UI.
+* Bugfix: Remove deprecated calls to `screen_icon()`.
 * Bugfix: Fitbit tokens now refresh automatically.
 * Bugfix: Tumblr now requires HTTPS, so update all request URLs. Props @westi.
 
