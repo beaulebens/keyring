@@ -16,6 +16,7 @@ class Keyring_Admin_UI {
 
 	function __construct() {
 		add_action( 'admin_menu', array( $this, 'admin_menu' ) );
+		add_filter( 'plugin_action_links_' . plugin_basename( __DIR__ ) . '/keyring.php', array( $this, 'settings_link' ) );
 	}
 
 	static function &init() {
@@ -26,6 +27,12 @@ class Keyring_Admin_UI {
 		}
 
 		return $instance;
+	}
+
+	function settings_link( $links ) {
+		$settings_link = '<a href="tools.php?page=keyring">' . __( 'Settings', 'keyring' ) . '</a>';
+		array_push( $links, $settings_link );
+		return $links;
 	}
 
 	function inline_css() {
