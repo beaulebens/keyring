@@ -102,9 +102,10 @@ Add files to includes/services/extended/ that either implement one of the includ
 == Changelog ==
 
 =  =
+* Enhancement: Added a Strava Service definition, props @mdrovdahl.
+* Enhancement: Remove deprecated calls to `screen_icon()`.
 * Bugfix: Fitbit tokens now refresh automatically.
 * Bugfix: Tumblr now requires HTTPS, so update all request URLs. Props @westi.
-* Enhancement: Remove deprecated calls to `screen_icon()`.
 
 = 1.8 =
 * Enhancement: New Jetpack/WordPress.com service definition.
