@@ -87,7 +87,7 @@ class Keyring_Service_GoogleAnalytics extends Keyring_Service_OAuth2 {
 	}
 
 	function request_token_params( $params ) {
-		$params['scope'] = self::SCOPE;
+		$params['scope']       = self::SCOPE;
 		$params['access_type'] = self::ACCESS_TYPE;
 		return $params;
 	}
