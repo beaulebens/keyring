@@ -29,8 +29,8 @@ And includes ready-to-use definitions for:
 * [Fitbit](https://fitbit.com/)
 * [Flickr](https://flickr.com/)
 * [Foursquare](https://foursquare.com/)
-* [Google Analytics](https://developers.google.com/analytics/devguides/reporting/core/v4/)
-* [Google Contacts](https://developers.google.com/google-apps/contacts/v3/)
+* [Google Analytics](https://www.google.com/analytics/)
+* [Google Contacts](https://www.google.com/contacts/)
 * [Instagram](https://instagram.com/)
 * [Instapaper](https://instapaper.com/)
 * [Jetpack](https://jetpack.com/)/[WordPress.com](https://wordpress.com/)
@@ -44,6 +44,7 @@ And includes ready-to-use definitions for:
 * [Tumblr](https://tumblr.com/)
 * [Twitter](https://twitter.com/)
 * [Yahoo! Updates](https://yahoo.com/)
+* [YouTube](https://youtube.com/)
 
 You can very easily write your own Service definitions and then use all the power of Keyring to hook into that authentication flow. See the [Keyring Developer's Guide](http://dentedreality.com.au/projects/wp-keyring/) for more details.
 
@@ -102,6 +103,10 @@ Keyring just provides a framework for handling connections to external services.
 Add files to includes/services/extended/ that either implement one of the includes/services/core/ service foundations, or start from scratch. Follow one of the existing service definitions for a template, and see service.php in the root of Keyring for some detail on methods you need to define, and optional ones that might make your life easier.
 
 == Changelog ==
+
+= =
+* Enhancement: Added a YouTube Service definition, based heavily on @superbia's Google Analytics one.
+* Bugfix: Updated links in readme for Google Analytics and Contacts to their user-facing URLs.
 
 = 1.9 =
 * Enhancement: Added a Google Analytics Service definition, props @superbia.
