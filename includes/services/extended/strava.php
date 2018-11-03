@@ -55,10 +55,23 @@ class Keyring_Service_Strava extends Keyring_Service_OAuth2 {
 			$profile = $this->request( $this->user_url, array( 'method' => $this->user_method ) );
 
 			if ( ! Keyring_Util::is_error( $profile ) ) {
-				$meta['firstname']  = $profile->firstname;
-				$meta['lastname']   = $profile->lastname;
-				$meta['picture']    = $profile->profile;
-				$meta['first_date'] = $profile->created_at; // Capture the athlete's profile creation date for later use, eg: in keyring-social-importers
+				// Somehow "username" can be "null" in the Strava data model, so then we use a concat of first_name + last_name
+				$meta['name'] = '';
+				if ( empty( $profile->username ) ) {
+					if ( ! empty( $profile->firstname ) ) {
+						$meta['name'] .= $profile->firstname;
+					}
+					if ( ! empty( $profile->lastname ) ) {
+						$meta['name'] .= ' ' . $profile->lastname;
+					}
+					$meta['name'] = trim( $meta['name'] );
+				} else {
+					$meta['name'] = $profile->username;
+				}
+				$meta['first_name']  = $profile->firstname;
+				$meta['last_name']   = $profile->lastname;
+				$meta['picture']     = $profile->profile;
+				$meta['first_date']  = $profile->created_at; // Capture the athlete's profile creation date for later use, eg: in keyring-social-importers
 			}
 
 			return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $profile, $this );
