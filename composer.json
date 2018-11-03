@@ -1,0 +1,7 @@
+{
+	"name": "beaulebens/keyring",
+	"description": "An authentication framework for WordPress development. Provides a standardized connection and communication framework for talking to web services.",
+	"require": {
+		"php": ">=5.3",
+	}
+}
