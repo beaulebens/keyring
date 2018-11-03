@@ -56,11 +56,17 @@ class Keyring_Service_Strava extends Keyring_Service_OAuth2 {
 
 			if ( ! Keyring_Util::is_error( $profile ) ) {
 				// Somehow "username" can be "null" in the Strava data model, so then we use a concat of first_name + last_name
-				if ( ! $profile->username ) {
-					$meta['name'] = trim( $profile->firstname . ' ' . $profile->lastname );
-				}
-				else {
-					$meta['name']  		 = $profile->username;
+				$meta['name'] = '';
+				if ( empty( $profile->username ) ) {
+					if ( ! empty( $profile->firstname ) ) {
+						$meta['name'] .= $profile->firstname;
+					}
+					if ( ! empty( $profile->lastname ) ) {
+						$meta['name'] .= ' ' . $profile->lastname;
+					}
+					$meta['name'] = trim( $meta['name'] );
+				} else {
+					$meta['name'] = $profile->username;
 				}
 				$meta['first_name']  = $profile->firstname;
 				$meta['last_name']   = $profile->lastname;
