@@ -106,6 +106,8 @@ Add files to includes/services/extended/ that either implement one of the includ
 
 = =
 * Enhancement: Added a YouTube Service definition, based heavily on @superbia's Google Analytics one.
+* Enhancement: Add a composer.json config file (Keyring is now on Packagist at https://packagist.org/packages/beaulebens/keyring)
+* Bugfix: Handle empty usernames in the Strava Service.
 * Bugfix: Updated links in readme for Google Analytics and Contacts to their user-facing URLs.
 
 = 1.9 =
