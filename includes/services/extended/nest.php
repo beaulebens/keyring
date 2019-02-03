@@ -20,7 +20,7 @@ class Keyring_Service_Nest extends Keyring_Service_OAuth2 {
 
 		$this->set_endpoint( 'authorize',    'https://home.nest.com/login/oauth2',            'GET'  );
 		$this->set_endpoint( 'access_token', 'https://api.home.nest.com/oauth2/access_token', 'POST' );
-		$this->set_endpoint( 'self',         'https://developer-api.nest.com/',                'GET'  );
+		$this->set_endpoint( 'self',         'https://developer-api.nest.com/',               'GET'  );
 
 		$creds = $this->get_credentials();
 		$this->app_id  = $creds['app_id'];
@@ -29,13 +29,17 @@ class Keyring_Service_Nest extends Keyring_Service_OAuth2 {
 
 		$this->authorization_header = 'Bearer';
 
+		// Strip nonces, since you can't save them in your app config, and Nest is strict about redirect_uris
+		// Can also only return you to an HTTPS address
+		$this->callback_url = remove_query_arg( array( 'nonce', 'kr_nonce' ), $this->callback_url );
+
 		// Nest ignores our redirect_uri, and just redirects back to a static URI
 		add_action( 'pre_keyring_nest_verify', array( $this, 'redirect_incoming_verify' ) );
 	}
 
 	function redirect_incoming_verify( $request ) {
 		if ( ! isset( $request['kr_nonce'] ) ) {
-			// First request, from Pinterest. Nonce it and move on.
+			// First request, from Nest. Nonce it and move on.
 			$kr_nonce = wp_create_nonce( 'keyring-verify' );
 			$nonce = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
 			wp_safe_redirect(
