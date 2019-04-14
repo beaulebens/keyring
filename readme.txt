@@ -106,6 +106,7 @@ Add files to includes/services/extended/ that either implement one of the includ
 == Changelog ==
 
 = =
+* Enhancement: Added a Pocket Service, props @roccotripaldi
 * Enhancement: Added a Google Mail (Gmail) Service, props @poisa
 * Enhancement: Added a YouTube Service definition, based heavily on @superbia's Google Analytics one.
 * Enhancement: All Google services now share a base service (0-google-base.php)
