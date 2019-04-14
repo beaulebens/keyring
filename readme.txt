@@ -31,6 +31,7 @@ And includes ready-to-use definitions for:
 * [Foursquare](https://foursquare.com/)
 * [Google Analytics](https://www.google.com/analytics/)
 * [Google Contacts](https://www.google.com/contacts/)
+* [Google Mail](https://www.google.com/mail/)
 * [Instagram](https://instagram.com/)
 * [Instapaper](https://instapaper.com/)
 * [Jetpack](https://jetpack.com/)/[WordPress.com](https://wordpress.com/)
@@ -105,7 +106,9 @@ Add files to includes/services/extended/ that either implement one of the includ
 == Changelog ==
 
 = =
+* Enhancement: Added a Google Mail (Gmail) Service, props @poisa
 * Enhancement: Added a YouTube Service definition, based heavily on @superbia's Google Analytics one.
+* Enhancement: All Google services now share a base service (0-google-base.php)
 * Enhancement: Add a composer.json config file (Keyring is now on Packagist at https://packagist.org/packages/beaulebens/keyring)
 * Bugfix: Handle empty usernames in the Strava Service.
 * Bugfix: Updated links in readme for Google Analytics and Contacts to their user-facing URLs.
