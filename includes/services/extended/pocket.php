@@ -13,13 +13,12 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_pocket_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'request_token', 'https://getpocket.com/v3/oauth/request', 'POST' );
+		$this->set_endpoint( 'request_token', 'https://getpocket.com/v3/oauth/request',   'POST' );
 		$this->set_endpoint( 'authorize',     'https://getpocket.com/auth/authorize',     'GET'  );
-		$this->set_endpoint( 'access_token',  'https://getpocket.com/v3/oauth/authorize',  'POST' );
+		$this->set_endpoint( 'access_token',  'https://getpocket.com/v3/oauth/authorize', 'POST' );
 
-		$creds         = $this->get_credentials();
-		$this->key     = $creds['key'];
-
+		$creds              = $this->get_credentials();
+		$this->key          = $creds['key'];
 		$kr_nonce           = wp_create_nonce( 'keyring-verify' );
 		$nonce              = wp_create_nonce( 'keyring-verify-pocket' );
 		$this->redirect_uri = Keyring_Util::admin_url( self::NAME, array( 'action' => 'verify', 'kr_nonce' => $kr_nonce, 'nonce' => $nonce, ) );
@@ -27,7 +26,6 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 		add_filter( 'keyring_request_token', array( $this, 'obtain_request_token' ), 10, 1 );
 		add_filter( 'keyring_pocket_request_token_params', array( $this, 'request_token_params' ), 10, 1 );
 		add_filter( 'keyring_pocket_verify_token_params', array( $this, 'verify_token_params' ), 10, 1 );
-		add_filter( 'keyring_pocket_verify_token_post_params', array( $this, 'verify_token_post_params' ), 10, 1 );
 	}
 
 	function basic_ui_intro() {
@@ -51,11 +49,10 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 			$this->requires_token = false;
 			$params = array(
 				'method' => $this->request_token_method,
-				'headers' => array( 'Content-Type' => 'application/json', 'X-Accept' => 'application/json' ),
-				'body' => json_encode( array(
+				'body' => array(
 					'consumer_key' => $this->key,
 					'redirect_uri' => $this->callback_url,
-				) ),
+				),
 			);
 
 			$resp = $this->request( $this->request_token_url, $params );
@@ -80,14 +77,41 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 	}
 
 	function verify_token_params( $params ) {
-		return array( 'consumer_key' => $params['client_id'], 'code' => $params['code'] );
+		return array(
+			'consumer_key' => $params['client_id'],
+			'code' => $params['code']
+		);
 	}
 
 	function verify_token_post_params( $params ) {
 		return array(
-			'headers' => array( 'Content-Type' => 'application/x-www-form-urlencoded; charset=UTF-8', 'X-Accept' => 'application/json' ),
+			'headers' => array(
+				'Content-Type' => 'application/json; charset=UTF-8',
+				'X-Accept' => 'application/json'
+			),
 			'body' => $params['body']
 		);
+	}
+
+	// Pocket always returns urlencoded access tokens for some reason
+	function parse_access_token( $token ) {
+		parse_str( $token, $vars );
+		return $vars;
+	}
+
+	function request( $url, array $params = array() ) {
+		$params['body']['consumer_key']    = $this->key;
+
+		$params['headers']['Content-Type'] = 'application/json; charset=UTF-8';
+		$params['headers']['X-Accept']     = 'application/json';
+
+		if ( $token = $this->get_token() ) {
+			$params['body']['access_token'] = $token->token;
+		}
+
+		$params['body'] = json_encode( $params['body'] );
+
+		return parent::request( $url, $params );
 	}
 
 	function build_token_meta( $token ) {
@@ -96,9 +120,7 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 		} else {
 			$meta = array(
 				'user_id'  => $token['username'],
-				'username' => $token['username'],
 				'name'     => $token['username'],
-				'picture'  => plugins_url() . '/keyring/assets/img/pocket.png',
 			);
 		}
 
@@ -110,15 +132,15 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 	}
 
 	function test_connection() {
-		$args = array(
-			'consumer_key' => $this->key,
-			'access_token' => $this->get_token()->token,
-			'count' => 1,
+		$response = $this->request(
+			'https://getpocket.com/v3/get',
+			array(
+				'method' => 'POST',
+				'body'   => array(
+					'count' => 1
+				)
+			)
 		);
-
-		$url = add_query_arg( $args, 'https://getpocket.com/v3/get' );
-		$response = $this->request( $url );
-
 		if ( ! Keyring_Util::is_error( $response ) ) {
 			return true;
 		}
