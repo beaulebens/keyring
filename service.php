@@ -325,5 +325,5 @@ $keyring_services = glob( dirname( __FILE__ ) . "/includes/services/core/*.php" 
 $keyring_services = array_merge( $keyring_services, glob( dirname( __FILE__ ) . "/includes/services/extended/*.php" ) );
 $keyring_services = apply_filters( 'keyring_services', $keyring_services );
 foreach ( $keyring_services as $keyring_service )
-	require $keyring_service;
+	require_once $keyring_service;
 unset( $keyring_services, $keyring_service );
