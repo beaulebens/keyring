@@ -3,8 +3,8 @@
 Contributors: beaulebens, mdawaffe, jshreve, jkudish, automattic
 Tags: authentication, security, oauth, http basic, authorization, facebook, foursquare, instagram, twitter, google
 Requires at least: 4.0
-Tested up to: 4.9.4
-Stable Tag: 1.9
+Tested up to: 5.2.1
+Stable Tag: 2.0
 
 An authentication framework that handles authorization/communication with most popular web services.
 
@@ -105,7 +105,7 @@ Add files to includes/services/extended/ that either implement one of the includ
 
 == Changelog ==
 
-= =
+= 2.0 =
 * Bugfix BREAKING: Remove invalid reference to $this in error handler. Changes number of params passed to keyring_error action.
 * Bugfix BREAKING: `expires` values in tokens MUST be UNIX timestamps now.
 * Enhancement BREAKING: All Google services now share a base service (0-google-base.php)
