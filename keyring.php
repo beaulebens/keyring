@@ -197,7 +197,7 @@ class Keyring {
 	static function error( $str, $info = array(), $die = true ) {
 		$keyring = Keyring::init();
 		$keyring->errors[] = $str;
-		do_action( 'keyring_error', $str, $info, isset( $this ) ? $this : null );
+		do_action( 'keyring_error', $str, $info );
 		if ( $die ) {
 			wp_die( $str, __( 'Keyring Error', 'keyring' ) );
 			exit;
