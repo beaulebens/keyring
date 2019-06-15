@@ -106,6 +106,8 @@ Add files to includes/services/extended/ that either implement one of the includ
 == Changelog ==
 
 = =
+* Bugfix BREAKING: Remove invalid reference to $this in error handler. Changes number of params passed to keyring_error action.
+* Bugfix BREAKING: `expires` values in tokens MUST be UNIX timestamps now.
 * Enhancement: Added a Pocket Service, props @roccotripaldi
 * Enhancement: Added a Google Mail (Gmail) Service, props @poisa
 * Enhancement: Added a YouTube Service definition, based heavily on @superbia's Google Analytics one.
