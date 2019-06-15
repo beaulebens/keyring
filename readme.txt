@@ -108,10 +108,10 @@ Add files to includes/services/extended/ that either implement one of the includ
 = =
 * Bugfix BREAKING: Remove invalid reference to $this in error handler. Changes number of params passed to keyring_error action.
 * Bugfix BREAKING: `expires` values in tokens MUST be UNIX timestamps now.
+* Enhancement BREAKING: All Google services now share a base service (0-google-base.php)
 * Enhancement: Added a Pocket Service, props @roccotripaldi
 * Enhancement: Added a Google Mail (Gmail) Service, props @poisa
 * Enhancement: Added a YouTube Service definition, based heavily on @superbia's Google Analytics one.
-* Enhancement: All Google services now share a base service (0-google-base.php)
 * Enhancement: Add a composer.json config file (Keyring is now on Packagist at https://packagist.org/packages/beaulebens/keyring)
 * Bugfix: Handle empty usernames in the Strava Service.
 * Bugfix: Updated links in readme for Google Analytics and Contacts to their user-facing URLs.
