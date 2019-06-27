@@ -106,8 +106,20 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 	}
 
 	function build_token_meta( $token ) {
-		$meta = array(
-			'refresh_token' => $token['refresh_token'],
+		$refresh_token = isset( $token['refresh_token'] ) ? $token['refresh_token'] : null;
+
+		if ( ! isset( $refresh_token ) ) {
+			$all_service_tokens = $this->get_tokens();
+			foreach ( $all_service_tokens as $service_token ) {
+				if ( null !== $service_token->get_meta( 'refresh_token' ) ) {
+					$refresh_token = $service_token->get_meta( 'refresh_token' );
+					break;
+				}
+			}
+		}
+
+                $meta = array(
+                        'refresh_token' => $refresh_token,
 			'expires'       => time() + $token['expires_in'],
 		);
 
