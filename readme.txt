@@ -58,6 +58,21 @@ Contributions are welcome via [Github pull request](https://github.com/beauleben
 2. Activate Keyring in Plugins > Installed Plugins
 3. Go to Tools > Keyring > Add New and you will be prompted to configure services before making user-specific connections to them
 
+
+== Tests ==
+
+PHP unit tests for the keyring service.
+
+# Run this once at the beginning to to set up some test instrumentation.
+composer run test:setup
+
+# Run this whenever you start testing to start Docker containers
+composer run test:run-docker
+
+# Run PHP unit tests
+composer run test
+
+
 == Frequently Asked Questions ==
 
 = How Do I Use Keyring in my Plugin? =
