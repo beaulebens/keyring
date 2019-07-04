@@ -1,6 +1,13 @@
 {
 	"name": "beaulebens/keyring",
 	"description": "An authentication framework for WordPress development. Provides a standardized connection and communication framework for talking to web services.",
+
+	"scripts": {
+		"test": "docker-compose -f docker-compose.phpunit.yml run --rm wordpress_phpunit phpunit --debug || true",
+		"test:run-docker": "docker-compose -f docker-compose.phpunit.yml up -d",
+		"test:setup": "docker-compose -f docker-compose.phpunit.yml run --rm wordpress_phpunit /app/tests/install-wp-tests.sh wordpress_test root '' mysql_phpunit latest true"
+	},
+
 	"require": {
 		"php": ">=5.3"
 	}
