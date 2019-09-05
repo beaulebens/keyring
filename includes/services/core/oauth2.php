@@ -218,7 +218,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		Keyring_Util::debug( $res );
 
 		$this->set_request_response_code( wp_remote_retrieve_response_code( $res ) );
-		if ( in_array( wp_remote_retrieve_response_code( $res ), array( 200, 201, 202 ) ) ) {
+		if ( in_array( wp_remote_retrieve_response_code( $res ), apply_filters( 'keyring_' . $this->get_name() . '_success_response_codes', array( 200, 201, 202 ) ) ) ) {
 			if ( $raw_response ) {
 				return wp_remote_retrieve_body( $res );
 			} else {
