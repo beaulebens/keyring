@@ -195,8 +195,8 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		if ( isset( $_POST['api_key'] ) && isset( $_POST['api_secret'] ) ) {
 			// Store credentials against this service
 			$this->update_credentials( array(
-				'key'          => stripslashes( $_POST['api_key'] ),
-				'secret'       => stripslashes( $_POST['api_secret'] ),
+				'key'          => stripslashes( trim( $_POST['api_key'] ) ),
+				'secret'       => stripslashes( trim( $_POST['api_secret'] ) ),
 				'redirect_uri' => stripslashes( $_POST['redirect_uri'] ),
 			) );
 			echo '<div class="updated"><p>' . __( 'Credentials saved.', 'keyring' ) . '</p></div>';
