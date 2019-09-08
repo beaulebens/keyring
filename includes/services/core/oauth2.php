@@ -128,7 +128,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		Keyring_Util::debug( 'OAuth2 Response' );
 		Keyring_Util::debug( $res );
 
-		if ( 200 == wp_remote_retrieve_response_code( $res ) ) {
+		if ( wp_startswith( wp_remote_retrieve_response_code( $res ), '2' ) ) {
 			$token = wp_remote_retrieve_body( $res );
 			Keyring_Util::debug( $token );
 
@@ -218,7 +218,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		Keyring_Util::debug( $res );
 
 		$this->set_request_response_code( wp_remote_retrieve_response_code( $res ) );
-		if ( in_array( wp_remote_retrieve_response_code( $res ), array( 200, 201, 202 ) ) ) {
+		if ( wp_startswith( wp_remote_retrieve_response_code( $res ), '2' ) ) {
 			if ( $raw_response ) {
 				return wp_remote_retrieve_body( $res );
 			} else {
