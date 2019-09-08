@@ -105,6 +105,9 @@ Add files to includes/services/extended/ that either implement one of the includ
 
 == Changelog ==
 
+=  =
+* Enhancement: Trim spaces off API keys etc to avoid mistakes when copy/pasting. Props @kbrown9
+
 = 2.0 =
 * Bugfix BREAKING: Remove invalid reference to $this in error handler. Changes number of params passed to keyring_error action.
 * Bugfix BREAKING: `expires` values in tokens MUST be UNIX timestamps now.

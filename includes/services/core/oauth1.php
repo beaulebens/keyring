@@ -37,8 +37,9 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		$nonce = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
 		$this->callback_url = Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify', 'kr_nonce' => $kr_nonce, 'nonce' => $nonce ) );
 
-		if ( !class_exists( 'OAuthRequest' ) )
+		if ( !class_exists( 'OAuthRequest' ) ) {
 			require dirname( dirname( dirname( __FILE__ ) ) ) . '/oauth-php/OAuth.php';
+		}
 	}
 
 	/**
