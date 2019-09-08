@@ -7,7 +7,7 @@
 
 class Keyring_Service_Github extends Keyring_Service_OAuth2 {
 	const NAME	= 'github';
-	const LABEL = 'Github';
+	const LABEL = 'GitHub';
 	const SCOPE = '';
 
 	function __construct() {
@@ -19,9 +19,9 @@ class Keyring_Service_Github extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_github_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize',	 'https://github.com/login/oauth/authorize',   'GET'  );
+		$this->set_endpoint( 'authorize',	 'https://github.com/login/oauth/authorize',    'GET'  );
 		$this->set_endpoint( 'access_token', 'https://github.com/login/oauth/access_token', 'POST' );
-		$this->set_endpoint( 'self',		 'https://api.github.com/user',		'GET'  );
+		$this->set_endpoint( 'self',		 'https://api.github.com/user',		            'GET'  );
 
 		$creds = $this->get_credentials();
 
@@ -37,22 +37,21 @@ class Keyring_Service_Github extends Keyring_Service_OAuth2 {
 
 		add_action( 'pre_keyring_github_verify', array( $this, 'redirect_incoming_verify' ) );
 
-		// Strip nonces, since you can't save them in your app config, and Github is strict about redirect_uris
+		// Strip nonces, since you can't save them in your app config, and GitHub is strict about redirect_uris
 		// Can also only return you to an HTTPS address
 		$this->callback_url = remove_query_arg( array( 'nonce', 'kr_nonce' ), $this->callback_url );
-
 	}
 
 	function verify_token_post_params( $params ) {
 		$params['headers'] = array(
-				'Accept' => 'application/json'
+			'Accept' => 'application/json'
 		);
 		return $params;
 	}
 
 	function basic_ui_intro() {
-		echo '<p>' . sprintf( __( 'To get started, <a href="%1$s">register an OAuth client on Github</a>. The most important setting is the <strong>OAuth redirect_uri</strong>, which should be set to <code>%2$s</code>. You can set the other values to whatever you like.', 'keyring' ), 'https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/', Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify' ) ) ) . '</p>';
-		echo '<p>' . __( "Once you've saved those changes, copy the <strong>CLIENT ID</strong> value into the <strong>API Key</strong> field, and the <strong>CLIENT SECRET</strong> value into the <strong>API Secret</strong> field and click save (you don't need an App ID value for Github).", 'keyring' ) . '</p>';
+		echo '<p>' . sprintf( __( 'To get started, <a href="%1$s">register an OAuth client on GitHub</a>. The most important setting is the <strong>OAuth redirect_uri</strong>, which should be set to <code>%2$s</code>. You can set the other values to whatever you like.', 'keyring' ), 'https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/', Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify' ) ) ) . '</p>';
+		echo '<p>' . __( "Once you've saved those changes, copy the <strong>CLIENT ID</strong> value into the <strong>API Key</strong> field, and the <strong>CLIENT SECRET</strong> value into the <strong>API Secret</strong> field and click save (you don't need an App ID value for GitHub).", 'keyring' ) . '</p>';
 	}
 
 	function request_token_params( $params ) {
@@ -62,7 +61,7 @@ class Keyring_Service_Github extends Keyring_Service_OAuth2 {
 
 	function redirect_incoming_verify( $request ) {
 		if ( !isset( $request['kr_nonce'] ) ) {
-			// First request, from Github. Nonce it and move on.
+			// First request, from GitHub. Nonce it and move on.
 			$kr_nonce = wp_create_nonce( 'keyring-verify' );
 			$nonce = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
 			wp_safe_redirect(
