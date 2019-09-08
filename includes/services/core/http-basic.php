@@ -17,8 +17,9 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 	function __construct() {
 		parent::__construct();
 
-		if ( ! KEYRING__HEADLESS_MODE )
+		if ( ! KEYRING__HEADLESS_MODE ) {
 			add_action( 'keyring_' . $this->get_name() . '_request_ui', array( $this, 'request_ui' ) );
+		}
 	}
 
 	function get_display( Keyring_Access_Token $token ) {
@@ -97,7 +98,7 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 	}
 
 	function verify_token() {
-		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-verify-' . $this->get_name() ) ) {
+		if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( $_REQUEST['nonce'], 'keyring-verify-' . $this->get_name() ) ) {
 			Keyring::error( __( 'Invalid/missing verification nonce.', 'keyring' ) );
 			exit;
 		}
@@ -114,12 +115,12 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 			$this->store->delete( array( 'id' => $state, 'type' => 'request' ) );
 		}
 
-		if ( !strlen( $_POST['username'] ) ) {
+		if ( ! strlen( $_POST['username'] ) ) {
 			$url = Keyring_Util::admin_url(
 				$this->get_name(),
 				array(
-					'action' => 'request',
-					'error' => 'empty',
+					'action'   => 'request',
+					'error'    => 'empty',
 					'kr_nonce' => wp_create_nonce( 'keyring-request' )
 				)
 			);
@@ -132,7 +133,7 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 
 		$token = new Keyring_Access_Token(
 			$this->get_name(),
-			base64_encode( $_POST['username'] . ':' . $_POST['password'] )
+			base64_encode( trim( $_POST['username'] ) . ':' . trim( $_POST['password'] ) )
 		);
 		$this->set_token( $token );
 		$res = $this->request( $this->verify_url, array( 'method' => $this->verify_method ) );
@@ -143,8 +144,8 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 			$url = Keyring_Util::admin_url(
 				$this->get_name(),
 				array(
-					'action' => 'request',
-					'error' => '401',
+					'action'   => 'request',
+					'error'    => '401',
 					'kr_nonce' => wp_create_nonce( 'keyring-request' )
 				)
 			);
@@ -153,7 +154,7 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 			exit;
 		}
 
-		$meta = array_merge( array( 'username' => $_POST['username'] ), $this->build_token_meta( $token ) );
+		$meta = array_merge( array( 'username' => trim( $_POST['username'] ), $this->build_token_meta( $token ) ) );
 
 		$access_token = new Keyring_Access_Token(
 			$this->get_name(),
