@@ -69,6 +69,7 @@ class Keyring_Service_Pinterest extends Keyring_Service_OAuth2 {
 	}
 
 	function basic_ui_intro() {
+		/* translators: %$1s: Pinterest developers URL, %2s: the redirect URL to verify the connection */
 		echo '<p>' . sprintf( __( 'To get started, <a href="%1$s">register an API client on Pinterest</a>. The most important setting is the <strong>OAuth redirect_uri</strong>, which should be set to <code>%2$s</code>. You can set the other values to whatever you like.', 'keyring' ), 'https://developers.pinterest.com/apps/', Keyring_Util::admin_url( 'pinterest', array( 'action' => 'verify' ) ) ) . '</p>';
 		echo '<p>' . __( "Once you're approved, copy your <strong>CLIENT ID</strong> value into the <strong>API Key</strong> field, and the <strong>CLIENT SECRET</strong> value into the <strong>API Secret</strong> field and click save (you don't need an App ID value for Pinterest).", 'keyring' ) . '</p>';
 	}
