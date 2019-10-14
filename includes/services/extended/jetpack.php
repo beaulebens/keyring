@@ -45,6 +45,7 @@ class Keyring_Service_Jetpack extends Keyring_Service_OAuth2 {
 	}
 
 	function basic_ui_intro() {
+		/* translators: %1$s: the signup URL on WordPress.com, %2$s: The redirect URL to verify the connection */
 		echo '<p>' . sprintf( __( 'To get started, <a href="%1$s">register an app on WordPress.com</a>. The most important thing is to include a valid <strong>Redirect URL</strong>, which should be set to <code>%2$s</code>. You can set most other values to whatever you like.', 'keyring' ), 'https://developer.wordpress.com/apps/new/', Keyring_Util::admin_url( self::NAME, array( 'action' => 'verify' ) ) ) . '</p>';
 		echo '<p>' . __( "Once you've saved those changes, copy the <strong>Client ID</strong> value into the <strong>API Key</strong> field, and the <strong>Client Secret</strong> value into the <strong>API Secret</strong> field and click save. You do not need an App ID.", 'keyring' ) . '</p>';
 	}

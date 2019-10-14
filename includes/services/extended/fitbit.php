@@ -45,6 +45,7 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 
 	function basic_ui_intro() {
 		echo '<p>' . sprintf( __( 'Go to Fitbit and <a href="%s">create a new application</a>, which allows Keyring to talk to Fitbit.', 'keyring' ), 'https://dev.fitbit.com/apps/new' ) . '</p>';
+		/* translators: %s: the redirect URL to verify the connection */
 		echo '<p>' . sprintf( __( "You can use anything for the name/description details etc. Make sure you set the <strong>OAuth 2.0 Application Type</strong> to <strong>Personal</strong> (grants you some extra access) and set your <strong>Callback URL</strong> to <code>%s</code>. You only need Read-Only access if you are syncing data, but Read &amp; Write will let you update details as well.", 'keyring' ), Keyring_Util::admin_url( self::NAME, array( 'action' => 'verify' ) ) ) . '</p>';
 	}
 

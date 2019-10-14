@@ -35,7 +35,9 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 		echo '<p>' . sprintf( __( 'If you haven\'t already, you\'ll need to <a href="%s">create a new app at Foursquare</a>. You should only need to worry about these settings:', 'keyring' ), 'https://foursquare.com/developers/register' ) . '</p>';
 		echo '<ol>';
 		echo '<li>' . __( "<strong>Your app name</strong>: enter whatever you like, maybe your website's name?", 'keyring' ) . '</li>';
+		/* translators: %s: the blog URL */
 		echo '<li>' . sprintf( __( "<strong>Download / welcome page url</strong>: just enter your website's URL, <code>%s</code>", 'keyring' ), get_bloginfo( 'url' ) ) . '</li>';
+		/* translators: %s: the redirect URL to verify the connection */
 		echo '<li>' . sprintf( __( "<strong>Redirect URI(s)</strong>: Copy-paste this, <code>%s</code>", 'keyring' ), Keyring_Util::admin_url( 'foursquare', array( 'action' => 'verify' ) ) ) . '</li>';
 		echo '<li>' . __( "<strong>New users can connect via the web</strong>: check the box", 'keyring' ) . '</li>';
 		echo '</ol>';
