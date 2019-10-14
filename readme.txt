@@ -109,6 +109,7 @@ Add files to includes/services/extended/ that either implement one of the includ
 * Enhancement: Added a GitHub Service definition, props @alperakgun.
 * Enhancement: Trim spaces off API keys etc to avoid mistakes when copy/pasting. Props @kbrown9.
 * Enhancement: Allow all 2xx response codes to be considered "Success" for all requests, for all protocols. Props @bgrgicak for the proposal.
+* Enhancement: Add translator comments. Props @scruffian.
 
 = 2.0 =
 * Bugfix BREAKING: Remove invalid reference to $this in error handler. Changes number of params passed to keyring_error action.
