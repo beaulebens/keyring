@@ -50,8 +50,9 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		$request_token_id  = $this->store_token( $request_token );
 
 		$url = $this->authorize_url;
-		if ( !stristr( $url, '?' ) )
+		if ( !stristr( $url, '?' ) ) {
 			$url .= '?';
+		}
 		$params = array(
 			'response_type' => 'code',
 			'client_id'     => $this->key,
@@ -106,8 +107,9 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		$this->store->delete( array( 'id' => $state, 'type' => 'request' ) );
 
 		$url = $this->access_token_url;
-		if ( !stristr( $url, '?' ) )
+		if ( !stristr( $url, '?' ) ) {
 			$url .= '?';
+		}
 		$params = array(
 			'client_id'     => $this->key,
 			'client_secret' => $this->secret,
