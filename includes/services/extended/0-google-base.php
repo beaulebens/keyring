@@ -51,10 +51,12 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		$class = get_called_class();
 
 		echo '<p>' . sprintf( __( "Google controls access to all of their APIs through their API Console. <a href='%s'>Go to the Library page in the console</a> and click the <strong>Select a project</strong> dropdown next to the logo in the upper left of the screen. Click the <strong>plus icon</strong> to create a new project. Enter a name and then click <strong>Create</strong>.", 'keyring' ), 'https://console.developers.google.com/apis/library' ) . '</p>';
+		/* translators: %s: The name of the service bening connected */
 		echo '<p>' . sprintf( __( "Now you need to enable the %s and setup your OAuth credentials.", 'keyring' ), $class::LABEL ) . '</p>';
 		echo '<ol>';
 		echo '<li>' . __( "Select your project from the project dropdown.", 'keyring' ) . '</li>';
 		echo '<li>' . __( "Click <strong>Library</strong> in the menu on the left.", 'keyring' ) . '</li>';
+		/* translators: %s: The name of the service bening connected */
 		echo '<li>' . sprintf( __( "Find and click <strong>%s</strong>.", 'keyring' ), $class::LABEL ) . '</li>';
 		echo '<li>' . __( "Next to the heading, click <strong>Enable</strong>.", 'keyring' ) . '</li>';
 		echo '<li>' . __( "Click the blue button labelled <strong>Create credentials</strong>.", 'keyring' ) . '</li>';
@@ -64,7 +66,9 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		echo '<li>' . __( "Click Save.", 'keyring' ) . '</li>';
 		echo '<li>' . __( "Click the <strong>Create credentials</strong> button and select <strong>OAuth client ID</strong>.", 'keyring' ) . '</li>';
 		echo '<li>' . __( "Select <strong>Web application</strong> and enter a relevant name or just use the default.", 'keyring' ) . '</li>';
+		/* translators: %s: The user's domain name */
 		echo '<li>' . sprintf( __( "For the <strong>Authorized JavaScript Origins</strong>, enter the URL of your domain, e.g. <code>%s</code>.", 'keyring' ), ( is_ssl() ? 'https' : 'http' ) . '://' . $_SERVER['HTTP_HOST'] ) . '</li>';
+		/* translators: %s: The redirect URL to verify the connection */
 		echo '<li>' . sprintf( __( "In the <strong>Authorized Redirect URIs</strong> box, enter the URL <code>%s</code>.", 'keyring' ), Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify' ) ) ) . '</li>';
 		echo '<li>' . __( "Click <strong>Create</strong> when you're done.", 'keyring' ) . '</li>';
 		echo '</ol>';
@@ -189,6 +193,7 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		echo '<div class="wrap">';
 		echo '<h2>' . __( 'Keyring Service Management', 'keyring' ) . '</h2>';
 		echo '<p><a href="' . Keyring_Util::admin_url( false, array( 'action' => 'services' ) ) . '">' . __( '&larr; Back', 'keyring' ) . '</a></p>';
+		/* translators: %s: The name of the service bening connected */
 		echo '<h3>' . sprintf( __( '%s API Credentials', 'keyring' ), esc_html( $this->get_label() ) ) . '</h3>';
 
 		// Handle actually saving credentials
