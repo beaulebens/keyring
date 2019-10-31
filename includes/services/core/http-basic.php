@@ -66,6 +66,10 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 
 		echo apply_filters( 'keyring_' . $this->get_name() . '_request_ui_intro', '' );
 
+		$cancel_url = isset($_SERVER['HTTP_REFERER'])
+			? $_SERVER['HTTP_REFERER']
+			: admin_url( 'tools.php?page=' . Keyring::init()->admin_page);
+
 		// Output basic form for collecting user/pass
 		echo '<p>' . sprintf( __( 'Enter your username and password for accessing <strong>%s</strong>:', 'keyring' ), $this->get_label() ) . '</p>';
 		echo '<form method="post" action="">';
@@ -82,7 +86,7 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		echo '</table>';
 		echo '<p class="submitbox">';
 		echo '<input type="submit" name="submit" value="' . __( 'Verify Details', 'keyring' ) . '" id="submit" class="button-primary">';
-		echo '<a href="' . esc_url( $_SERVER['HTTP_REFERER'] ) . '" class="submitdelete" style="margin-left:2em;">' . __( 'Cancel', 'keyring' ) . '</a>';
+		echo '<a href="' . esc_url( $cancel_url ) . '" class="submitdelete" style="margin-left:2em;">' . __( 'Cancel', 'keyring' ) . '</a>';
 		echo '</p>';
 		echo '</form>';
 		echo '</div>';

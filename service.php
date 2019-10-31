@@ -190,10 +190,14 @@ abstract class Keyring_Service {
 
 		echo apply_filters( 'keyring_' . $this->get_name() . '_basic_ui_api_secret', $ui_api_secret );
 
+		$cancel_url = isset($_SERVER['HTTP_REFERER'])
+			? $_SERVER['HTTP_REFERER']
+			: admin_url( 'tools.php?page=' . Keyring::init()->admin_page);
+
 		echo '</table>';
 		echo '<p class="submitbox">';
 		echo '<input type="submit" name="submit" value="' . __( 'Save Changes', 'keyring' ) . '" id="submit" class="button-primary">';
-		echo '<a href="' . esc_url( $_SERVER['HTTP_REFERER'] ) . '" class="submitdelete" style="margin-left:2em;">' . __( 'Cancel', 'keyring' ) . '</a>';
+		echo '<a href="' . esc_url( $cancel_url ) . '" class="submitdelete" style="margin-left:2em;">' . __( 'Cancel', 'keyring' ) . '</a>';
 		echo '</p>';
 		echo '</form>';
 		?><script type="text/javascript" charset="utf-8">

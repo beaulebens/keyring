@@ -81,6 +81,10 @@ class Keyring_Service_Instapaper extends Keyring_Service_OAuth1 {
 
 		echo apply_filters( 'keyring_' . $this->get_name() . '_request_ui_intro', '' );
 
+		$cancel_url = isset($_SERVER['HTTP_REFERER'])
+			? $_SERVER['HTTP_REFERER']
+			: admin_url( 'tools.php?page=' . Keyring::init()->admin_page);
+
 		// Output basic form for collecting user/pass
 		/* translators: %s: the name of the connection service (instapaper) */
 		echo '<p>' . sprintf( __( 'Enter your username (or email address) and password for accessing <strong>%s</strong>:', 'keyring' ), $this->get_label() ) . '</p>';
@@ -98,7 +102,7 @@ class Keyring_Service_Instapaper extends Keyring_Service_OAuth1 {
 		echo '</table>';
 		echo '<p class="submitbox">';
 		echo '<input type="submit" name="submit" value="' . __( 'Verify Details', 'keyring' ) . '" id="submit" class="button-primary">';
-		echo '<a href="' . esc_attr( $_SERVER['HTTP_REFERER'] ) . '" class="submitdelete" id="logincancel" style="margin-left:2em;">' . __( 'Cancel', 'keyring' ) . '</a>';
+		echo '<a href="' . esc_attr( $cancel_url ) . '" class="submitdelete" id="logincancel" style="margin-left:2em;">' . __( 'Cancel', 'keyring' ) . '</a>';
 		echo '</p>';
 		echo '</form>';
 		echo '</div>';
