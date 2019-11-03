@@ -68,7 +68,7 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 
 		$cancel_url = isset($_SERVER['HTTP_REFERER'])
 			? $_SERVER['HTTP_REFERER']
-			: admin_url( 'tools.php?page=' . Keyring::init()->admin_page);
+			: Keyring_Util::admin_url( $this->get_name() );
 
 		// Output basic form for collecting user/pass
 		echo '<p>' . sprintf( __( 'Enter your username and password for accessing <strong>%s</strong>:', 'keyring' ), $this->get_label() ) . '</p>';

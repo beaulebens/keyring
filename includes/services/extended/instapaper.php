@@ -83,7 +83,7 @@ class Keyring_Service_Instapaper extends Keyring_Service_OAuth1 {
 
 		$cancel_url = isset($_SERVER['HTTP_REFERER'])
 			? $_SERVER['HTTP_REFERER']
-			: admin_url( 'tools.php?page=' . Keyring::init()->admin_page);
+			: Keyring_Util::admin_url( $this->get_name() );
 
 		// Output basic form for collecting user/pass
 		/* translators: %s: the name of the connection service (instapaper) */
