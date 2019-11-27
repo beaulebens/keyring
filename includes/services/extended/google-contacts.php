@@ -13,6 +13,7 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_GoogleBase {
 	const LABEL       = 'Google Contacts';
 	const SCOPE       = 'https://www.google.com/m8/feeds https://www.googleapis.com/auth/userinfo.profile'; // See https://developers.google.com/google-apps/contacts/v3/#authorizing_requests_with_oauth_20
 	const API_VERSION = '3.0';
+	const ACCESS_TYPE = 'offline';
 
 	function __construct() {
 		parent::__construct();
@@ -32,11 +33,6 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_GoogleBase {
 		} else {
 			return null;
 		}
-	}
-
-	function request_token_params( $params ) {
-		$params['scope'] = self::SCOPE;
-		return $params;
 	}
 
 	function request( $url, array $params = array() ) {
