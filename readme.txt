@@ -106,6 +106,7 @@ Add files to includes/services/extended/ that either implement one of the includ
 == Changelog ==
 
 =  =
+* Bugfix: Make the Google services always request a refresh token for offline access. Props @kbrown9 and @atrniv for input.
 * Bugfix: Update use of add_submenu_page() to comply with WP 5.3. Props @jhwwp (wp.org) for the fix.
 * Enhancement: Added a GitHub Service definition, props @alperakgun.
 * Enhancement: Trim spaces off API keys etc to avoid mistakes when copy/pasting. Props @kbrown9.
