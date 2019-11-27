@@ -74,6 +74,7 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 
 	function request_token_params( $params ) {
 		$class = get_called_class();
+		$params['prompt']      = 'consent'; // Always prompt, and get a refresh token for offline access
 		$params['scope']       = $class::SCOPE;
 		$params['access_type'] = $class::ACCESS_TYPE;
 		return $params;
