@@ -106,6 +106,7 @@ Add files to includes/services/extended/ that either implement one of the includ
 == Changelog ==
 
 =  =
+* Bugfix: Update use of add_submenu_page() to comply with WP 5.3. Props @jhwwp (wp.org) for the fix.
 * Enhancement: Added a GitHub Service definition, props @alperakgun.
 * Enhancement: Trim spaces off API keys etc to avoid mistakes when copy/pasting. Props @kbrown9.
 * Enhancement: Allow all 2xx response codes to be considered "Success" for all requests, for all protocols. Props @bgrgicak for the proposal.

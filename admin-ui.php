@@ -45,7 +45,7 @@ class Keyring_Admin_UI {
 	}
 
 	function admin_menu() {
-		$hook = add_management_page( 'Keyring', 'Keyring', 'read', 'keyring', array( $this, 'admin_page' ), '' );
+		$hook = add_management_page( 'Keyring', 'Keyring', 'read', 'keyring', array( $this, 'admin_page' ), null );
 		add_action( "load-$hook", array( $this, 'admin_page_load' ) );
 	}
 
