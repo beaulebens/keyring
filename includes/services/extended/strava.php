@@ -41,7 +41,7 @@ class Keyring_Service_Strava extends Keyring_Service_OAuth2 {
 	}
 
 	function request_token_params( $params ) {
-		$params['scope'] = apply_filters( 'keyring_' . $this->get_name() . '_scope', 'read' );
+		$params['scope'] = apply_filters( 'keyring_' . $this->get_name() . '_scope', 'read,activity:read_all' );
 		return $params;
 	}
 
