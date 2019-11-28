@@ -9,15 +9,12 @@
  */
 
 class Keyring_Service_Google_Drive extends Keyring_Service_GoogleBase {
-	const NAME        = 'google_drive';
+	const NAME        = 'google-drive';
 	const LABEL       = 'Google Drive';
 	const SCOPE       = 'profile https://www.googleapis.com/auth/drive.file'; // See https://developers.google.com/identity/protocols/googlescopes#sheetsv4
 	const ACCESS_TYPE = 'offline';
 
 	public function __construct() {
-		// Publicize returns a bad name for this service so override the default
-		add_filter( 'wpcom_get_keyring_connection_item', array( $this, 'modify_label' ) );
-
 		parent::__construct();
 	}
 
@@ -27,26 +24,12 @@ class Keyring_Service_Google_Drive extends Keyring_Service_GoogleBase {
 			defined( 'KEYRING__GOOGLEDRIVE_SECRET' )
 		) {
 			return array(
-				'key'          => KEYRING__GOOGLEDRIVE_KEY,
-				'secret'       => KEYRING__GOOGLEDRIVE_SECRET,
+				'key'    => KEYRING__GOOGLEDRIVE_KEY,
+				'secret' => KEYRING__GOOGLEDRIVE_SECRET,
 			);
 		} else {
 			return null;
 		}
-	}
-
-	/**
-	 * Return an appropriate text label for this service. Used by the 'wpcom_get_keyring_connection_item' filter
-	 *
-	 * @param array $service Array of service details (see WPCOM_External_Connections::format_keyring_connection_items)
-	 * @return void
-	 */
-	function modify_label( $service ) {
-		if ( $service['service'] === self::NAME ) {
-			$service['label'] = self::LABEL;
-		}
-
-		return $service;
 	}
 
 	/**
