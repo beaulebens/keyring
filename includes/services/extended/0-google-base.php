@@ -176,7 +176,7 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		);
 
 		// Store the updated access token
-		$access_token = apply_filters( 'keyring_access_token', $access_token,  (array) $return );
+		$access_token = apply_filters( 'keyring_access_token', $access_token, (array) $return );
 		$id = $this->store->update( $access_token );
 
 		// And switch to using it
