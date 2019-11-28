@@ -261,11 +261,13 @@ class Keyring_Util {
 	static function admin_url( $service = false, $params = array() ) {
 		$url = admin_url();
 
-		if ( $service )
+		if ( $service ) {
 			$params['service'] = $service;
+		}
 
-		if ( count( $params ) )
+		if ( count( $params ) ) {
 			$url = add_query_arg( $params, $url );
+		}
 
 		return apply_filters( 'keyring_admin_url', $url, $params );
 	}
