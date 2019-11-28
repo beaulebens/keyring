@@ -113,6 +113,7 @@ Add files to includes/services/extended/ that either implement one of the includ
 * Enhancement: Add translator comments. Props @scruffian.
 * Bugfix: Make the Google services always request a refresh token for offline access. Props @kbrown9 and @atrniv for input.
 * Bugfix: Update use of add_submenu_page() to comply with WP 5.3. Props @jhwwp (wp.org) for the fix.
+* Bugfix: Apply the keyring_access_token filter consistently in Google Services. Props @pablinos.
 
 = 2.0 =
 * Bugfix BREAKING: Remove invalid reference to $this in error handler. Changes number of params passed to keyring_error action.
