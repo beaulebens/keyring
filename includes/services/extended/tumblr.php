@@ -18,19 +18,19 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 		}
 
 		$this->set_endpoint( 'request_token', 'https://www.tumblr.com/oauth/request_token', 'POST' );
-		$this->set_endpoint( 'authorize',     'https://www.tumblr.com/oauth/authorize',     'GET'  );
-		$this->set_endpoint( 'access_token',  'https://www.tumblr.com/oauth/access_token',  'POST' );
+		$this->set_endpoint( 'authorize', 'https://www.tumblr.com/oauth/authorize', 'GET' );
+		$this->set_endpoint( 'access_token', 'https://www.tumblr.com/oauth/access_token', 'POST' );
 
-		$creds = $this->get_credentials();
-		$this->app_id  = $creds['app_id'];
-		$this->key     = $creds['key'];
-		$this->secret  = $creds['secret'];
+		$creds        = $this->get_credentials();
+		$this->app_id = $creds['app_id'];
+		$this->key    = $creds['key'];
+		$this->secret = $creds['secret'];
 
-		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
+		$this->consumer         = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
 
 		$this->authorization_header = true; // Send OAuth token in the header, not querystring
-		$this->authorization_realm = 'tumblr.com';
+		$this->authorization_realm  = 'tumblr.com';
 	}
 
 	function basic_ui_intro() {
@@ -60,7 +60,7 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 			$meta = array();
 		} else {
 			$this->person = $response->response->user;
-			$meta = array(
+			$meta         = array(
 				'name' => $this->person->name,
 			);
 		}
@@ -74,9 +74,9 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 
 	function test_connection() {
 			$res = $this->request( 'https://api.tumblr.com/v2/user/info', array( 'method' => 'POST' ) );
-			if ( ! Keyring_Util::is_error( $res ) ) {
-				return true;
-			}
+		if ( ! Keyring_Util::is_error( $res ) ) {
+			return true;
+		}
 
 			return $res;
 	}

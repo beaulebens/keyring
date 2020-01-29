@@ -19,15 +19,15 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_fitbit_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize',    'https://www.fitbit.com/oauth2/authorize',      'GET'  );
-		$this->set_endpoint( 'access_token', 'https://api.fitbit.com/oauth2/token',          'POST' );
-		$this->set_endpoint( 'refresh',      'https://api.fitbit.com/oauth2/token',          'POST' );
-		$this->set_endpoint( 'profile',      'https://api.fitbit.com/1/user/-/profile.json', 'GET'  );
+		$this->set_endpoint( 'authorize', 'https://www.fitbit.com/oauth2/authorize', 'GET' );
+		$this->set_endpoint( 'access_token', 'https://api.fitbit.com/oauth2/token', 'POST' );
+		$this->set_endpoint( 'refresh', 'https://api.fitbit.com/oauth2/token', 'POST' );
+		$this->set_endpoint( 'profile', 'https://api.fitbit.com/1/user/-/profile.json', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->app_id  = $creds['app_id'];
-		$this->key     = $creds['key'];
-		$this->secret  = $creds['secret'];
+		$creds        = $this->get_credentials();
+		$this->app_id = $creds['app_id'];
+		$this->key    = $creds['key'];
+		$this->secret = $creds['secret'];
 
 		// Fitbit requires an exact match on Redirect URI, which means we can't send any nonces
 		$this->callback_url = remove_query_arg( array( 'nonce', 'kr_nonce' ), $this->callback_url );
@@ -46,7 +46,7 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 	function basic_ui_intro() {
 		echo '<p>' . sprintf( __( 'Go to Fitbit and <a href="%s">create a new application</a>, which allows Keyring to talk to Fitbit.', 'keyring' ), 'https://dev.fitbit.com/apps/new' ) . '</p>';
 		/* translators: %s: the redirect URL to verify the connection */
-		echo '<p>' . sprintf( __( "You can use anything for the name/description details etc. Make sure you set the <strong>OAuth 2.0 Application Type</strong> to <strong>Personal</strong> (grants you some extra access) and set your <strong>Callback URL</strong> to <code>%s</code>. You only need Read-Only access if you are syncing data, but Read &amp; Write will let you update details as well.", 'keyring' ), Keyring_Util::admin_url( self::NAME, array( 'action' => 'verify' ) ) ) . '</p>';
+		echo '<p>' . sprintf( __( 'You can use anything for the name/description details etc. Make sure you set the <strong>OAuth 2.0 Application Type</strong> to <strong>Personal</strong> (grants you some extra access) and set your <strong>Callback URL</strong> to <code>%s</code>. You only need Read-Only access if you are syncing data, but Read &amp; Write will let you update details as well.', 'keyring' ), Keyring_Util::admin_url( self::NAME, array( 'action' => 'verify' ) ) ) . '</p>';
 	}
 
 	function request_token_params( $params ) {
@@ -145,24 +145,27 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 		}
 
 		// Refresh our access token
-		$response = wp_remote_post( $this->refresh_url, array(
-			'method'  => $this->refresh_method,
-			'headers' => $this->get_basic_auth(),
-			'body'    => array(
-				'grant_type'    => 'refresh_token',
-				'refresh_token' => $meta['refresh_token'],
+		$response = wp_remote_post(
+			$this->refresh_url,
+			array(
+				'method'  => $this->refresh_method,
+				'headers' => $this->get_basic_auth(),
+				'body'    => array(
+					'grant_type'    => 'refresh_token',
+					'refresh_token' => $meta['refresh_token'],
+				),
 			)
-		) );
+		);
 		Keyring_Util::debug( $response );
 
 		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			return false;
 		}
 
-		$return = json_decode( wp_remote_retrieve_body( $response ) );
+		$return                = json_decode( wp_remote_retrieve_body( $response ) );
 		$meta['refresh_token'] = $return->refresh_token;
-		$meta['expires'] = time() + $return->expires_in;
-		$access_token = new Keyring_Access_Token(
+		$meta['expires']       = time() + $return->expires_in;
+		$access_token          = new Keyring_Access_Token(
 			$this->get_name(),
 			$return->access_token,
 			$meta,

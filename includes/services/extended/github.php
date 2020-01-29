@@ -6,7 +6,7 @@
  */
 
 class Keyring_Service_Github extends Keyring_Service_OAuth2 {
-	const NAME	= 'github';
+	const NAME  = 'github';
 	const LABEL = 'GitHub';
 	const SCOPE = '';
 
@@ -19,17 +19,16 @@ class Keyring_Service_Github extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_github_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize',	 'https://github.com/login/oauth/authorize',    'GET'  );
+		$this->set_endpoint( 'authorize', 'https://github.com/login/oauth/authorize', 'GET' );
 		$this->set_endpoint( 'access_token', 'https://github.com/login/oauth/access_token', 'POST' );
-		$this->set_endpoint( 'self',		 'https://api.github.com/user',		            'GET'  );
+		$this->set_endpoint( 'self', 'https://api.github.com/user', 'GET' );
 
 		$creds = $this->get_credentials();
 
-		$this->key	   = $creds['key'];
-		$this->secret  = $creds['secret'];
+		$this->key    = $creds['key'];
+		$this->secret = $creds['secret'];
 
-
-		$this->authorization_header	   = 'token';
+		$this->authorization_header    = 'token';
 		$this->authorization_parameter = false;
 
 		add_filter( 'keyring_github_request_token_params', array( $this, 'request_token_params' ) );
@@ -44,7 +43,7 @@ class Keyring_Service_Github extends Keyring_Service_OAuth2 {
 
 	function verify_token_post_params( $params ) {
 		$params['headers'] = array(
-			'Accept' => 'application/json'
+			'Accept' => 'application/json',
 		);
 		return $params;
 	}
@@ -60,19 +59,19 @@ class Keyring_Service_Github extends Keyring_Service_OAuth2 {
 	}
 
 	function redirect_incoming_verify( $request ) {
-		if ( !isset( $request['kr_nonce'] ) ) {
+		if ( ! isset( $request['kr_nonce'] ) ) {
 			// First request, from GitHub. Nonce it and move on.
 			$kr_nonce = wp_create_nonce( 'keyring-verify' );
-			$nonce = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
+			$nonce    = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
 			wp_safe_redirect(
 				Keyring_Util::admin_url(
 					$this->get_name(),
 					array(
 						'action'   => 'verify',
 						'kr_nonce' => $kr_nonce,
-						'nonce'	   => $nonce,
-						'state'	   => $request['state'],
-						'code'	   => $request['code'], // Auth code from successful response (maybe)
+						'nonce'    => $nonce,
+						'state'    => $request['state'],
+						'code'     => $request['code'], // Auth code from successful response (maybe)
 					)
 				)
 			);
@@ -96,8 +95,8 @@ class Keyring_Service_Github extends Keyring_Service_OAuth2 {
 			$meta = array(
 				'user_id'  => $response->id,
 				'username' => $response->login,
-				'name'	   => $response->name,
-				'picture'  => $response->avatar_url
+				'name'     => $response->name,
+				'picture'  => $response->avatar_url,
 			);
 		}
 

@@ -36,32 +36,32 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		if ( isset( $_GET['error'] ) ) {
 			echo '<div id="keyring-admin-errors" class="updated"><ul>';
 			switch ( $_GET['error'] ) {
-			case '401':
-				echo '<li>' . __( 'Your account details could not be confirmed, please try again.', 'keyring' ) . '</li>';
-				break;
-			case 'empty':
-				echo '<li>' . __( 'Please make sure you enter a username and password.', 'keyring' ) . '</li>';
-				break;
+				case '401':
+					echo '<li>' . __( 'Your account details could not be confirmed, please try again.', 'keyring' ) . '</li>';
+					break;
+				case 'empty':
+					echo '<li>' . __( 'Please make sure you enter a username and password.', 'keyring' ) . '</li>';
+					break;
 			}
 			echo '</ul></div>';
 		}
 
 		// Even though it doesn't make too much sense, we support request tokens in HTTP Basic
 		// to ensure consistency with other services
-		$request_token = new Keyring_Request_Token(
+		$request_token    = new Keyring_Request_Token(
 			$this->get_name(),
 			array(),
 			apply_filters(
 				'keyring_request_token_meta',
 				array(
-					'for' => isset( $_REQUEST['for'] ) ? (string) $_REQUEST['for'] : false
+					'for' => isset( $_REQUEST['for'] ) ? (string) $_REQUEST['for'] : false,
 				),
 				$this->get_name(),
 				array() // no token
 			)
 		);
-		$request_token     = apply_filters( 'keyring_request_token', $request_token, $this );
-		$request_token_id  = $this->store_token( $request_token );
+		$request_token    = apply_filters( 'keyring_request_token', $request_token, $this );
+		$request_token_id = $this->store_token( $request_token );
 		Keyring_Util::debug( 'HTTP Basic Stored Request token ' . $request_token_id );
 
 		echo apply_filters( 'keyring_' . $this->get_name() . '_request_ui_intro', '' );
@@ -90,7 +90,8 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 			jQuery( document ).ready( function() {
 				jQuery( '#username' ).focus();
 			} );
-		</script><?php
+		</script>
+		<?php
 	}
 
 	function request_token() {
@@ -106,13 +107,23 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		// Load up the request token that got us here and globalize it
 		if ( isset( $_REQUEST['state'] ) ) {
 			global $keyring_request_token;
-			$state = empty( $_GET['state'] ) ? '' : preg_replace( '/[^\x20-\x7E]/', '', $_GET['state'] );
-			$keyring_request_token = $this->store->get_token( array( 'id' => $state, 'type' => 'request' ) );
+			$state                 = empty( $_GET['state'] ) ? '' : preg_replace( '/[^\x20-\x7E]/', '', $_GET['state'] );
+			$keyring_request_token = $this->store->get_token(
+				array(
+					'id'   => $state,
+					'type' => 'request',
+				)
+			);
 			Keyring_Util::debug( 'HTTP Basic Loaded Request Token ' . $state );
 			Keyring_Util::debug( $keyring_request_token );
 
 			// Remove request token, don't need it any more.
-			$this->store->delete( array( 'id' => $state, 'type' => 'request' ) );
+			$this->store->delete(
+				array(
+					'id'   => $state,
+					'type' => 'request',
+				)
+			);
 		}
 
 		if ( ! strlen( $_POST['username'] ) ) {
@@ -121,7 +132,7 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 				array(
 					'action'   => 'request',
 					'error'    => 'empty',
-					'kr_nonce' => wp_create_nonce( 'keyring-request' )
+					'kr_nonce' => wp_create_nonce( 'keyring-request' ),
 				)
 			);
 			Keyring_Util::debug( $url );
@@ -146,7 +157,7 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 				array(
 					'action'   => 'request',
 					'error'    => '401',
-					'kr_nonce' => wp_create_nonce( 'keyring-request' )
+					'kr_nonce' => wp_create_nonce( 'keyring-request' ),
 				)
 			);
 			Keyring_Util::debug( $url );
@@ -154,7 +165,12 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 			exit;
 		}
 
-		$meta = array_merge( array( 'username' => trim( $_POST['username'] ), $this->build_token_meta( $token ) ) );
+		$meta = array_merge(
+			array(
+				'username' => trim( $_POST['username'] ),
+				$this->build_token_meta( $token ),
+			)
+		);
 
 		$access_token = new Keyring_Access_Token(
 			$this->get_name(),
@@ -169,11 +185,13 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 	}
 
 	function request( $url, array $params = array() ) {
-		if ( $this->requires_token() && empty( $this->token ) )
+		if ( $this->requires_token() && empty( $this->token ) ) {
 			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
+		}
 
-		if ( $this->requires_token() )
+		if ( $this->requires_token() ) {
 			$params['headers'] = array( 'Authorization' => 'Basic ' . $this->token );
+		}
 
 		$method = 'GET';
 		if ( isset( $params['method'] ) ) {
@@ -191,26 +209,27 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		Keyring_Util::debug( $params );
 
 		switch ( strtoupper( $method ) ) {
-		case 'GET':
-			$res = wp_remote_get( $url, $params );
-			break;
+			case 'GET':
+				$res = wp_remote_get( $url, $params );
+				break;
 
-		case 'POST':
-			$res = wp_remote_post( $url, $params );
-			break;
+			case 'POST':
+				$res = wp_remote_post( $url, $params );
+				break;
 
-		default:
-			Keyring::error( __( 'Unsupported method specified for verify_token.', 'keyring' ) );
-			exit;
+			default:
+				Keyring::error( __( 'Unsupported method specified for verify_token.', 'keyring' ) );
+				exit;
 		}
 
 		Keyring_Util::debug( $res );
 		$this->set_request_response_code( wp_remote_retrieve_response_code( $res ) );
 		if ( wp_startswith( wp_remote_retrieve_response_code( $res ), '2' ) ) {
-			if ( $raw_response )
+			if ( $raw_response ) {
 				return wp_remote_retrieve_body( $res );
-			else
+			} else {
 				return $this->parse_response( wp_remote_retrieve_body( $res ) );
+			}
 		} else {
 			return new Keyring_Error( 'keyring-request-error', $res );
 		}

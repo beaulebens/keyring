@@ -1,6 +1,6 @@
 <?php
 
-require dirname(__FILE__).'/../OAuth.php';
+require dirname( __FILE__ ) . '/../OAuth.php';
 
 /**
  * A simple utils class for methods needed
@@ -9,8 +9,8 @@ require dirname(__FILE__).'/../OAuth.php';
 class OAuthTestUtils {
 	private static function reset_request_vars() {
 		$_SERVER = array();
-		$_POST = array();
-		$_GET = array();	
+		$_POST   = array();
+		$_GET    = array();
 	}
 
 	/**
@@ -24,36 +24,36 @@ class OAuthTestUtils {
 	public static function build_request( $method, $uri, $post_data = '', $auth_header = '' ) {
 		self::reset_request_vars();
 
-		$method = strtoupper($method);
+		$method = strtoupper( $method );
 
-		$parts = parse_url($uri);
+		$parts = parse_url( $uri );
 
 		$scheme = $parts['scheme'];
 		$port   = isset( $parts['port'] ) && $parts['port'] ? $parts['port'] : ( $scheme === 'https' ? '443' : '80' );
 		$host   = $parts['host'];
-		$path   = isset( $parts['path'] )  ? $parts['path']  : NULL;
-		$query  = isset( $parts['query'] ) ? $parts['query'] : NULL;
+		$path   = isset( $parts['path'] ) ? $parts['path'] : null;
+		$query  = isset( $parts['query'] ) ? $parts['query'] : null;
 
-		if( $scheme == 'https') {
+		if ( $scheme == 'https' ) {
 			$_SERVER['HTTPS'] = 'on';
 		}
 
 		$_SERVER['REQUEST_METHOD'] = $method;
-		$_SERVER['HTTP_HOST'] = $host;
-		$_SERVER['SERVER_NAME'] = $host;
-		$_SERVER['SERVER_PORT'] = $port;
-		$_SERVER['SCRIPT_NAME'] = $path;
-		$_SERVER['REQUEST_URI'] = $path . '?' . $query;
-		$_SERVER['QUERY_STRING'] = $query.'';
-		parse_str($query, $_GET);
+		$_SERVER['HTTP_HOST']      = $host;
+		$_SERVER['SERVER_NAME']    = $host;
+		$_SERVER['SERVER_PORT']    = $port;
+		$_SERVER['SCRIPT_NAME']    = $path;
+		$_SERVER['REQUEST_URI']    = $path . '?' . $query;
+		$_SERVER['QUERY_STRING']   = $query . '';
+		parse_str( $query, $_GET );
 
-		if( $method == 'POST' ) {
+		if ( $method == 'POST' ) {
 			$_SERVER['HTTP_CONTENT_TYPE'] = 'application/x-www-form-urlencoded';
-			$_POST = parse_str($post_data);
-			OAuthRequest::$POST_INPUT = 'data:application/x-www-form-urlencoded,'.$post_data;
-		}	
-			
-		if( $auth_header != '' ) {
+			$_POST                        = parse_str( $post_data );
+			OAuthRequest::$POST_INPUT     = 'data:application/x-www-form-urlencoded,' . $post_data;
+		}
+
+		if ( $auth_header != '' ) {
 			$_SERVER['HTTP_AUTHORIZATION'] = $auth_header;
 		}
 	}
