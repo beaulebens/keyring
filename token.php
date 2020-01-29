@@ -37,21 +37,19 @@ class Keyring_Token {
 	}
 
 	function get_uniq_id() {
-		if ( isset( $this->unique_id ) ) {
+		if ( isset( $this->unique_id ) )
 			return $this->unique_id;
-		}
 		return null;
 	}
 
 	function get_display() {
-		if ( $service = $this->get_service() ) {
+		if ( $service = $this->get_service() )
 			return $service->get_display( $this );
-		}
 		return $this->name;
 	}
 
 	function get_service() {
-		if ( ! $this->service ) {
+		if ( !$this->service ) {
 			$class = $this->get_meta( '_classname', true );
 			if ( $class && class_exists( $class ) ) {
 				$this->service = call_user_func( array( $class, 'init' ) );

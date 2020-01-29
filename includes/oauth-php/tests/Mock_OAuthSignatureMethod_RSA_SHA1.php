@@ -2,12 +2,12 @@
 
 /**
  * A mock implementation of OAuthSignatureMethod_RSA_SHA1
- * Always returns the signatures described in
+ * Always returns the signatures described in 
  * http://wiki.oauth.net/TestCases section 9.3 ("RSA-SHA1")
  */
 class Mock_OAuthSignatureMethod_RSA_SHA1 extends OAuthSignatureMethod_RSA_SHA1 {
-	public function fetch_private_cert( &$request ) {
-		$cert = <<<EOD
+  public function fetch_private_cert(&$request) {
+    $cert = <<<EOD
 -----BEGIN PRIVATE KEY-----
 MIICdgIBADANBgkqhkiG9w0BAQEFAASCAmAwggJcAgEAAoGBALRiMLAh9iimur8V
 A7qVvdqxevEuUkW4K+2KdMXmnQbG9Aa7k7eBjK1S+0LYmVjPKlJGNXHDGuy5Fw/d
@@ -25,11 +25,11 @@ AO/0isr/3aa6O6NLQxISLKcPDk2NOccAfS/xOtfOz4sJYM3+Bs4Io9+dZGSDCA54
 Lw03eHTNQghS0A==
 -----END PRIVATE KEY-----
 EOD;
-		return $cert;
-	}
+    return $cert;
+  }
 
-	public function fetch_public_cert( &$request ) {
-		$cert = <<<EOD
+  public function fetch_public_cert(&$request) {
+    $cert = <<<EOD
 -----BEGIN CERTIFICATE-----
 MIIBpjCCAQ+gAwIBAgIBATANBgkqhkiG9w0BAQUFADAZMRcwFQYDVQQDDA5UZXN0
 IFByaW5jaXBhbDAeFw03MDAxMDEwODAwMDBaFw0zODEyMzEwODAwMDBaMBkxFzAV
@@ -42,6 +42,6 @@ DQEBBQUAA4GBAGZLPEuJ5SiJ2ryq+CmEGOXfvlTtEL2nuGtr9PewxkgnOjZpUy+d
 WpkUQDIDJEoFUzKMVuJf4KO/FJ345+BNLGgbJ6WujreoM1X/gYfdnJ/J
 -----END CERTIFICATE-----
 EOD;
-		return $cert;
-	}
+    return $cert;
+  }
 }
