@@ -19,14 +19,14 @@ class Keyring_Service_Pinterest extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_pinterest_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize', 'https://api.pinterest.com/oauth/', 'GET' );
-		$this->set_endpoint( 'access_token', 'https://api.pinterest.com/v1/oauth/token', 'POST' );
-		$this->set_endpoint( 'self', 'https://api.pinterest.com/v1/me/?fields=first_name,last_name,username,image', 'GET' ); // undocumented, but required to get the `image` in a single request
+		$this->set_endpoint( 'authorize',    'https://api.pinterest.com/oauth/',                                            'GET'  );
+		$this->set_endpoint( 'access_token', 'https://api.pinterest.com/v1/oauth/token',                                    'POST' );
+		$this->set_endpoint( 'self',         'https://api.pinterest.com/v1/me/?fields=first_name,last_name,username,image', 'GET'  ); // undocumented, but required to get the `image` in a single request
 
-		$creds        = $this->get_credentials();
-		$this->app_id = $creds['app_id'];
-		$this->key    = $creds['key'];
-		$this->secret = $creds['secret'];
+		$creds = $this->get_credentials();
+		$this->app_id  = $creds['app_id'];
+		$this->key     = $creds['key'];
+		$this->secret  = $creds['secret'];
 
 		// Send auth token in query string
 		$this->authorization_header    = false;
@@ -48,10 +48,10 @@ class Keyring_Service_Pinterest extends Keyring_Service_OAuth2 {
 	}
 
 	function redirect_incoming_verify( $request ) {
-		if ( ! isset( $request['kr_nonce'] ) ) {
+		if ( !isset( $request['kr_nonce'] ) ) {
 			// First request, from Pinterest. Nonce it and move on.
 			$kr_nonce = wp_create_nonce( 'keyring-verify' );
-			$nonce    = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
+			$nonce = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
 			wp_safe_redirect(
 				Keyring_Util::admin_url(
 					$this->get_name(),
@@ -90,7 +90,7 @@ class Keyring_Service_Pinterest extends Keyring_Service_OAuth2 {
 				'user_id'  => $response->data->id,
 				'username' => $response->data->username,
 				'name'     => $response->data->first_name . ' ' . $response->data->last_name,
-				'picture'  => $response->data->image->{'60x60'}->url, // Pinterest violate their own docs that this should be 'small'
+				'picture'  => $response->data->image->{'60x60'}->url // Pinterest violate their own docs that this should be 'small'
 			);
 		}
 

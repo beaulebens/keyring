@@ -19,14 +19,14 @@ class Keyring_Service_Jetpack extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_jetpack_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize', 'https://public-api.wordpress.com/oauth2/authorize', 'GET' );
-		$this->set_endpoint( 'access_token', 'https://public-api.wordpress.com/oauth2/token', 'POST' );
-		$this->set_endpoint( 'self', 'https://public-api.wordpress.com/rest/v1/me/', 'GET' );
+		$this->set_endpoint( 'authorize',    'https://public-api.wordpress.com/oauth2/authorize', 'GET'  );
+		$this->set_endpoint( 'access_token', 'https://public-api.wordpress.com/oauth2/token',     'POST' );
+		$this->set_endpoint( 'self',         'https://public-api.wordpress.com/rest/v1/me/',      'GET'  );
 
-		$creds        = $this->get_credentials();
-		$this->app_id = $creds['app_id'];
-		$this->key    = $creds['key'];
-		$this->secret = $creds['secret'];
+		$creds = $this->get_credentials();
+		$this->app_id  = $creds['app_id'];
+		$this->key     = $creds['key'];
+		$this->secret  = $creds['secret'];
 
 		$this->authorization_header = 'Bearer';
 
@@ -35,7 +35,7 @@ class Keyring_Service_Jetpack extends Keyring_Service_OAuth2 {
 		add_action( 'pre_keyring_jetpack_verify', array( $this, 'redirect_incoming_verify' ) );
 
 		// Need to reset the callback because Google is very strict about where it sends people
-		if ( ! empty( $creds['redirect_uri'] ) ) {
+		if ( !empty( $creds['redirect_uri'] ) ) {
 			$this->callback_url = $creds['redirect_uri']; // Allow user to manually enter a redirect URI
 		} else {
 			$this->callback_url = remove_query_arg( array( 'nonce', 'kr_nonce' ), $this->callback_url ); // At least strip nonces, since you can't save them in your app config
@@ -60,7 +60,7 @@ class Keyring_Service_Jetpack extends Keyring_Service_OAuth2 {
 		if ( ! isset( $request['kr_nonce'] ) ) {
 			// First request, from WP.com. Nonce it and move on.
 			$kr_nonce = wp_create_nonce( 'keyring-verify' );
-			$nonce    = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
+			$nonce = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
 			wp_safe_redirect(
 				Keyring_Util::admin_url(
 					$this->get_name(),

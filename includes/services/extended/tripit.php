@@ -20,18 +20,18 @@ class Keyring_Service_TripIt extends Keyring_Service_OAuth1 {
 		$this->authorization_header = true;
 		$this->authorization_realm  = false;
 
-		$this->set_endpoint( 'request_token', 'https://api.tripit.com/oauth/request_token', 'POST' );
-		$this->set_endpoint( 'authorize', 'https://www.tripit.com/oauth/authorize', 'GET' );
-		$this->set_endpoint( 'access_token', 'https://api.tripit.com/oauth/access_token', 'POST' );
-		$this->set_endpoint( 'verify', 'https://api.tripit.com/v1/get/profile/id/me', 'GET' );
+		$this->set_endpoint( 'request_token', 'https://api.tripit.com/oauth/request_token',  'POST' );
+		$this->set_endpoint( 'authorize',     'https://www.tripit.com/oauth/authorize',      'GET'  );
+		$this->set_endpoint( 'access_token',  'https://api.tripit.com/oauth/access_token',   'POST' );
+		$this->set_endpoint( 'verify',        'https://api.tripit.com/v1/get/profile/id/me', 'GET'  );
 
-		$creds        = $this->get_credentials();
-		$this->app_id = $creds['app_id'];
-		$this->key    = $creds['key'];
-		$this->secret = $creds['secret'];
+		$creds = $this->get_credentials();
+		$this->app_id  = $creds['app_id'];
+		$this->key     = $creds['key'];
+		$this->secret  = $creds['secret'];
 
-		$this->consumer         = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
-		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1();
+		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
+		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
 
 		$this->requires_token( true );
 	}
@@ -62,10 +62,10 @@ class Keyring_Service_TripIt extends Keyring_Service_OAuth1 {
 			$meta = array();
 		} else {
 			$meta = array(
-				'user_id'  => $response->Profile->{'@attributes'}->ref,
-				'username' => $response->Profile->screen_name,
-				'name'     => $response->Profile->public_display_name,
-				'picture'  => $response->Profile->photo_url,
+				'user_id'    => $response->Profile->{'@attributes'}->ref,
+				'username'   => $response->Profile->screen_name,
+				'name'       => $response->Profile->public_display_name,
+				'picture'    => $response->Profile->photo_url,
 			);
 		}
 

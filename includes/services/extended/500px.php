@@ -18,21 +18,21 @@ class Keyring_Service_500px extends Keyring_Service_OAuth1 {
 		}
 
 		$this->authorization_header = true;
-		$this->authorization_realm  = 'api.500px.com';
+		$this->authorization_realm = 'api.500px.com';
 
 		$this->set_endpoint( 'request_token', 'https://api.500px.com/v1/oauth/request_token', 'GET' );
-		$this->set_endpoint( 'authorize', 'https://api.500px.com/v1/oauth/authorize', 'GET' );
-		$this->set_endpoint( 'access_token', 'https://api.500px.com/v1/oauth/access_token', 'GET' );
-		$this->set_endpoint( 'authenticate', 'https://api.500px.com/v1/oauth/authorize', 'GET' );
-		$this->set_endpoint( 'users', 'https://api.500px.com/v1/users', 'GET' );
+		$this->set_endpoint( 'authorize',     'https://api.500px.com/v1/oauth/authorize',     'GET' );
+		$this->set_endpoint( 'access_token',  'https://api.500px.com/v1/oauth/access_token',  'GET' );
+		$this->set_endpoint( 'authenticate',  'https://api.500px.com/v1/oauth/authorize',     'GET' );
+		$this->set_endpoint( 'users',  'https://api.500px.com/v1/users',                      'GET' );
 
-		$creds        = $this->get_credentials();
-		$this->app_id = $creds['app_id'];
-		$this->key    = $creds['key'];
-		$this->secret = $creds['secret'];
+		$creds = $this->get_credentials();
+		$this->app_id  = $creds['app_id'];
+		$this->key     = $creds['key'];
+		$this->secret  = $creds['secret'];
 
-		$this->consumer         = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
-		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1();
+		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
+		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
 
 		$this->requires_token( true );
 	}
@@ -58,7 +58,7 @@ class Keyring_Service_500px extends Keyring_Service_OAuth1 {
 			)
 		);
 
-		$response = $this->request( 'https://api.500px.com/v1/users', array( 'method' => 'GET' ) );
+		$response = $this->request( "https://api.500px.com/v1/users", array( 'method' => 'GET' ) );
 
 		if ( Keyring_Util::is_error( $response ) ) {
 			$meta = array();
