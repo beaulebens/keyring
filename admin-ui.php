@@ -186,7 +186,8 @@ class Keyring_Admin_UI {
 
 				$services = $this->keyring->get_registered_services();
 				if ( count( $services ) ) {
-					$configured = $not_configured = array();
+					$configured     = array();
+					$not_configured = array();
 					foreach ( $services as $service ) {
 						if ( $service->is_configured() ) {
 							$configured[] = $service;

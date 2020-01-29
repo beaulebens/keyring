@@ -52,6 +52,19 @@
 		</properties>
 	</rule>
 
+	<rule ref="WordPress.NamingConventions.ValidVariableName">
+		<properties>
+			<property name="customPropertiesWhitelist" type="array">
+				<!-- From Tripit. -->
+				<element value="Profile"/>
+				<!-- From Jetpack. -->
+				<element value="avatar_URL"/>
+				<!-- From Runkeeper. -->
+				<element value="userID"/>
+			</property>
+		</properties>
+	</rule>
+
 	<!-- Directories and third party library exclusions. -->
 	<exclude-pattern>/vendor/*</exclude-pattern>
 	<exclude-pattern>/includes/oauth-php/*</exclude-pattern>

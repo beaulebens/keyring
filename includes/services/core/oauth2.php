@@ -183,7 +183,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		Keyring_Util::debug( $url );
 
 		if ( $this->requires_token() && empty( $this->token ) ) {
-			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
+			return new Keyring_Error( 'keyring-request-error', __( 'No token', 'keyring' ) );
 		}
 
 		$token = $this->token ? $this->token : null;

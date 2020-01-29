@@ -213,8 +213,12 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 			echo '<div class="updated"><p>' . __( 'Credentials saved.', 'keyring' ) . '</p></div>';
 		}
 
-		$api_key = $api_secret = $redirect_uri = '';
-		if ( $creds = $this->get_credentials() ) {
+		$api_key      = '';
+		$api_secret   = '';
+		$redirect_uri = '';
+
+		$creds = $this->get_credentials();
+		if ( $creds ) {
 			$api_key      = $creds['key'];
 			$api_secret   = $creds['secret'];
 			$redirect_uri = $creds['redirect_uri'];

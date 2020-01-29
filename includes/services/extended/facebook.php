@@ -91,7 +91,8 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 	 * @return Array containing originals, plus the scope parameter
 	 */
 	function filter_request_token( $params ) {
-		if ( $scope = implode( ',', apply_filters( 'keyring_facebook_scope', array() ) ) ) {
+		$scope = implode( ',', apply_filters( 'keyring_facebook_scope', array() ) );
+		if ( $scope ) {
 			$params['scope'] = $scope;
 		}
 		return $params;

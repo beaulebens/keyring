@@ -166,8 +166,12 @@ abstract class Keyring_Service {
 			echo '<div class="updated"><p>' . __( 'Credentials saved.', 'keyring' ) . '</p></div>';
 		}
 
-		$app_id = $api_key = $api_secret = '';
-		if ( $creds = $this->get_credentials() ) {
+		$app_id     = '';
+		$api_key    = '';
+		$api_secret = '';
+
+		$creds = $this->get_credentials();
+		if ( $creds ) {
 			$app_id     = $creds['app_id'];
 			$api_key    = $creds['key'];
 			$api_secret = $creds['secret'];

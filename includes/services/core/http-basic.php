@@ -186,7 +186,7 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 
 	function request( $url, array $params = array() ) {
 		if ( $this->requires_token() && empty( $this->token ) ) {
-			return new Keyring_Error( 'keyring-request-error', __( 'No token' ) );
+			return new Keyring_Error( 'keyring-request-error', __( 'No token', 'keyring' ) );
 		}
 
 		if ( $this->requires_token() ) {

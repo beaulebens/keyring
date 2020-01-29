@@ -123,7 +123,8 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 		$params['headers']['Content-Type'] = 'application/json; charset=UTF-8';
 		$params['headers']['X-Accept']     = 'application/json';
 
-		if ( $token = $this->get_token() ) {
+		$token = $this->get_token();
+		if ( $token ) {
 			$params['body']['access_token'] = $token->token;
 		}
 

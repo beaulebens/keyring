@@ -44,7 +44,8 @@ class Keyring_Token {
 	}
 
 	function get_display() {
-		if ( $service = $this->get_service() ) {
+		$service = $this->get_service();
+		if ( $service ) {
 			return $service->get_display( $this );
 		}
 		return $this->name;
@@ -96,7 +97,8 @@ class Keyring_Token {
 	* Check if a token has expired, or will expire in the next $window seconds
 	**/
 	function is_expired( $window = 0 ) {
-		if ( ! $expires = $this->get_meta( 'expires' ) ) {
+		$expires = $this->get_meta( 'expires' );
+		if ( ! $expires ) {
 			return false; // No expires value, assume it's a permanent token
 		}
 
