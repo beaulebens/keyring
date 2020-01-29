@@ -13,6 +13,6 @@ php:
 
 before_script:
 - composer --version
-- composer install
+- composer install --ignore-platform-reqs
 
-script: composer run lint
+script: composer run php:lint
