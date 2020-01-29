@@ -13,20 +13,26 @@ class Keyring_SingleStore extends Keyring_Store {
 	static function &init() {
 		static $instance = false;
 
-		if ( !$instance ) {
-			register_post_type( 'kr_request_token', array(
-				'label'       => __( 'Keyring Request Token', 'keyring' ),
-				'description' => __( 'Token or authentication details stored by Keyring. Request tokens are used during the authorization flow.', 'keyring' ),
-				'public'      => false,
-			) );
+		if ( ! $instance ) {
+			register_post_type(
+				'kr_request_token',
+				array(
+					'label'       => __( 'Keyring Request Token', 'keyring' ),
+					'description' => __( 'Token or authentication details stored by Keyring. Request tokens are used during the authorization flow.', 'keyring' ),
+					'public'      => false,
+				)
+			);
 
-			register_post_type( 'kr_access_token', array(
-				'label'       => __( 'Keyring Access Token', 'keyring' ),
-				'description' => __( 'Token or authentication details stored by Keyring. Access tokens are used to make secure requests.', 'keyring' ),
-				'public'      => false,
-			) );
+			register_post_type(
+				'kr_access_token',
+				array(
+					'label'       => __( 'Keyring Access Token', 'keyring' ),
+					'description' => __( 'Token or authentication details stored by Keyring. Access tokens are used to make secure requests.', 'keyring' ),
+					'public'      => false,
+				)
+			);
 
-			$instance = new Keyring_SingleStore;
+			$instance = new Keyring_SingleStore();
 		}
 
 		return $instance;
@@ -34,16 +40,18 @@ class Keyring_SingleStore extends Keyring_Store {
 
 	function insert( $token ) {
 		// Avoid duplicates by checking to see if this exists already
-		$found = get_posts( array(
-			'posts_per_page' => 1,
-			'post_type'      => 'kr_' . $token->type() . '_token',
-			'meta_key'       => 'service',
-			'meta_value'     => $token->get_name(),
-			'author'         => get_current_user_id(),
-			's'              => serialize( $token->token ), // Search the post content for this token
-			'exact'          => true, // Require exact content match
-			'sentence'       => true, // Require to search by phrase, otherwise string is split by regex
-		) );
+		$found = get_posts(
+			array(
+				'posts_per_page' => 1,
+				'post_type'      => 'kr_' . $token->type() . '_token',
+				'meta_key'       => 'service',
+				'meta_value'     => $token->get_name(),
+				'author'         => get_current_user_id(),
+				's'              => serialize( $token->token ), // Search the post content for this token
+				'exact'          => true, // Require exact content match
+				'sentence'       => true, // Require to search by phrase, otherwise string is split by regex
+			)
+		);
 
 		if ( $found ) {
 			$token->unique_id = $found[0]->ID;
@@ -55,7 +63,7 @@ class Keyring_SingleStore extends Keyring_Store {
 			'post_status'  => 'publish',
 			'post_content' => serialize( $token->token ),
 		);
-		$id = wp_insert_post( add_magic_quotes( $post ) );
+		$id   = wp_insert_post( add_magic_quotes( $post ) );
 		if ( $id ) {
 			// Always record what service this token is for
 			update_post_meta( $id, 'service', $token->get_name() );
@@ -70,13 +78,15 @@ class Keyring_SingleStore extends Keyring_Store {
 	}
 
 	function update( $token ) {
-		if ( !$token->unique_id )
+		if ( ! $token->unique_id ) {
 			return false;
+		}
 
-		$id = $token->unique_id;
+		$id   = $token->unique_id;
 		$post = get_post( $id );
-		if ( !$post )
+		if ( ! $post ) {
 			return false;
+		}
 
 		$post->post_content = serialize( $token->token );
 		wp_update_post( $post );
@@ -89,8 +99,9 @@ class Keyring_SingleStore extends Keyring_Store {
 	}
 
 	function delete( $args = array() ) {
-		if ( !$args['id'] )
+		if ( ! $args['id'] ) {
 			return false;
+		}
 		return wp_delete_post( $args['id'] );
 	}
 
@@ -101,7 +112,7 @@ class Keyring_SingleStore extends Keyring_Store {
 			'user_id' => get_current_user_id(),
 			'blog_id' => get_current_blog_id(),
 		);
-		$args = wp_parse_args( $args, $defaults );
+		$args     = wp_parse_args( $args, $defaults );
 
 		$query = array(
 			'numberposts' => -1, // all
@@ -116,13 +127,13 @@ class Keyring_SingleStore extends Keyring_Store {
 		}
 
 		$token_type = 'request' == $args['type'] ? 'Keyring_Request_Token' : 'Keyring_Access_Token';
-		$tokens = array();
-		$posts = get_posts( $query );
+		$tokens     = array();
+		$posts      = get_posts( $query );
 		if ( count( $posts ) ) {
 			foreach ( $posts as $post ) {
 				$meta = get_post_meta( $post->ID );
 				foreach ( $meta as $mid => $met ) {
-					$meta[$mid] = $met[0];
+					$meta[ $mid ] = $met[0];
 				}
 
 				$tokens[] = new $token_type(
@@ -149,16 +160,17 @@ class Keyring_SingleStore extends Keyring_Store {
 			'user_id' => get_current_user_id(),
 			'blog_id' => get_current_blog_id(),
 		);
-		$args = wp_parse_args( $args, $defaults );
+		$args     = wp_parse_args( $args, $defaults );
 
-		if ( !$args['id'] && !$args['service'] )
+		if ( ! $args['id'] && ! $args['service'] ) {
 			return false;
+		}
 
 		$post = get_post( $args['id'] );
 		if ( $post ) {
 			$meta = get_post_meta( $post->ID );
 			foreach ( $meta as $mid => $met ) {
-				$meta[$mid] = $met[0];
+				$meta[ $mid ] = $met[0];
 			}
 
 			$token_type = 'kr_request_token' == $post->post_type ? 'Keyring_Request_Token' : 'Keyring_Access_Token';

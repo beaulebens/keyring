@@ -22,8 +22,8 @@ defined( 'KEYRING__HEADLESS_MODE' ) or define( 'KEYRING__HEADLESS_MODE', false )
 
 // Debug/messaging levels. Don't mess with these
 define( 'KEYRING__DEBUG_NOTICE', 1 );
-define( 'KEYRING__DEBUG_WARN',   2 );
-define( 'KEYRING__DEBUG_ERROR',  3 );
+define( 'KEYRING__DEBUG_WARN', 2 );
+define( 'KEYRING__DEBUG_ERROR', 3 );
 
 // Indicates Keyring is installed/active so that other plugins can detect it
 define( 'KEYRING__VERSION', '2.0' );
@@ -47,10 +47,15 @@ class Keyring {
 			require_once dirname( __FILE__ ) . '/admin-ui.php';
 			Keyring_Admin_UI::init();
 
-			add_filter( 'keyring_admin_url', function( $url, $params ) {
-				$url = admin_url( 'tools.php?page=' . Keyring::init()->admin_page );
-				return add_query_arg( $params, $url );
-			}, 10, 2 );
+			add_filter(
+				'keyring_admin_url',
+				function( $url, $params ) {
+					$url = admin_url( 'tools.php?page=' . Keyring::init()->admin_page );
+					return add_query_arg( $params, $url );
+				},
+				10,
+				2
+			);
 		}
 
 		// This is used internally to create URLs, and also to know when to
@@ -61,10 +66,11 @@ class Keyring {
 	static function &init( $force_load = false ) {
 		static $instance = false;
 
-		if ( !$instance ) {
-			if ( ! KEYRING__HEADLESS_MODE )
+		if ( ! $instance ) {
+			if ( ! KEYRING__HEADLESS_MODE ) {
 				load_plugin_textdomain( 'keyring', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
-			$instance = new Keyring;
+			}
+			$instance = new Keyring();
 
 			// Keyring is being loaded 'late', so we need to do some extra set-up
 			if ( did_action( 'init' ) || $force_load ) {
@@ -85,10 +91,11 @@ class Keyring {
 		// Load stores early so we can confirm they're loaded correctly
 		require_once dirname( __FILE__ ) . '/store.php';
 		do_action( 'keyring_load_token_stores' );
-		$keyring = Keyring::init();
+		$keyring              = self::init();
 		$keyring->token_store = apply_filters( 'keyring_token_store', defined( 'KEYRING__TOKEN_STORE' ) ? KEYRING__TOKEN_STORE : false );
-		if ( !class_exists( $keyring->token_store ) || !in_array( 'Keyring_Store', class_parents( $keyring->token_store ) ) )
+		if ( ! class_exists( $keyring->token_store ) || ! in_array( 'Keyring_Store', class_parents( $keyring->token_store ) ) ) {
 			wp_die( sprintf( __( 'Invalid <code>KEYRING__TOKEN_STORE</code> specified. Please make sure <code>KEYRING__TOKEN_STORE</code> is set to a valid classname for handling token storage in <code>%s</code> (or <code>wp-config.php</code>)', 'keyring' ), __FILE__ ) );
+		}
 
 		// Load base token and service definitions + core services
 		require_once dirname( __FILE__ ) . '/token.php';
@@ -98,13 +105,18 @@ class Keyring {
 		add_action( 'init', array( 'Keyring', 'init' ), 1 );
 
 		// Load external Services (plugins etc should hook to this to define new ones/extensions)
-		add_action( 'init', function() {
-			do_action( 'keyring_load_services' );
-		}, 2 );
+		add_action(
+			'init',
+			function() {
+				do_action( 'keyring_load_services' );
+			},
+			2
+		);
 
 		/**
 		 * And trigger request handlers, which plugins and extended Services use to handle UI,
 		 * redirects, errors etc.
+		 *
 		 * @see ::request_handlers()
 		 */
 		add_action( 'admin_init', array( 'Keyring', 'request_handlers' ), 100 );
@@ -125,20 +137,20 @@ class Keyring {
 		}
 
 		if (
-				!empty( $_REQUEST['action'] )
+				! empty( $_REQUEST['action'] )
 			&&
 				in_array( $_REQUEST['action'], apply_filters( 'keyring_core_actions', array( 'request', 'verify', 'created', 'delete', 'manage' ) ) )
 			&&
-				!empty( $_REQUEST['service'] )
+				! empty( $_REQUEST['service'] )
 			&&
-				in_array( $_REQUEST['service'], array_keys( Keyring::get_registered_services() ) )
+				in_array( $_REQUEST['service'], array_keys( self::get_registered_services() ) )
 		) {
 			// We have an action here to allow us to do things pre-authorization, just in case
 			do_action( "pre_keyring_{$_REQUEST['service']}_{$_REQUEST['action']}", $_REQUEST );
 
 			// Core nonce check required for everything. "keyring-ACTION" is the kr_nonce format
-			if ( !isset( $_REQUEST['kr_nonce'] ) || !wp_verify_nonce( $_REQUEST['kr_nonce'], 'keyring-' . $_REQUEST['action'] ) ) {
-				Keyring::error( __( 'Invalid/missing Keyring core nonce. All core actions require a valid nonce.', 'keyring' ) );
+			if ( ! isset( $_REQUEST['kr_nonce'] ) || ! wp_verify_nonce( $_REQUEST['kr_nonce'], 'keyring-' . $_REQUEST['action'] ) ) {
+				self::error( __( 'Invalid/missing Keyring core nonce. All core actions require a valid nonce.', 'keyring' ) );
 				exit;
 			}
 
@@ -146,56 +158,61 @@ class Keyring {
 			Keyring_Util::debug( $_GET );
 			do_action( "keyring_{$_REQUEST['service']}_{$_REQUEST['action']}", $_REQUEST );
 
-			if ( 'delete' == $_REQUEST['action'] )
-				do_action( "keyring_connection_deleted", $_REQUEST['service'], $_REQUEST );
+			if ( 'delete' == $_REQUEST['action'] ) {
+				do_action( 'keyring_connection_deleted', $_REQUEST['service'], $_REQUEST );
+			}
 		}
 
-		if ( defined( 'KEYRING__FORCE_USER' ) && KEYRING__FORCE_USER && in_array( $_REQUEST['action'], array( 'request', 'verify' ) ) )
+		if ( defined( 'KEYRING__FORCE_USER' ) && KEYRING__FORCE_USER && in_array( $_REQUEST['action'], array( 'request', 'verify' ) ) ) {
 			wp_set_current_user( $real_user );
+		}
 	}
 
 	static function register_service( Keyring_Service $service ) {
 		if ( Keyring_Util::is_service( $service ) ) {
-			Keyring::init()->registered_services[ $service->get_name() ] = $service;
+			self::init()->registered_services[ $service->get_name() ] = $service;
 			return true;
 		}
 		return false;
 	}
 
 	static function get_registered_services() {
-		return Keyring::init()->registered_services;
+		return self::init()->registered_services;
 	}
 
 	static function get_service_by_name( $name ) {
-		$keyring = Keyring::init();
-		if ( !isset( $keyring->registered_services[ $name ] ) )
+		$keyring = self::init();
+		if ( ! isset( $keyring->registered_services[ $name ] ) ) {
 			return null;
+		}
 
 		return $keyring->registered_services[ $name ];
 	}
 
 	static function get_token_store() {
-		$keyring = Keyring::init();
+		$keyring = self::init();
 
-		if ( !$keyring->store )
+		if ( ! $keyring->store ) {
 			$keyring->store = call_user_func( array( $keyring->token_store, 'init' ) );
+		}
 
 		return $keyring->store;
 	}
 
 	static function message( $str ) {
-		$keyring = Keyring::init();
+		$keyring             = self::init();
 		$keyring->messages[] = $str;
 	}
 
 	/**
 	 * Generic error handler/trigger.
-	 * @param  String $str	Informational message (user-readable)
-	 * @param  array  $info Additional information relating to the error.
+	 *
+	 * @param  String  $str  Informational message (user-readable)
+	 * @param  array   $info Additional information relating to the error.
 	 * @param  boolean $die If we should immediately die (default) or continue
 	 */
 	static function error( $str, $info = array(), $die = true ) {
-		$keyring = Keyring::init();
+		$keyring           = self::init();
 		$keyring->errors[] = $str;
 		do_action( 'keyring_error', $str, $info );
 		if ( $die ) {
@@ -223,27 +240,30 @@ class Keyring {
 
 class Keyring_Util {
 	static function debug( $str, $level = KEYRING__DEBUG_NOTICE ) {
-		if ( !KEYRING__DEBUG_MODE )
+		if ( ! KEYRING__DEBUG_MODE ) {
 			return;
+		}
 
-		if ( is_object( $str ) || is_array( $str ) )
+		if ( is_object( $str ) || is_array( $str ) ) {
 			$str = print_r( $str, true );
+		}
 
 		switch ( $level ) {
-		case KEYRING__DEBUG_WARN :
-			echo "<div style='border:solid 1px #000; padding: 5px; background: #eee;'>Keyring Warning: $str</div>";
-			break;
-		case KEYRING__DEBUG_ERROR :
-			wp_die( '<h1>Keyring Error:</h1>' . '<p>' . $str . '</p>' );
-			exit;
+			case KEYRING__DEBUG_WARN:
+				echo "<div style='border:solid 1px #000; padding: 5px; background: #eee;'>Keyring Warning: $str</div>";
+				break;
+			case KEYRING__DEBUG_ERROR:
+				wp_die( '<h1>Keyring Error:</h1>' . '<p>' . $str . '</p>' );
+				exit;
 		}
 
 		error_log( "Keyring: $str" );
 	}
 
 	static function is_service( $service ) {
-		if ( is_object( $service ) && is_subclass_of( $service, 'Keyring_Service' ) )
+		if ( is_object( $service ) && is_subclass_of( $service, 'Keyring_Service' ) ) {
 			return true;
+		}
 
 		return false;
 	}
@@ -273,18 +293,18 @@ class Keyring_Util {
 	}
 
 	static function connect_to( $service, $for ) {
-		Keyring_Util::debug( 'Connect to: ' . $service );
+		self::debug( 'Connect to: ' . $service );
 		// Redirect into Keyring's auth handler if a valid service is provided
-		$kr_nonce = wp_create_nonce( 'keyring-request' );
+		$kr_nonce      = wp_create_nonce( 'keyring-request' );
 		$request_nonce = wp_create_nonce( 'keyring-request-' . $service );
 		wp_safe_redirect(
-			Keyring_Util::admin_url(
+			self::admin_url(
 				$service,
 				array(
 					'action'   => 'request',
 					'kr_nonce' => $kr_nonce,
 					'nonce'    => $request_nonce,
-					'for'      => $for
+					'for'      => $for,
 				)
 			)
 		);
@@ -299,7 +319,8 @@ class Keyring_Util {
 		<?php foreach ( (array) $tokens as $token ) : ?>
 			<option value="<?php echo $token->get_uniq_id(); ?>"><?php echo $token->get_display(); ?></option>
 		<?php endforeach; ?>
-		</select><?php
+		</select>
+		<?php
 	}
 
 	static function is_error( $obj ) {

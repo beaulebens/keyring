@@ -41,7 +41,7 @@ class Keyring_Service_Google_Drive extends Keyring_Service_GoogleBase {
 	 */
 	function fetch_profile_picture() {
 		$image = false;
-		$res = $this->request( $this->userinfo_url, array( 'method' => $this->self_method ) );
+		$res   = $this->request( $this->userinfo_url, array( 'method' => $this->self_method ) );
 
 		if ( ! Keyring_Util::is_error( $res ) ) {
 			$image = str_replace( 's64', 's256', $res->picture );

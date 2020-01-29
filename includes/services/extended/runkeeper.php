@@ -18,16 +18,16 @@ class Keyring_Service_RunKeeper extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_runkeeper_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize',    'https://runkeeper.com/apps/authorize',    'GET'  );
-		$this->set_endpoint( 'access_token', 'https://runkeeper.com/apps/token',        'POST' );
-		$this->set_endpoint( 'deauthorize',  'https://runkeeper.com/apps/de-authorize', 'POST' );
-		$this->set_endpoint( 'user',         'https://api.runkeeper.com/user',          'GET'  );
-		$this->set_endpoint( 'profile',      'https://api.runkeeper.com/profile',       'GET'  );
+		$this->set_endpoint( 'authorize', 'https://runkeeper.com/apps/authorize', 'GET' );
+		$this->set_endpoint( 'access_token', 'https://runkeeper.com/apps/token', 'POST' );
+		$this->set_endpoint( 'deauthorize', 'https://runkeeper.com/apps/de-authorize', 'POST' );
+		$this->set_endpoint( 'user', 'https://api.runkeeper.com/user', 'GET' );
+		$this->set_endpoint( 'profile', 'https://api.runkeeper.com/profile', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->app_id  = $creds['app_id'];
-		$this->key     = $creds['key'];
-		$this->secret  = $creds['secret'];
+		$creds        = $this->get_credentials();
+		$this->app_id = $creds['app_id'];
+		$this->key    = $creds['key'];
+		$this->secret = $creds['secret'];
 
 		$this->authorization_header    = 'Bearer';
 		$this->authorization_parameter = false;
@@ -55,7 +55,7 @@ class Keyring_Service_RunKeeper extends Keyring_Service_OAuth2 {
 
 			// Now get the rest of their profile
 			$profile = $this->request( $this->profile_url, array( 'method' => $this->profile_method ) );
-			if ( !Keyring_Util::is_error( $profile ) ) {
+			if ( ! Keyring_Util::is_error( $profile ) ) {
 				$meta['username'] = substr( $profile->profile, strrpos( $profile->profile, '/' ) + 1 );
 				$meta['name']     = $profile->name;
 				$meta['picture']  = $profile->large_picture;
@@ -67,7 +67,8 @@ class Keyring_Service_RunKeeper extends Keyring_Service_OAuth2 {
 	}
 
 	function get_display( Keyring_Access_Token $token ) {
-		return $token->get_meta( 'name' );;
+		return $token->get_meta( 'name' );
+
 	}
 
 	function test_connection() {

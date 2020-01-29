@@ -17,17 +17,17 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 			add_filter( 'keyring_yahoo_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'request_token', 'https://api.login.yahoo.com/oauth/v2/get_request_token', 'GET'  );
-		$this->set_endpoint( 'authorize',     'https://api.login.yahoo.com/oauth/v2/request_auth',      'GET'  );
-		$this->set_endpoint( 'access_token',  'https://api.login.yahoo.com/oauth/v2/get_token',         'POST' );
+		$this->set_endpoint( 'request_token', 'https://api.login.yahoo.com/oauth/v2/get_request_token', 'GET' );
+		$this->set_endpoint( 'authorize', 'https://api.login.yahoo.com/oauth/v2/request_auth', 'GET' );
+		$this->set_endpoint( 'access_token', 'https://api.login.yahoo.com/oauth/v2/get_token', 'POST' );
 
-		$creds = $this->get_credentials();
-		$this->app_id  = $creds['app_id'];
-		$this->key     = $creds['key'];
-		$this->secret  = $creds['secret'];
+		$creds        = $this->get_credentials();
+		$this->app_id = $creds['app_id'];
+		$this->key    = $creds['key'];
+		$this->secret = $creds['secret'];
 
-		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
-		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
+		$this->consumer         = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
+		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1();
 	}
 
 	function basic_ui_intro() {
@@ -59,7 +59,7 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 			$meta = array();
 		} else {
 			$this->person = $response->profile;
-			$meta = array(
+			$meta         = array(
 				'user_id' => $token['xoauth_yahoo_guid'],
 				'name'    => $this->person->nickname,
 				'picture' => $this->person->image->imageUrl,
@@ -69,7 +69,7 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $response, $this );
 	}
 
-	function get_display( Keyring_Access_Token$token ) {
+	function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
 	}
 
@@ -97,10 +97,13 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 			$api_url  = 'https://api.login.yahoo.com/oauth/v2/get_token';
 			$api_url .= '?oauth_session_handle=' . $this->token->token->sessionHandle;
 
-			$refresh = $this->request( $api_url, array(
-				'method'       => 'GET',
-				'raw_response' => true,
-			) );
+			$refresh = $this->request(
+				$api_url,
+				array(
+					'method'       => 'GET',
+					'raw_response' => true,
+				)
+			);
 
 			if ( ! Keyring_Util::is_error( $refresh ) ) {
 				$token = $this->parse_access_token( $refresh );
@@ -125,7 +128,7 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 
 				// Store the updated access token
 				$access_token = apply_filters( 'keyring_access_token', $access_token, $token );
-				$id = $this->store->update( $access_token );
+				$id           = $this->store->update( $access_token );
 
 				// And switch to using it
 				$this->set_token( $access_token );
