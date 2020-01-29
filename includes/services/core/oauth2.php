@@ -75,6 +75,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 
 		if ( ! isset( $_GET['code'] ) || ! isset( $_GET['state'] ) ) {
 			Keyring::error(
+				/* translators: Name of the keyring service. */
 				sprintf( __( 'There was a problem communicating with %s. Please try again in a moment.', 'keyring' ), $this->get_label() )
 			);
 			return false;
@@ -94,6 +95,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 
 		if ( ! $keyring_request_token ) {
 			Keyring::error(
+				/* translators: Name of the keyring service. */
 				sprintf( __( 'Failed to load your request token while connecting to %s. Please try again in a moment.', 'keyring' ), $this->get_label() )
 			);
 			return false;
@@ -141,7 +143,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		Keyring_Util::debug( $res );
 
 		// Accept all 2xx response codes
-		if ( '2' == substr( wp_remote_retrieve_response_code( $res ), 0, 1 ) ) {
+		if ( '2' === substr( wp_remote_retrieve_response_code( $res ), 0, 1 ) ) {
 			$token = wp_remote_retrieve_body( $res );
 			Keyring_Util::debug( $token );
 
@@ -160,6 +162,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			exit;
 		}
 		Keyring::error(
+			/* translators: Name of the keyring service. */
 			sprintf( __( 'There was a problem authorizing with %s. Please try again in a moment.', 'keyring' ), $this->get_label() ),
 			$error_debug_info
 		);
@@ -239,7 +242,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 
 		$this->set_request_response_code( wp_remote_retrieve_response_code( $res ) );
 		// Accept all 2xx response codes
-		if ( '2' == substr( wp_remote_retrieve_response_code( $res ), 0, 1 ) ) {
+		if ( '2' === substr( wp_remote_retrieve_response_code( $res ), 0, 1 ) ) {
 			if ( $raw_response ) {
 				return wp_remote_retrieve_body( $res );
 			} else {

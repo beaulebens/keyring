@@ -38,6 +38,7 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 	function basic_ui_intro() {
 		echo '<p>' . __( "If you haven't already, you'll need to set up an app on Pocket:", 'keyring' ) . '</p>';
 		echo '<ol>';
+		/* translators: url */
 		echo '<li>' . sprintf( __( "Head over to <a href='%s'>this page</a>", 'keyring' ), 'https://getpocket.com/developer/apps/new' ) . '</li>';
 		echo '<li>' . __( 'Enter a name for your app (maybe the name of your website?) and a brief description.', 'keyring' ) . '</li>';
 		echo '<li>' . __( 'Select <strong>Retrieve</strong> for Permissions, and <strong>Web</strong> for Platforms.', 'keyring' ) . '</li>';

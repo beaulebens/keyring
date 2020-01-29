@@ -67,6 +67,7 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		echo apply_filters( 'keyring_' . $this->get_name() . '_request_ui_intro', '' );
 
 		// Output basic form for collecting user/pass
+		/* translators: Name of the keyring service. */
 		echo '<p>' . sprintf( __( 'Enter your username and password for accessing <strong>%s</strong>:', 'keyring' ), $this->get_label() ) . '</p>';
 		echo '<form method="post" action="">';
 		echo '<input type="hidden" name="service" value="' . esc_attr( $this->get_name() ) . '" />';

@@ -38,6 +38,7 @@ class Keyring_Service_500px extends Keyring_Service_OAuth1 {
 	}
 
 	function basic_ui_intro() {
+		/* translators: url */
 		echo '<p>' . sprintf( __( 'To connect to 500px, you\'ll need to <a href="%s">create an application at 500px.com</a>.', 'keyring' ), 'https://500px.com/settings/applications' ) . '</p>';
 		echo '<p>' . __( "Once you've created your app, enter the <strong>Consumer Key</strong> and <strong>Consumer Secret</strong> below.", 'keyring' ) . '</p>';
 	}

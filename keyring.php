@@ -93,7 +93,8 @@ class Keyring {
 		do_action( 'keyring_load_token_stores' );
 		$keyring              = Keyring::init();
 		$keyring->token_store = apply_filters( 'keyring_token_store', defined( 'KEYRING__TOKEN_STORE' ) ? KEYRING__TOKEN_STORE : false );
-		if ( ! class_exists( $keyring->token_store ) || ! in_array( 'Keyring_Store', class_parents( $keyring->token_store ) ) ) {
+		if ( ! class_exists( $keyring->token_store ) || ! in_array( 'Keyring_Store', class_parents( $keyring->token_store ), true ) ) {
+			/* translators: file name */
 			wp_die( sprintf( __( 'Invalid <code>KEYRING__TOKEN_STORE</code> specified. Please make sure <code>KEYRING__TOKEN_STORE</code> is set to a valid classname for handling token storage in <code>%s</code> (or <code>wp-config.php</code>)', 'keyring' ), __FILE__ ) );
 		}
 
@@ -129,7 +130,7 @@ class Keyring {
 	static function request_handlers() {
 		global $current_user;
 
-		if ( defined( 'KEYRING__FORCE_USER' ) && KEYRING__FORCE_USER && in_array( $_REQUEST['action'], array( 'request', 'verify' ) ) ) {
+		if ( defined( 'KEYRING__FORCE_USER' ) && KEYRING__FORCE_USER && in_array( $_REQUEST['action'], array( 'request', 'verify' ), true ) ) {
 			global $current_user;
 			$real_user = $current_user->ID;
 			wp_set_current_user( KEYRING__FORCE_USER );
@@ -138,11 +139,11 @@ class Keyring {
 		if (
 				! empty( $_REQUEST['action'] )
 			&&
-				in_array( $_REQUEST['action'], apply_filters( 'keyring_core_actions', array( 'request', 'verify', 'created', 'delete', 'manage' ) ) )
+				in_array( $_REQUEST['action'], apply_filters( 'keyring_core_actions', array( 'request', 'verify', 'created', 'delete', 'manage' ) ), true )
 			&&
 				! empty( $_REQUEST['service'] )
 			&&
-				in_array( $_REQUEST['service'], array_keys( Keyring::get_registered_services() ) )
+				in_array( $_REQUEST['service'], array_keys( Keyring::get_registered_services() ), true )
 		) {
 			// We have an action here to allow us to do things pre-authorization, just in case
 			do_action( "pre_keyring_{$_REQUEST['service']}_{$_REQUEST['action']}", $_REQUEST );
@@ -157,12 +158,12 @@ class Keyring {
 			Keyring_Util::debug( $_GET );
 			do_action( "keyring_{$_REQUEST['service']}_{$_REQUEST['action']}", $_REQUEST );
 
-			if ( 'delete' == $_REQUEST['action'] ) {
+			if ( 'delete' === $_REQUEST['action'] ) {
 				do_action( 'keyring_connection_deleted', $_REQUEST['service'], $_REQUEST );
 			}
 		}
 
-		if ( defined( 'KEYRING__FORCE_USER' ) && KEYRING__FORCE_USER && in_array( $_REQUEST['action'], array( 'request', 'verify' ) ) ) {
+		if ( defined( 'KEYRING__FORCE_USER' ) && KEYRING__FORCE_USER && in_array( $_REQUEST['action'], array( 'request', 'verify' ), true ) ) {
 			wp_set_current_user( $real_user );
 		}
 	}

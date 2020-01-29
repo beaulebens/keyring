@@ -77,14 +77,14 @@ class Keyring_Token {
 	function get_meta( $name = false, $allow_hidden = false ) {
 		$return = null;
 		if ( $name ) {
-			if ( '_' != substr( $name, 0, 1 ) || $allow_hidden ) {
+			if ( '_' !== substr( $name, 0, 1 ) || $allow_hidden ) {
 				if ( isset( $this->meta[ $name ] ) ) {
 					$return = $this->meta[ $name ];
 				}
 			}
 		} else {
 			foreach ( (array) $this->meta as $key => $val ) {
-				if ( '_' != substr( $key, 0, 1 ) || $allow_hidden ) {
+				if ( '_' !== substr( $key, 0, 1 ) || $allow_hidden ) {
 					$return[ $key ] = $val;
 				}
 			}
@@ -102,7 +102,7 @@ class Keyring_Token {
 			return false; // No expires value, assume it's a permanent token
 		}
 
-		if ( '0000-00-00 00:00:00' == $expires ) {
+		if ( '0000-00-00 00:00:00' === $expires ) {
 			return false; // Doesn't expire
 		}
 

@@ -34,6 +34,7 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 	}
 
 	function basic_ui_intro() {
+		/* translators: 1: url 2: url */
 		echo '<p>' . sprintf( __( 'To get started, <a href="%1$s">register an application with Tumblr</a>. The <strong>Default callback URL</strong> should be set to <code>%2$s</code>, and you can enter whatever you like in the other fields.', 'keyring' ), 'https://www.tumblr.com/oauth/register', Keyring_Util::admin_url( 'tumblr', array( 'action' => 'verify' ) ) ) . '</p>';
 		echo '<p>' . __( "Once you've created your app, copy the <strong>OAuth Consumer Key</strong> into the <strong>API Key</strong> field below. Click the <strong>Show secret key</strong> link, and then copy the <strong>Secret Key</strong> value into the <strong>API Secret</strong> field below. You don't need an App ID value for Tumblr.", 'keyring' ) . '</p>';
 	}

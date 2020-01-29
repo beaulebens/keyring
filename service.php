@@ -75,7 +75,7 @@ abstract class Keyring_Service {
 		if ( ! $instance ) {
 			$class    = get_called_class();
 			$services = Keyring::get_registered_services();
-			if ( in_array( $class::NAME, array_keys( $services ) ) ) {
+			if ( in_array( $class::NAME, array_keys( $services ), true ) ) {
 				$instance = $services[ $class::NAME ];
 			} else {
 				$instance = new $class;
@@ -106,7 +106,7 @@ abstract class Keyring_Service {
 
 	function get_name() {
 		$c = get_called_class();
-		if ( '' != $c::NAME ) {
+		if ( '' !== $c::NAME ) {
 			$name = $c::NAME;
 		} else {
 			$name = strtolower( $c );
@@ -116,7 +116,7 @@ abstract class Keyring_Service {
 
 	function get_label() {
 		$c = get_called_class();
-		if ( '' != $c::LABEL ) {
+		if ( '' !== $c::LABEL ) {
 			$label = $c::LABEL;
 		} else {
 			$label = $this->get_name();
@@ -148,6 +148,7 @@ abstract class Keyring_Service {
 		echo '<div class="wrap">';
 		echo '<h2>' . __( 'Keyring Service Management', 'keyring' ) . '</h2>';
 		echo '<p><a href="' . Keyring_Util::admin_url( false, array( 'action' => 'services' ) ) . '">' . __( '&larr; Back', 'keyring' ) . '</a></p>';
+		/* translators: Name of the keyring service. */
 		echo '<h3>' . sprintf( __( '%s API Credentials', 'keyring' ), esc_html( $this->get_label() ) ) . '</h3>';
 
 		// Handle actually saving credentials

@@ -50,6 +50,7 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 	function basic_ui_intro() {
 		$class = get_called_class();
 
+		/* translators: url */
 		echo '<p>' . sprintf( __( "Google controls access to all of their APIs through their API Console. <a href='%s'>Go to the Library page in the console</a> and click the <strong>Select a project</strong> dropdown next to the logo in the upper left of the screen. Click the <strong>plus icon</strong> to create a new project. Enter a name and then click <strong>Create</strong>.", 'keyring' ), 'https://console.developers.google.com/apis/library' ) . '</p>';
 		/* translators: %s: The name of the service being connected */
 		echo '<p>' . sprintf( __( 'Now you need to enable the %s and setup your OAuth credentials.', 'keyring' ), $class::LABEL ) . '</p>';

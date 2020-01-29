@@ -36,6 +36,7 @@ class Keyring_Service_Strava extends Keyring_Service_OAuth2 {
 	}
 
 	function basic_ui_intro() {
+		/* translators: url */
 		echo '<p>' . sprintf( __( 'You\'ll need to <a href="%s">create a new application</a> on Strava so that you can connect.', 'keyring' ), 'https://www.strava.com/settings/api' ) . '</p>';
 		echo '<p>' . __( "Once you've registered your application, copy the <strong>Application Name</strong> into the <strong>App ID</strong>, the <strong>Client ID</strong> and the <strong>Client Secret</strong> into the <strong>API Key</strong> and <strong>API Secret</strong> fields below,.", 'keyring' ) . '</p>';
 	}

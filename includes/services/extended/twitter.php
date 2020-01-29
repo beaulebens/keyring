@@ -37,7 +37,8 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 	}
 
 	function basic_ui_intro() {
-				echo '<p>' . sprintf( __( 'If you haven\'t already, you\'ll need to <a href="%1$s">create an app on Twitter</a> (log in using your normal Twitter account). The <strong>Callback URL</strong> is <code>%2$s</code>.', 'keyring' ), 'https://apps.twitter.com/app/new', self_admin_url( 'tools.php' ) ) . '</p>';
+		/* translators: 1: url 2: url */
+		echo '<p>' . sprintf( __( 'If you haven\'t already, you\'ll need to <a href="%1$s">create an app on Twitter</a> (log in using your normal Twitter account). The <strong>Callback URL</strong> is <code>%2$s</code>.', 'keyring' ), 'https://apps.twitter.com/app/new', self_admin_url( 'tools.php' ) ) . '</p>';
 		echo '<p>' . __( "Once you've created an app, copy and paste your <strong>Consumer key</strong> and <strong>Consumer secret</strong> (from under the <strong>OAuth settings</strong> section of your app's details) into the boxes below. You don't need an App ID for Twitter.", 'keyring' ) . '</p>';
 	}
 
@@ -86,7 +87,7 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 			// page frequently. If so, ignore that error, things are likely aaaa-okay...
 			$keyring_error_message = $res->get_error_message();
 		if ( is_array( $keyring_error_message ) && isset( $keyring_error_message['response']['code'] ) ) {
-			if ( 429 == absint( $keyring_error_message['response']['code'] ) ) {
+			if ( 429 === absint( $keyring_error_message['response']['code'] ) ) {
 				return true;
 			}
 		}

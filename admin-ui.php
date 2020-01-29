@@ -99,7 +99,7 @@ class Keyring_Admin_UI {
 
 	function admin_page() {
 		// Handle delete request. Will default back to "tokens" later
-		if ( isset( $_REQUEST['action'] ) && 'delete' == $_REQUEST['action'] ) {
+		if ( isset( $_REQUEST['action'] ) && 'delete' === $_REQUEST['action'] ) {
 			if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( $_REQUEST['nonce'], 'keyring-delete-' . $_REQUEST['service'] . '-' . $_REQUEST['token'] ) ) {
 				Keyring::error( __( 'Invalid/missing delete nonce.', 'keyring' ) );
 				exit;
@@ -118,7 +118,7 @@ class Keyring_Admin_UI {
 		}
 
 		// Handle test request. Will default back to "tokens" later
-		if ( isset( $_REQUEST['action'] ) && 'test' == $_REQUEST['action'] ) {
+		if ( isset( $_REQUEST['action'] ) && 'test' === $_REQUEST['action'] ) {
 			if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( $_REQUEST['nonce'], 'keyring-test-' . $_REQUEST['service'] . '-' . $_REQUEST['token'] ) ) {
 				Keyring::error( __( 'Invalid/missing testing nonce.', 'keyring' ) );
 				exit;
@@ -154,12 +154,12 @@ class Keyring_Admin_UI {
 		}
 
 		$action = 'tokens';
-		if ( isset( $_REQUEST['action'] ) && in_array( $_REQUEST['action'], array( 'tokens', 'services', 'request', 'verify', 'manage' ) ) ) {
+		if ( isset( $_REQUEST['action'] ) && in_array( $_REQUEST['action'], array( 'tokens', 'services', 'request', 'verify', 'manage' ), true ) ) {
 			$action = $_REQUEST['action'];
 		}
 
 		// Prevent non-admins from accessing any management UI
-		if ( 'manage' == $action && ! current_user_can( 'manage_options' ) ) {
+		if ( 'manage' === $action && ! current_user_can( 'manage_options' ) ) {
 			$action = 'tokens';
 		}
 
@@ -286,6 +286,7 @@ class Keyring_Connections_List_Table extends WP_List_Table {
 	}
 
 	function no_items() {
+		/* translators: url */
 		echo '<p>' . sprintf( __( 'You haven\'t added any connections yet. <a href="%s">Add a New Connection</a>.', 'keyring' ), esc_url( Keyring_Util::admin_url( false, array( 'action' => 'services' ) ) ) ) . '</p>';
 	}
 

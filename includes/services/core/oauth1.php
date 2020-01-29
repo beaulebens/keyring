@@ -107,7 +107,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 
 		$query  = '';
 		$parsed = parse_url( (string) $req );
-		if ( ! empty( $parsed['query'] ) && 'POST' == strtoupper( $this->request_token_method ) ) {
+		if ( ! empty( $parsed['query'] ) && 'POST' === strtoupper( $this->request_token_method ) ) {
 			$request_token_url = str_replace( '?' . $parsed['query'], '', (string) $req );
 			$query             = $parsed['query'];
 		} else {
@@ -142,7 +142,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		Keyring_Util::debug( $res );
 
 		// Accept all 2xx response codes
-		if ( '2' == substr( wp_remote_retrieve_response_code( $res ), 0, 1 ) ) {
+		if ( '2' === substr( wp_remote_retrieve_response_code( $res ), 0, 1 ) ) {
 			// Get the values returned from the remote service
 			$token = wp_remote_retrieve_body( $res );
 			parse_str( trim( $token ), $token );
@@ -176,6 +176,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			$this->store->update( $request_token );
 		} else {
 			Keyring::error(
+				/* translators: Name of the keyring service. */
 				sprintf( __( 'There was a problem connecting to %s to create an authorized connection. Please try again in a moment.', 'keyring' ), $this->get_label() )
 			);
 			return false;
@@ -275,6 +276,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 			exit;
 		} else {
 			Keyring::error(
+				/* translators: Name of the keyring service. */
 				sprintf( __( 'There was a problem connecting to %s to create an authorized connection. Please try again in a moment.', 'keyring' ), $this->get_label() )
 			);
 			return false;
@@ -338,7 +340,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 
 		$query  = '';
 		$parsed = parse_url( $request_url );
-		if ( ! empty( $parsed['query'] ) && 'POST' == $method ) {
+		if ( ! empty( $parsed['query'] ) && 'POST' === $method ) {
 			$request_url = str_replace( '?' . $parsed['query'], '', $request_url );
 			$query       = $parsed['query'];
 		}
@@ -376,7 +378,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		Keyring_Util::debug( $res );
 		$this->set_request_response_code( wp_remote_retrieve_response_code( $res ) );
 		// Accept all 2xx response codes
-		if ( '2' == substr( wp_remote_retrieve_response_code( $res ), 0, 1 ) ) {
+		if ( '2' === substr( wp_remote_retrieve_response_code( $res ), 0, 1 ) ) {
 			if ( $raw_response ) {
 				return wp_remote_retrieve_body( $res );
 			} else {

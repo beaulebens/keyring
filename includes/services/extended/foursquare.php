@@ -32,6 +32,7 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 	}
 
 	function basic_ui_intro() {
+		/* translators: url */
 		echo '<p>' . sprintf( __( 'If you haven\'t already, you\'ll need to <a href="%s">create a new app at Foursquare</a>. You should only need to worry about these settings:', 'keyring' ), 'https://foursquare.com/developers/register' ) . '</p>';
 		echo '<ol>';
 		echo '<li>' . __( "<strong>Your app name</strong>: enter whatever you like, maybe your website's name?", 'keyring' ) . '</li>';

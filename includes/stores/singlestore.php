@@ -126,7 +126,7 @@ class Keyring_SingleStore extends Keyring_Store {
 			$query['meta_value'] = $args['service'];
 		}
 
-		$token_type = 'request' == $args['type'] ? 'Keyring_Request_Token' : 'Keyring_Access_Token';
+		$token_type = 'request' === $args['type'] ? 'Keyring_Request_Token' : 'Keyring_Access_Token';
 		$tokens     = array();
 		$posts      = get_posts( $query );
 		if ( count( $posts ) ) {
@@ -173,7 +173,7 @@ class Keyring_SingleStore extends Keyring_Store {
 				$meta[ $mid ] = $met[0];
 			}
 
-			$token_type = 'kr_request_token' == $post->post_type ? 'Keyring_Request_Token' : 'Keyring_Access_Token';
+			$token_type = 'kr_request_token' === $post->post_type ? 'Keyring_Request_Token' : 'Keyring_Access_Token';
 			return new $token_type(
 				get_post_meta(
 					$post->ID,
