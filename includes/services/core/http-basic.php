@@ -206,7 +206,7 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 
 		Keyring_Util::debug( $res );
 		$this->set_request_response_code( wp_remote_retrieve_response_code( $res ) );
-		if ( wp_startswith( wp_remote_retrieve_response_code( $res ), '2' ) ) {
+		if ( '2' == substr( wp_remote_retrieve_response_code( $res ), 0, 1 ) ) {
 			if ( $raw_response )
 				return wp_remote_retrieve_body( $res );
 			else
