@@ -317,6 +317,19 @@ abstract class Keyring_Service {
 		$tokens = $this->get_tokens();
 		return Keyring_Util::token_select_box( $tokens, $name, $create );
 	}
+
+	/**
+	 * A shortcut to query registered endpoints.  It saves having to re-extract the url and method manually.
+	 *
+	 * @param string $endpoint The registered endpoint (via `->set_endpoint()`) to query.
+	 * @return Keyring_Error|String Either an error or the response data.
+	 */
+	function request_endpoint( $endpoint ) {
+		if ( property_exists( $this, "{$endpoint}_url" ) && property_exists( $this, "{$endpoint}_method" ) ) {
+			return $this->request( $this->{"{$endpoint}_url"}, array( 'method' => $this->{"{$endpoint}_method"} ) );
+		}
+		return new Keyring_Error( 'undefined-endpoint', __( 'Keyring Error: The specified endpoint has not been defined.' ) );
+	}
 }
 
 // Load all packaged services in the ./includes/services/ directory by including all PHP files, first in core, then in extended
