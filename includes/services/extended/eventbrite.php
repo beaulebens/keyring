@@ -14,8 +14,6 @@ class Keyring_Service_Eventbrite extends Keyring_Service_OAuth2 {
 	function __construct() {
 		parent::__construct();
 
-		add_filter( 'keyring_' . $this->get_name() . '_request_token_params', array( $this, 'add_connection_referrer' ) );
-
 		$this->set_endpoint( 'authorize',    self::OAUTH_BASE . 'authorize', 'GET' );
 		$this->set_endpoint( 'access_token', self::OAUTH_BASE . 'token',     'POST' );
 		$this->set_endpoint( 'self',         self::API_BASE . 'users/me/',   'GET' );
@@ -33,23 +31,6 @@ class Keyring_Service_Eventbrite extends Keyring_Service_OAuth2 {
 
 		$this->authorization_header    = 'Bearer';
 		$this->authorization_parameter = false;
-	}
-
-	/**
-	 * Append a referrer to the oAuth request made to Eventbrite, at their request
-	 *
-	 * See http://themedevp2.wordpress.com/2013/12/05/can-we-add-refwpoauth-to/
-	 *
-	 * @param array $params
-	 * @filter keyring_eventbrite_request_token_params
-	 * @return array
-	 */
-	public function add_connection_referrer( $params ) {
-		if ( ! isset( $params['ref'] ) ) {
-			$params['ref'] = 'wpoauth';
-		}
-
-		return $params;
 	}
 
 	function basic_ui_intro() {
