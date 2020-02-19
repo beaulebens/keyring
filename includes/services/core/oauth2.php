@@ -62,6 +62,11 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		$params = apply_filters( 'keyring_' . $this->get_name() . '_request_token_params', $params );
 		Keyring_Util::debug( 'OAuth2 Redirect URL: ' . $url . _http_build_query( $params, '', '&' ) );
 
+		$scope = apply_filters( 'keyring_' . $this->get_name() . '_request_scope', false );
+		if ( $scope ) {
+			$params['scope'] = $scope;
+		}
+
 		wp_redirect( $url . _http_build_query( $params, '', '&' ) );
 		exit;
 	}
@@ -198,6 +203,12 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			unset( $params['method'] );
 		}
 
+		$full_response = false;
+		if ( isset( $params['full_response'] ) ) {
+			$full_response = (bool) $params['full_response'];
+			unset( $params['full_response'] );
+		}
+
 		Keyring_Util::debug( 'OAuth2 Params' );
 		Keyring_Util::debug( $params );
 
@@ -211,6 +222,13 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			$res = wp_remote_post( $url, $params );
 			break;
 
+		case 'PUT':
+			// Make sure PUT requests have a Content-Length header set otherwise the server might return an error
+			// See: https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html
+			if ( ! isset( $params['body'] ) && ! isset( $params['headers']['Content-Length'] ) ) {
+				$params['headers']['Content-Length'] = '0';
+			}
+
 		default:
 			$params = array_merge( array( 'method' => $method, 'sslverify' => false ), $params );
 			$res = wp_remote_request( $url, $params );
@@ -223,7 +241,9 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		$this->set_request_response_code( wp_remote_retrieve_response_code( $res ) );
 		// Accept all 2xx response codes
 		if ( '2' == substr( wp_remote_retrieve_response_code( $res ), 0, 1 ) ) {
-			if ( $raw_response ) {
+			if ( $full_response ) {
+				return $res;
+			} else if ( $raw_response ) {
 				return wp_remote_retrieve_body( $res );
 			} else {
 				return $this->parse_response( wp_remote_retrieve_body( $res ) );
