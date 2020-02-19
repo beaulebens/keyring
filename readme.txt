@@ -112,12 +112,15 @@ Add files to includes/services/extended/ that either implement one of the includ
 * Enhancement: Allow all 2xx response codes to be considered "Success" for all requests, for all protocols. Props @bgrgicak for the proposal.
 * Enhancement: Add translator comments. Props @scruffian.
 * Enhancement: Define the `self` endpoint for Tumbler, and add helper methods to retrieve user info. Props @glendaviesnz.
+* Enhancement: Add a `keyring_{service}_request_scope` filter for OAuth2 services, matching the existing filter for OAuth1 services. Props @glendaviesnz.
+* Enhancement: Add a `'full_response'` param to `Keyring_Service_OAuth2::request()`, which will cause the method to return the full HTTP response object. Props @glendaviesnz.
 * Bugfix: Make the Google services always request a refresh token for offline access. Props @kbrown9 and @atrniv for input.
 * Bugfix: Update Strava to use refresh tokens and offline access, per their new API requirements. Props @mdrovdahl for pointing it out.
 * Bugfix: Update use of add_submenu_page() to comply with WP 5.3. Props @jhwwp (wp.org) for the fix.
 * Bugfix: Apply the keyring_access_token filter consistently in Google Services. Props @pablinos.
 * Bugfix: Use static "Cancel" URIs in UIs. Props @pgl.
 * Bugfix: Remove some WordPress.com-specific code from Eventbrite.
+* Bugfix: Ensure that `PUT` requests have a `Content-Length` header set. Props @glendaviesnz.
 
 = 2.0 =
 * Bugfix BREAKING: Remove invalid reference to $this in error handler. Changes number of params passed to keyring_error action.
