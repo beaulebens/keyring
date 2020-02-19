@@ -221,13 +221,13 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 			$params = array_merge( array( 'sslverify' => false ), $params );
 			$res = wp_remote_post( $url, $params );
 			break;
-		
-			case 'PUT':
-				// Make sure PUT requests have a Content-Length header set otherwise the server might return an error
-				// See: https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html
-				if ( ! isset( $params['body'] ) && ! isset( $params['headers']['Content-Length'] ) ) {
-					$params['headers']['Content-Length'] = '0';
-				}
+
+		case 'PUT':
+			// Make sure PUT requests have a Content-Length header set otherwise the server might return an error
+			// See: https://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html
+			if ( ! isset( $params['body'] ) && ! isset( $params['headers']['Content-Length'] ) ) {
+				$params['headers']['Content-Length'] = '0';
+			}
 
 		default:
 			$params = array_merge( array( 'method' => $method, 'sslverify' => false ), $params );
