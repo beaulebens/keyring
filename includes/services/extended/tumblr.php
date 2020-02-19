@@ -20,6 +20,7 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 		$this->set_endpoint( 'request_token', 'https://www.tumblr.com/oauth/request_token', 'POST' );
 		$this->set_endpoint( 'authorize',     'https://www.tumblr.com/oauth/authorize',     'GET'  );
 		$this->set_endpoint( 'access_token',  'https://www.tumblr.com/oauth/access_token',  'POST' );
+		$this->set_endpoint( 'self',          'https://api.tumblr.com/v2/user/info',        'GET' );
 
 		$creds = $this->get_credentials();
 		$this->app_id  = $creds['app_id'];
@@ -54,7 +55,7 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 			)
 		);
 
-		$response = $this->request( 'https://api.tumblr.com/v2/user/info', array( 'method' => 'POST' ) );
+		$response = $this->request( 'https://api.tumblr.com/v2/user/info', array( 'method' => 'GET' ) );
 
 		if ( Keyring_Util::is_error( $response ) ) {
 			$meta = array();
@@ -73,12 +74,92 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 	}
 
 	function test_connection() {
-			$res = $this->request( 'https://api.tumblr.com/v2/user/info', array( 'method' => 'POST' ) );
+			$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
 			if ( ! Keyring_Util::is_error( $res ) ) {
 				return true;
 			}
 
 			return $res;
+	}
+
+	function fetch_profile_picture() {
+		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
+		if ( empty( $res ) || is_wp_error( $res ) ) {
+			return null;
+		}
+
+		foreach ( $res->response->user->blogs as $blog ) {
+			if ( !$blog->primary ) {
+				continue;
+			}
+			return $this->fetch_profile_picture_for_blog( $blog );
+		}
+
+		return null;
+	}
+
+	function fetch_primary_blog() {
+		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
+		if ( empty( $res ) || is_wp_error( $res ) ) {
+			return null;
+		}
+
+		foreach ( $res->response->user->blogs as $blog ) {
+			if ( ! $blog->primary )
+				continue;
+
+			$blog_basename = parse_url( $blog->url, PHP_URL_HOST );
+
+			$primary_tumblr_blog = array(
+				'id' => $blog_basename,
+				'name' => $blog->title,
+				'category' => $blog->type,
+				'url' => $blog->url,
+				'picture' => $this->fetch_profile_picture_for_blog( $blog ),
+			);
+			
+			return (object) $primary_tumblr_blog;
+		}
+
+		return false;
+	}
+
+	function fetch_additional_external_users() {
+		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
+		if ( empty( $res ) || is_wp_error( $res ) ) {
+			return null;
+		}
+
+		$additional_external_users = array();
+
+		foreach ( $res->response->user->blogs as $blog ) {
+			if ( $blog->primary )
+				continue;
+
+			$blog_basename = parse_url( $blog->url, PHP_URL_HOST );
+
+			$this_tumblr_blog = array(
+				'id' => $blog_basename,
+				'name' => $blog->title,
+				'category' => $blog->type,
+				'url' => $blog->url,
+				'picture' => $this->fetch_profile_picture_for_blog( $blog ), 
+			);
+
+			$additional_external_users[] = (object) $this_tumblr_blog;
+		}
+
+		return $additional_external_users;
+	}
+
+	function fetch_profile_picture_for_blog( $blog ) {
+		// unfortunately tumblr's API does not allow the retrieval
+		// of avatars for private blogs...
+		if ( 'private' === $blog->type ) {
+			return null;
+		}
+		$blog_basename = parse_url( $blog->url, PHP_URL_HOST );
+		return esc_url_raw( sprintf( 'https://api.tumblr.com/v2/blog/%s/avatar/512', $blog_basename ) );
 	}
 }
 
