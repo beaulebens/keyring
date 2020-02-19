@@ -14,10 +14,6 @@ class Keyring_Service_Google_Drive extends Keyring_Service_GoogleBase {
 	const SCOPE       = 'profile https://www.googleapis.com/auth/drive.file'; // See https://developers.google.com/identity/protocols/googlescopes#sheetsv4
 	const ACCESS_TYPE = 'offline';
 
-	public function __construct() {
-		parent::__construct();
-	}
-
 	function _get_credentials() {
 		if (
 			defined( 'KEYRING__GOOGLEDRIVE_KEY' ) &&
