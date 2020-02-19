@@ -111,6 +111,7 @@ Add files to includes/services/extended/ that either implement one of the includ
 * Enhancement: Trim spaces off API keys etc to avoid mistakes when copy/pasting. Props @kbrown9.
 * Enhancement: Allow all 2xx response codes to be considered "Success" for all requests, for all protocols. Props @bgrgicak for the proposal.
 * Enhancement: Add translator comments. Props @scruffian.
+* Enhancement: Define the `self` endpoint for Tumbler, and add helper methods to retrieve user info. Props @glendaviesnz.
 * Bugfix: Make the Google services always request a refresh token for offline access. Props @kbrown9 and @atrniv for input.
 * Bugfix: Update Strava to use refresh tokens and offline access, per their new API requirements. Props @mdrovdahl for pointing it out.
 * Bugfix: Update use of add_submenu_page() to comply with WP 5.3. Props @jhwwp (wp.org) for the fix.
