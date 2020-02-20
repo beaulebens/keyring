@@ -3,6 +3,11 @@
 # Tell Travis CI we're using PHP
 language: php
 
+# whitelist branches for the "push" build check
+branches:
+  only:
+    - master
+
 # Run Matrix for these PHP versions
 php:
 - "5.6"
@@ -15,4 +20,4 @@ before_script:
 - composer --version
 - composer install
 
-script: composer tests-includes
+script: composer test-includes
