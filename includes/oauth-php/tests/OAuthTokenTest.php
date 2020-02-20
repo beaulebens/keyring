@@ -2,7 +2,7 @@
 
 require_once 'common.php';
 
-class OAuthTokenTest extends PHPUnit_Framework_TestCase {
+class OAuthTokenTest extends PHPUnit\Framework\TestCase {
 	public function testSerialize() {
 		$token = new OAuthToken('token', 'secret');
 		$this->assertEquals('oauth_token=token&oauth_token_secret=secret', $token->to_string());
