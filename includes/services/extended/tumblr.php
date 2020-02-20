@@ -18,23 +18,24 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 		}
 
 		$this->set_endpoint( 'request_token', 'https://www.tumblr.com/oauth/request_token', 'POST' );
-		$this->set_endpoint( 'authorize',     'https://www.tumblr.com/oauth/authorize',     'GET'  );
-		$this->set_endpoint( 'access_token',  'https://www.tumblr.com/oauth/access_token',  'POST' );
-		$this->set_endpoint( 'self',          'https://api.tumblr.com/v2/user/info',        'GET' );
+		$this->set_endpoint( 'authorize', 'https://www.tumblr.com/oauth/authorize', 'GET' );
+		$this->set_endpoint( 'access_token', 'https://www.tumblr.com/oauth/access_token', 'POST' );
+		$this->set_endpoint( 'self', 'https://api.tumblr.com/v2/user/info', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->app_id  = $creds['app_id'];
-		$this->key     = $creds['key'];
-		$this->secret  = $creds['secret'];
+		$creds        = $this->get_credentials();
+		$this->app_id = $creds['app_id'];
+		$this->key    = $creds['key'];
+		$this->secret = $creds['secret'];
 
-		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
+		$this->consumer         = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
 
 		$this->authorization_header = true; // Send OAuth token in the header, not querystring
-		$this->authorization_realm = 'tumblr.com';
+		$this->authorization_realm  = 'tumblr.com';
 	}
 
 	function basic_ui_intro() {
+		/* translators: url */
 		echo '<p>' . sprintf( __( 'To get started, <a href="%1$s">register an application with Tumblr</a>. The <strong>Default callback URL</strong> should be set to <code>%2$s</code>, and you can enter whatever you like in the other fields.', 'keyring' ), 'https://www.tumblr.com/oauth/register', Keyring_Util::admin_url( 'tumblr', array( 'action' => 'verify' ) ) ) . '</p>';
 		echo '<p>' . __( "Once you've created your app, copy the <strong>OAuth Consumer Key</strong> into the <strong>API Key</strong> field below. Click the <strong>Show secret key</strong> link, and then copy the <strong>Secret Key</strong> value into the <strong>API Secret</strong> field below. You don't need an App ID value for Tumblr.", 'keyring' ) . '</p>';
 	}
@@ -61,7 +62,7 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 			$meta = array();
 		} else {
 			$this->person = $response->response->user;
-			$meta = array(
+			$meta         = array(
 				'name' => $this->person->name,
 			);
 		}
@@ -75,9 +76,9 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 
 	function test_connection() {
 			$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
-			if ( ! Keyring_Util::is_error( $res ) ) {
-				return true;
-			}
+		if ( ! Keyring_Util::is_error( $res ) ) {
+			return true;
+		}
 
 			return $res;
 	}
@@ -89,7 +90,7 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 		}
 
 		foreach ( $res->response->user->blogs as $blog ) {
-			if ( !$blog->primary ) {
+			if ( ! $blog->primary ) {
 				continue;
 			}
 			return $this->fetch_profile_picture_for_blog( $blog );
@@ -105,19 +106,20 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 		}
 
 		foreach ( $res->response->user->blogs as $blog ) {
-			if ( ! $blog->primary )
+			if ( ! $blog->primary ) {
 				continue;
+			}
 
 			$blog_basename = parse_url( $blog->url, PHP_URL_HOST );
 
 			$primary_tumblr_blog = array(
-				'id' => $blog_basename,
-				'name' => $blog->title,
+				'id'       => $blog_basename,
+				'name'     => $blog->title,
 				'category' => $blog->type,
-				'url' => $blog->url,
-				'picture' => $this->fetch_profile_picture_for_blog( $blog ),
+				'url'      => $blog->url,
+				'picture'  => $this->fetch_profile_picture_for_blog( $blog ),
 			);
-			
+
 			return (object) $primary_tumblr_blog;
 		}
 
@@ -133,17 +135,18 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 		$additional_external_users = array();
 
 		foreach ( $res->response->user->blogs as $blog ) {
-			if ( $blog->primary )
+			if ( $blog->primary ) {
 				continue;
+			}
 
 			$blog_basename = parse_url( $blog->url, PHP_URL_HOST );
 
 			$this_tumblr_blog = array(
-				'id' => $blog_basename,
-				'name' => $blog->title,
+				'id'       => $blog_basename,
+				'name'     => $blog->title,
 				'category' => $blog->type,
-				'url' => $blog->url,
-				'picture' => $this->fetch_profile_picture_for_blog( $blog ), 
+				'url'      => $blog->url,
+				'picture'  => $this->fetch_profile_picture_for_blog( $blog ),
 			);
 
 			$additional_external_users[] = (object) $this_tumblr_blog;

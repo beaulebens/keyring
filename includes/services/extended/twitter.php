@@ -18,26 +18,27 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 		}
 
 		$this->authorization_header = true;
-		$this->authorization_realm  = "twitter.com";
+		$this->authorization_realm  = 'twitter.com';
 
 		$this->set_endpoint( 'request_token', 'https://twitter.com/oauth/request_token', 'POST' );
-		$this->set_endpoint( 'authorize',     'https://twitter.com/oauth/authorize',     'GET'  );
-		$this->set_endpoint( 'access_token',  'https://twitter.com/oauth/access_token',  'POST' );
-		$this->set_endpoint( 'verify',        'https://api.twitter.com/1.1/account/verify_credentials.json', 'GET' );
+		$this->set_endpoint( 'authorize', 'https://twitter.com/oauth/authorize', 'GET' );
+		$this->set_endpoint( 'access_token', 'https://twitter.com/oauth/access_token', 'POST' );
+		$this->set_endpoint( 'verify', 'https://api.twitter.com/1.1/account/verify_credentials.json', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->app_id  = $creds['app_id'];
-		$this->key     = $creds['key'];
-		$this->secret  = $creds['secret'];
+		$creds        = $this->get_credentials();
+		$this->app_id = $creds['app_id'];
+		$this->key    = $creds['key'];
+		$this->secret = $creds['secret'];
 
-		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
+		$this->consumer         = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
 
 		$this->requires_token( true );
 	}
 
 	function basic_ui_intro() {
-                echo '<p>' . sprintf( __( 'If you haven\'t already, you\'ll need to <a href="%1$s">create an app on Twitter</a> (log in using your normal Twitter account). The <strong>Callback URL</strong> is <code>%2$s</code>.', 'keyring' ), 'https://apps.twitter.com/app/new', self_admin_url( 'tools.php' ) ) . '</p>';
+		/* translators: url */
+		echo '<p>' . sprintf( __( 'If you haven\'t already, you\'ll need to <a href="%1$s">create an app on Twitter</a> (log in using your normal Twitter account). The <strong>Callback URL</strong> is <code>%2$s</code>.', 'keyring' ), 'https://apps.twitter.com/app/new', self_admin_url( 'tools.php' ) ) . '</p>';
 		echo '<p>' . __( "Once you've created an app, copy and paste your <strong>Consumer key</strong> and <strong>Consumer secret</strong> (from under the <strong>OAuth settings</strong> section of your app's details) into the boxes below. You don't need an App ID for Twitter.", 'keyring' ) . '</p>';
 	}
 
@@ -62,10 +63,10 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 			$meta = array();
 		} else {
 			$meta = array(
-				'user_id'    => $token['user_id'],
-				'username'   => $token['screen_name'],
-				'name'       => $response->name,
-				'picture'    => str_replace( '_normal.', '.', $response->profile_image_url ),
+				'user_id'  => $token['user_id'],
+				'username' => $token['screen_name'],
+				'name'     => $response->name,
+				'picture'  => str_replace( '_normal.', '.', $response->profile_image_url ),
 			);
 		}
 
@@ -78,18 +79,18 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 
 	function test_connection() {
 			$res = $this->request( 'https://api.twitter.com/1.1/account/verify_credentials.json' );
-			if ( ! Keyring_Util::is_error( $res ) ) {
-				return true;
-			}
+		if ( ! Keyring_Util::is_error( $res ) ) {
+			return true;
+		}
 
 			// Twitter may return a rate limiting error if the user accesses the sharing settings or post
 			// page frequently. If so, ignore that error, things are likely aaaa-okay...
 			$keyring_error_message = $res->get_error_message();
-			if ( is_array( $keyring_error_message ) && isset( $keyring_error_message['response']['code'] ) ) {
-				if ( 429 == absint( $keyring_error_message['response']['code'] ) ) {
-					return true;
-				}
+		if ( is_array( $keyring_error_message ) && isset( $keyring_error_message['response']['code'] ) ) {
+			if ( 429 === absint( $keyring_error_message['response']['code'] ) ) {
+				return true;
 			}
+		}
 
 			return $res;
 	}

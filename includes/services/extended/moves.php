@@ -35,15 +35,15 @@ class Keyring_Service_Moves extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_moves_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize',    'https://api.moves-app.com/oauth/v1/authorize',    'GET'  );
+		$this->set_endpoint( 'authorize', 'https://api.moves-app.com/oauth/v1/authorize', 'GET' );
 		$this->set_endpoint( 'access_token', 'https://api.moves-app.com/oauth/v1/access_token', 'POST' );
-		$this->set_endpoint( 'verify_token', 'https://api.moves-app.com/oauth/v1/tokeninfo',    'GET'  );
-		$this->set_endpoint( 'profile',      'https://api.moves-app.com/api/1.1/user/profile',  'GET'  );
+		$this->set_endpoint( 'verify_token', 'https://api.moves-app.com/oauth/v1/tokeninfo', 'GET' );
+		$this->set_endpoint( 'profile', 'https://api.moves-app.com/api/1.1/user/profile', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->app_id  = $creds['app_id'];
-		$this->key     = $creds['key'];
-		$this->secret  = $creds['secret'];
+		$creds        = $this->get_credentials();
+		$this->app_id = $creds['app_id'];
+		$this->key    = $creds['key'];
+		$this->secret = $creds['secret'];
 
 		// Moves requires an exact match on Redirect URI, which means we can't send any nonces
 		$this->callback_url = remove_query_arg( array( 'nonce', 'kr_nonce' ), $this->callback_url );
@@ -56,6 +56,7 @@ class Keyring_Service_Moves extends Keyring_Service_OAuth2 {
 	}
 
 	function basic_ui_intro() {
+		/* translators: url */
 		echo '<p>' . sprintf( __( 'Head over and <a href="%s">create a new application</a> on Moves-app which you\'ll use to connect.', 'keyring' ), 'https://dev.moves-app.com/apps/new' ) . '</p>';
 		/* translators: %s: the redirect URL to verify the connection */
 		echo '<p>' . sprintf( __( "Once it's created, click the <strong>Development</strong> tab. Your <strong>App ID</strong> and <strong>API Key</strong> are both shown on that page as <strong>Client ID</strong>. Enter your <strong>Client secret</strong> in the <strong>API Secret</strong> box. On that tab there is also a <strong>Redirect URI</strong> box, which you should set to <code>%s</code>.", 'keyring' ), Keyring_Util::admin_url( self::NAME, array( 'action' => 'verify' ) ) ) . '</p>';
@@ -67,7 +68,7 @@ class Keyring_Service_Moves extends Keyring_Service_OAuth2 {
 	}
 
 	function redirect_incoming_verify( $request ) {
-		if ( !isset( $request['kr_nonce'] ) ) {
+		if ( ! isset( $request['kr_nonce'] ) ) {
 			$kr_nonce = wp_create_nonce( 'keyring-verify' );
 			$nonce    = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
 			wp_safe_redirect(
