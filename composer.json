@@ -13,7 +13,7 @@
 		"wp-coding-standards/wpcs": "2.1.1"
 	},
 	"scripts": {
-		"test-includes": "phpunit includes/oauth-php",
+		"test-includes": "vendor/bin/phpunit includes/oauth-php",
 		"php:lint": "vendor/bin/phpcs -p -s",
 		"php:lint:errors": "vendor/bin/phpcs -p -s --runtime-set ignore_warnings_on_exit 1",
 		"php:lint:autofix": "vendor/bin/phpcbf"
