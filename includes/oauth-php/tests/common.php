@@ -8,7 +8,18 @@ require dirname(__FILE__).'/../OAuth.php';
  */
 class OAuthTestUtils {
 	private static function reset_request_vars() {
-		$_SERVER = array();
+		unset(
+			$_SERVER['HTTPS'],
+			$_SERVER['REQUEST_METHOD'],
+			$_SERVER['HTTP_HOST'],
+			$_SERVER['SERVER_NAME'],
+			$_SERVER['SERVER_PORT'],
+			$_SERVER['SCRIPT_NAME'],
+			$_SERVER['REQUEST_URI'],
+			$_SERVER['QUERY_STRING'],
+			$_SERVER['HTTP_CONTENT_TYPE'],
+			$_SERVER['HTTP_AUTHORIZATION']
+		);
 		$_POST = array();
 		$_GET = array();	
 	}

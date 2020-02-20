@@ -1,4 +1,4 @@
-<phpunit colors="true">
+<phpunit colors="true" backupGlobals="true">
   <testsuite name="OAuth">
     <directory>tests</directory>
   </testsuite>
