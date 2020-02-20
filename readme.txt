@@ -106,6 +106,7 @@ Add files to includes/services/extended/ that either implement one of the includ
 == Changelog ==
 
 =  =
+* Enhancement BREAKING: LinkedIn now uses OAuth2. Props @glendaviesnz.
 * Enhancement: Added a GitHub Service definition, props @alperakgun.
 * Enhancement: Added a Google Drive Service definition, props @scruffian.
 * Enhancement: Trim spaces off API keys etc to avoid mistakes when copy/pasting. Props @kbrown9.
