@@ -8,7 +8,18 @@ require dirname(__FILE__).'/../OAuth.php';
  */
 class OAuthTestUtils {
 	private static function reset_request_vars() {
-		$_SERVER = array();
+		unset(
+			$_SERVER['HTTPS'],
+			$_SERVER['REQUEST_METHOD'],
+			$_SERVER['HTTP_HOST'],
+			$_SERVER['SERVER_NAME'],
+			$_SERVER['SERVER_PORT'],
+			$_SERVER['SCRIPT_NAME'],
+			$_SERVER['REQUEST_URI'],
+			$_SERVER['QUERY_STRING'],
+			$_SERVER['HTTP_CONTENT_TYPE'],
+			$_SERVER['HTTP_AUTHORIZATION']
+		);
 		$_POST = array();
 		$_GET = array();	
 	}
@@ -49,7 +60,7 @@ class OAuthTestUtils {
 
 		if( $method == 'POST' ) {
 			$_SERVER['HTTP_CONTENT_TYPE'] = 'application/x-www-form-urlencoded';
-			$_POST = parse_str($post_data);
+			parse_str( $post_data, $_POST );
 			OAuthRequest::$POST_INPUT = 'data:application/x-www-form-urlencoded,'.$post_data;
 		}	
 			

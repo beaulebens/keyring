@@ -1,0 +1,6 @@
+{
+	"core": "WordPress/WordPress",
+	"plugins": [ "." ],
+	"port": "5555",
+	"testsPort": "5556"
+}
