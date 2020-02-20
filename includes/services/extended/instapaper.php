@@ -240,12 +240,12 @@ class Keyring_Service_Instapaper extends Keyring_Service_OAuth1 {
 	}
 
 	function test_connection() {
-			$response = $this->request( $this->verify_url, array( 'method' => $this->verify_method ) );
+		$response = $this->request( $this->verify_url, array( 'method' => $this->verify_method ) );
 		if ( ! Keyring_Util::is_error( $response ) ) {
 			return true;
 		}
 
-			return $response;
+		return $response;
 	}
 }
 
