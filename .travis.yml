@@ -28,6 +28,6 @@ matrix:
 
 before_script:
 - composer --version
-- composer install --ignore-platform-reqs
+- composer install
 
 script: composer test-includes
