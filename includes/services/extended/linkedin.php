@@ -19,9 +19,9 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_linkedin_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize',    'https://www.linkedin.com/oauth/v2/authorization', 'GET' );
-		$this->set_endpoint( 'access_token', 'https://www.linkedin.com/oauth/v2/accessToken',   'POST' );
-		$this->set_endpoint( 'self',         'https://api.linkedin.com/v2/me',            'GET' );
+		$this->set_endpoint( 'authorize',    'https://www.linkedin.com/oauth/v2/authorization',          'GET' );
+		$this->set_endpoint( 'access_token', 'https://www.linkedin.com/oauth/v2/accessToken',            'POST' );
+		$this->set_endpoint( 'self',         'https://api.linkedin.com/v2/me',                           'GET' );
 		$this->set_endpoint( 'profile_pic',  'https://api.linkedin.com/v2/me/picture-urls::(original)/', 'GET' );
 
 		$creds = $this->get_credentials();
@@ -124,11 +124,11 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth2 {
 	function fetch_profile_picture () {
 		$response = $this->request(
 			$this->self_url . '?projection=(profilePicture(displayImage~:playableStreams))',
-			[ 'method' => $this->self_method ]
+			array( 'method' => $this->self_method )
 		);
 
 		if ( Keyring_Util::is_error( $response ) ) {
-			return new WP_Error( 'missing-profile_picture', 'Could not find profile picture.' );
+			return new WP_Error( 'missing-profile_picture', __( 'Could not find profile picture.', 'keyring' ) );
 		}
 
 		return $response->profilePicture->{'displayImage~'}->elements[0]->identifiers[0]->identifier;
