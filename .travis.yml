@@ -15,4 +15,4 @@ before_script:
 - composer --version
 - composer install
 
-script: composer run tests-includes
+script: composer tests-includes
