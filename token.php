@@ -102,7 +102,8 @@ class Keyring_Token {
 			return false; // No expires value, assume it's a permanent token
 		}
 
-		if ( '0000-00-00 00:00:00' === $expires ) {
+		// phpcs:ignore WordPress.PHP.StrictComparisons
+		if ( '0000-00-00 00:00:00' == $expires ) {
 			return false; // Doesn't expire
 		}
 
