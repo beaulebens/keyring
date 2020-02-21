@@ -37,19 +37,22 @@ class Keyring_Token {
 	}
 
 	function get_uniq_id() {
-		if ( isset( $this->unique_id ) )
+		if ( isset( $this->unique_id ) ) {
 			return $this->unique_id;
+		}
 		return null;
 	}
 
 	function get_display() {
-		if ( $service = $this->get_service() )
+		$service = $this->get_service();
+		if ( $service ) {
 			return $service->get_display( $this );
+		}
 		return $this->name;
 	}
 
 	function get_service() {
-		if ( !$this->service ) {
+		if ( ! $this->service ) {
 			$class = $this->get_meta( '_classname', true );
 			if ( $class && class_exists( $class ) ) {
 				$this->service = call_user_func( array( $class, 'init' ) );
@@ -74,14 +77,14 @@ class Keyring_Token {
 	function get_meta( $name = false, $allow_hidden = false ) {
 		$return = null;
 		if ( $name ) {
-			if ( '_' != substr( $name, 0, 1 ) || $allow_hidden ) {
+			if ( '_' !== substr( $name, 0, 1 ) || $allow_hidden ) {
 				if ( isset( $this->meta[ $name ] ) ) {
 					$return = $this->meta[ $name ];
 				}
 			}
 		} else {
 			foreach ( (array) $this->meta as $key => $val ) {
-				if ( '_' != substr( $key, 0, 1 ) || $allow_hidden ) {
+				if ( '_' !== substr( $key, 0, 1 ) || $allow_hidden ) {
 					$return[ $key ] = $val;
 				}
 			}
@@ -91,13 +94,15 @@ class Keyring_Token {
 	}
 
 	/**
-	* Check if a token has expired, or will expire in the next $window seconds
-	**/
+	 * Check if a token has expired, or will expire in the next $window seconds
+	 */
 	function is_expired( $window = 0 ) {
-		if ( ! $expires = $this->get_meta( 'expires' ) ) {
+		$expires = $this->get_meta( 'expires' );
+		if ( ! $expires ) {
 			return false; // No expires value, assume it's a permanent token
 		}
 
+		// phpcs:ignore WordPress.PHP.StrictComparisons
 		if ( '0000-00-00 00:00:00' == $expires ) {
 			return false; // Doesn't expire
 		}

@@ -8,8 +8,8 @@
  * @package Keyring
  */
 abstract class Keyring_Service {
-	const NAME          = '';
-	const LABEL         = '';
+	const NAME                = '';
+	const LABEL               = '';
 	protected $token          = false;
 	protected $requires_token = true;
 	protected $store          = false;
@@ -72,10 +72,10 @@ abstract class Keyring_Service {
 	static function &init() {
 		static $instance = false;
 
-		if ( !$instance ) {
-			$class = get_called_class();
+		if ( ! $instance ) {
+			$class    = get_called_class();
 			$services = Keyring::get_registered_services();
-			if ( in_array( $class::NAME, array_keys( $services ) ) ) {
+			if ( in_array( $class::NAME, array_keys( $services ), true ) ) {
 				$instance = $services[ $class::NAME ];
 			} else {
 				$instance = new $class;
@@ -95,29 +95,32 @@ abstract class Keyring_Service {
 	 *         then set requirement to true/false as specified.
 	 */
 	function requires_token( $does_it = null ) {
-		if ( is_null( $does_it ) )
+		if ( is_null( $does_it ) ) {
 			return $this->requires_token;
+		}
 
-		$requires = $this->requires_token;
+		$requires             = $this->requires_token;
 		$this->requires_token = $does_it;
 		return $requires;
 	}
 
 	function get_name() {
 		$c = get_called_class();
-		if ( '' != $c::NAME )
+		if ( '' !== $c::NAME ) {
 			$name = $c::NAME;
-		else
+		} else {
 			$name = strtolower( $c );
+		}
 		return $name;
 	}
 
 	function get_label() {
 		$c = get_called_class();
-		if ( '' != $c::LABEL )
+		if ( '' !== $c::LABEL ) {
 			$label = $c::LABEL;
-		else
+		} else {
 			$label = $this->get_name();
+		}
 		return $label;
 	}
 
@@ -136,7 +139,7 @@ abstract class Keyring_Service {
 	}
 
 	function basic_ui() {
-		if ( !isset( $_REQUEST['nonce'] ) || !wp_verify_nonce( $_REQUEST['nonce'], 'keyring-manage-' . $this->get_name() ) ) {
+		if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( $_REQUEST['nonce'], 'keyring-manage-' . $this->get_name() ) ) {
 			Keyring::error( __( 'Invalid/missing management nonce.', 'keyring' ) );
 			exit;
 		}
@@ -145,21 +148,31 @@ abstract class Keyring_Service {
 		echo '<div class="wrap">';
 		echo '<h2>' . __( 'Keyring Service Management', 'keyring' ) . '</h2>';
 		echo '<p><a href="' . Keyring_Util::admin_url( false, array( 'action' => 'services' ) ) . '">' . __( '&larr; Back', 'keyring' ) . '</a></p>';
+		/* translators: service name */
 		echo '<h3>' . sprintf( __( '%s API Credentials', 'keyring' ), esc_html( $this->get_label() ) ) . '</h3>';
 
 		// Handle actually saving credentials
 		if ( isset( $_POST['api_key'] ) && isset( $_POST['api_secret'] ) ) {
 			// Store credentials against this service
-			$this->update_credentials( apply_filters( 'keyring_' . $this->get_name() . '_basic_ui_save_credentials', array(
-				'app_id' => ( ! empty( $_POST['app_id'] ) ? stripslashes( trim( $_POST['app_id'] ) ) : '' ),
-				'key'    => ( ! empty( $_POST['api_key'] ) ? stripslashes( trim( $_POST['api_key'] ) ) : '' ),
-				'secret' => ( ! empty( $_POST['api_secret'] ) ? stripslashes( trim( $_POST['api_secret'] ) ) : '' )
-			) ) );
+			$this->update_credentials(
+				apply_filters(
+					'keyring_' . $this->get_name() . '_basic_ui_save_credentials',
+					array(
+						'app_id' => ( ! empty( $_POST['app_id'] ) ? stripslashes( trim( $_POST['app_id'] ) ) : '' ),
+						'key'    => ( ! empty( $_POST['api_key'] ) ? stripslashes( trim( $_POST['api_key'] ) ) : '' ),
+						'secret' => ( ! empty( $_POST['api_secret'] ) ? stripslashes( trim( $_POST['api_secret'] ) ) : '' ),
+					)
+				)
+			);
 			echo '<div class="updated"><p>' . __( 'Credentials saved.', 'keyring' ) . '</p></div>';
 		}
 
-		$app_id = $api_key = $api_secret = '';
-		if ( $creds = $this->get_credentials() ) {
+		$app_id     = '';
+		$api_key    = '';
+		$api_secret = '';
+
+		$creds = $this->get_credentials();
+		if ( $creds ) {
 			$app_id     = $creds['app_id'];
 			$api_key    = $creds['key'];
 			$api_secret = $creds['secret'];
@@ -175,17 +188,17 @@ abstract class Keyring_Service {
 		wp_nonce_field( 'keyring-manage-' . $this->get_name(), 'nonce', false );
 		echo '<table class="form-table">';
 
-		$ui_app_id = '<tr><th scope="row">' . __( 'App ID', 'keyring' ) . '</th>';
+		$ui_app_id  = '<tr><th scope="row">' . __( 'App ID', 'keyring' ) . '</th>';
 		$ui_app_id .= '<td><input type="text" name="app_id" value="' . esc_attr( $app_id ) . '" id="app_id" class="regular-text"></td></tr>';
 
 		echo apply_filters( 'keyring_' . $this->get_name() . '_basic_ui_app_id', $ui_app_id );
 
-		$ui_api_key = '<tr><th scope="row">' . __( 'API Key', 'keyring' ) . '</th>';
+		$ui_api_key  = '<tr><th scope="row">' . __( 'API Key', 'keyring' ) . '</th>';
 		$ui_api_key .= '<td><input type="text" name="api_key" value="' . esc_attr( $api_key ) . '" id="api_key" class="regular-text"></td></tr>';
 
 		echo apply_filters( 'keyring_' . $this->get_name() . '_basic_ui_api_key', $ui_api_key );
 
-		$ui_api_secret = '<tr><th scope="row">' . __( 'API Secret', 'keyring' ) . '</th>';
+		$ui_api_secret  = '<tr><th scope="row">' . __( 'API Secret', 'keyring' ) . '</th>';
 		$ui_api_secret .= '<td><input type="text" name="api_secret" value="' . esc_attr( $api_secret ) . '" id="api_secret" class="regular-text"></td></tr>';
 
 		echo apply_filters( 'keyring_' . $this->get_name() . '_basic_ui_api_secret', $ui_api_secret );
@@ -200,7 +213,8 @@ abstract class Keyring_Service {
 			jQuery( document ).ready( function() {
 				jQuery( '#app_id' ).focus();
 			} );
-		</script><?php
+		</script>
+		<?php
 		echo '</div>';
 	}
 
@@ -216,8 +230,9 @@ abstract class Keyring_Service {
 		if ( method_exists( $this, '_get_credentials' ) ) {
 			$creds = $this->_get_credentials();
 
-			if ( !is_null( $creds ) )
+			if ( ! is_null( $creds ) ) {
 				return apply_filters( 'keyring_service_credentials', $creds, $this->get_name() );
+			}
 		}
 
 		// Then check for generic constants
@@ -241,7 +256,7 @@ abstract class Keyring_Service {
 		// Last check in the database for a shared store of credentials
 		$creds = false;
 		$all   = apply_filters( 'keyring_credentials', get_option( 'keyring_credentials' ) );
-		if ( !empty( $all[ $this->get_name() ] ) ) {
+		if ( ! empty( $all[ $this->get_name() ] ) ) {
 			$creds = $all[ $this->get_name() ];
 		}
 
@@ -255,7 +270,7 @@ abstract class Keyring_Service {
 	 * @param array $credentials
 	 */
 	function update_credentials( array $credentials ) {
-		$all = apply_filters( 'keyring_credentials', get_option( 'keyring_credentials' ) );
+		$all                      = apply_filters( 'keyring_credentials', get_option( 'keyring_credentials' ) );
 		$all[ $this->get_name() ] = $credentials;
 		return update_option( 'keyring_credentials', $all );
 	}
@@ -279,7 +294,18 @@ abstract class Keyring_Service {
 
 		// Back to Keyring admin, with ?service=SERVICE&created=UNIQUE_ID&kr_nonce=NONCE
 		$kr_nonce = wp_create_nonce( 'keyring-created' );
-		$url = apply_filters( 'keyring_verified_redirect', Keyring_Util::admin_url( $c::NAME, array( 'action' => 'created', 'id' => $id, 'kr_nonce' => $kr_nonce ) ), $c::NAME );
+		$url      = apply_filters(
+			'keyring_verified_redirect',
+			Keyring_Util::admin_url(
+				$c::NAME,
+				array(
+					'action'   => 'created',
+					'id'       => $id,
+					'kr_nonce' => $kr_nonce,
+				)
+			),
+			$c::NAME
+		);
 		Keyring_Util::debug( 'Verified connection, redirect to ' . $url );
 		wp_safe_redirect( $url );
 		exit;
@@ -292,7 +318,7 @@ abstract class Keyring_Service {
 
 	function store_token( $token ) {
 		$token->meta['_classname'] = get_called_class();
-		$id = $this->store->insert( $token );
+		$id                        = $this->store->insert( $token );
 		return $id;
 	}
 
@@ -310,7 +336,12 @@ abstract class Keyring_Service {
 
 	function get_tokens( $id = false ) {
 		$c = get_called_class();
-		return $this->store->get_tokens( array( 'service' => $c::NAME, 'type' => 'access' ) );
+		return $this->store->get_tokens(
+			array(
+				'service' => $c::NAME,
+				'type'    => 'access',
+			)
+		);
 	}
 
 	function token_select_box( $name, $create = false ) {
@@ -321,9 +352,10 @@ abstract class Keyring_Service {
 
 // Load all packaged services in the ./includes/services/ directory by including all PHP files, first in core, then in extended
 // Remove a Service (prevent it from loading at all) by filtering on 'keyring_services'
-$keyring_services = glob( dirname( __FILE__ ) . "/includes/services/core/*.php" );
-$keyring_services = array_merge( $keyring_services, glob( dirname( __FILE__ ) . "/includes/services/extended/*.php" ) );
+$keyring_services = glob( dirname( __FILE__ ) . '/includes/services/core/*.php' );
+$keyring_services = array_merge( $keyring_services, glob( dirname( __FILE__ ) . '/includes/services/extended/*.php' ) );
 $keyring_services = apply_filters( 'keyring_services', $keyring_services );
-foreach ( $keyring_services as $keyring_service )
+foreach ( $keyring_services as $keyring_service ) {
 	require_once $keyring_service;
+}
 unset( $keyring_services, $keyring_service );

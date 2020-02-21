@@ -19,15 +19,15 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_linkedin_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize',    'https://www.linkedin.com/oauth/v2/authorization',          'GET' );
-		$this->set_endpoint( 'access_token', 'https://www.linkedin.com/oauth/v2/accessToken',            'POST' );
-		$this->set_endpoint( 'self',         'https://api.linkedin.com/v2/me',                           'GET' );
-		$this->set_endpoint( 'profile_pic',  'https://api.linkedin.com/v2/me/picture-urls::(original)/', 'GET' );
+		$this->set_endpoint( 'authorize', 'https://www.linkedin.com/oauth/v2/authorization', 'GET' );
+		$this->set_endpoint( 'access_token', 'https://www.linkedin.com/oauth/v2/accessToken', 'POST' );
+		$this->set_endpoint( 'self', 'https://api.linkedin.com/v2/me', 'GET' );
+		$this->set_endpoint( 'profile_pic', 'https://api.linkedin.com/v2/me/picture-urls::(original)/', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->app_id  = $creds['app_id'];
-		$this->key     = $creds['key'];
-		$this->secret  = $creds['secret'];
+		$creds        = $this->get_credentials();
+		$this->app_id = $creds['app_id'];
+		$this->key    = $creds['key'];
+		$this->secret = $creds['secret'];
 
 		$this->consumer             = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method     = new OAuthSignatureMethod_HMAC_SHA1;
@@ -37,9 +37,11 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth2 {
 	}
 
 	function basic_ui_intro() {
+		/* translators: url */
 		echo '<p>' . sprintf( __( "To connect to LinkedIn, you'll first need to <a href='%s'>create an app</a>. A lot of the details are required, but they're not actually important to the operation of your app, since Keyring will override any important settings.", 'keyring' ), 'https://www.linkedin.com/secure/developer?newapp=' ) . '</p>';
 		echo '<p>' . __( "Once you've created your app, go down to the <strong>Auth</strong> section and copy the <strong>Client ID</strong> value into the <strong>API Key</strong> field below, and the <strong>Client Secret</strong> value into the <strong>API Secret</strong> field", 'keyring' ) . '</p>';
-		echo '<p>' . sprintf( __( "In the LinkedIn <strong>Redirect URLs:</strong> box, enter the URL <code>%s</code>.", 'keyring' ), Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify' ) ) ) . '</p>';
+		/* translators: url */
+		echo '<p>' . sprintf( __( 'In the LinkedIn <strong>Redirect URLs:</strong> box, enter the URL <code>%s</code>.', 'keyring' ), Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify' ) ) ) . '</p>';
 		echo '<p>' . __( "Then click save (you don't need an App ID value for LinkedIn).", 'keyring' ) . '</p>';
 	}
 
@@ -95,17 +97,17 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth2 {
 		} else {
 			$this->person = $response;
 
-			$firstName = $this->person->firstName;
-			$lastName  = $this->person->lastName;
-			$lfirst = "{$firstName->preferredLocale->language}_{$firstName->preferredLocale->country}";
-			$llast  = "{$lastName->preferredLocale->language}_{$lastName->preferredLocale->country}";
+			$first_name = $this->person->firstName;
+			$last_name  = $this->person->lastName;
+			$lfirst     = "{$first_name->preferredLocale->language}_{$first_name->preferredLocale->country}";
+			$llast      = "{$last_name->preferredLocale->language}_{$last_name->preferredLocale->country}";
 
-			$profilePicture = $this->person->profilePicture;
+			$profile_picture = $this->person->profilePicture;
 
 			$meta = array(
 				'user_id' => $this->person->id,
-				'name'    => $firstName->localized->{$lfirst} . ' ' . $lastName->localized->{$llast},
-				'picture' => $profilePicture->{'displayImage~'}->elements[0]->identifiers[0]->identifier,
+				'name'    => $first_name->localized->{$lfirst} . ' ' . $last_name->localized->{$llast},
+				'picture' => $profile_picture->{'displayImage~'}->elements[0]->identifiers[0]->identifier,
 			);
 		}
 
@@ -121,7 +123,7 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth2 {
 	 *
 	 * @return string|mixed
 	 */
-	function fetch_profile_picture () {
+	function fetch_profile_picture() {
 		$response = $this->request(
 			$this->self_url . '?projection=(profilePicture(displayImage~:playableStreams))',
 			array( 'method' => $this->self_method )
@@ -131,6 +133,7 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth2 {
 			return new WP_Error( 'missing-profile_picture', __( 'Could not find profile picture.', 'keyring' ) );
 		}
 
+		// phpcs:ignore WordPress.NamingConventions.ValidVariableName
 		return $response->profilePicture->{'displayImage~'}->elements[0]->identifiers[0]->identifier;
 	}
 

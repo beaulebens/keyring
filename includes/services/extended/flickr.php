@@ -18,21 +18,22 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 		}
 
 		$this->set_endpoint( 'request_token', 'https://www.flickr.com/services/oauth/request_token', 'GET' );
-		$this->set_endpoint( 'authorize',     'https://www.flickr.com/services/oauth/authorize',     'GET' );
-		$this->set_endpoint( 'access_token',  'https://www.flickr.com/services/oauth/access_token',  'GET' );
+		$this->set_endpoint( 'authorize', 'https://www.flickr.com/services/oauth/authorize', 'GET' );
+		$this->set_endpoint( 'access_token', 'https://www.flickr.com/services/oauth/access_token', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->app_id  = $creds['app_id'];
-		$this->key     = $creds['key'];
-		$this->secret  = $creds['secret'];
+		$creds        = $this->get_credentials();
+		$this->app_id = $creds['app_id'];
+		$this->key    = $creds['key'];
+		$this->secret = $creds['secret'];
 
-		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
+		$this->consumer         = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
 
 		$this->requires_token( true );
 	}
 
 	function basic_ui_intro() {
+		/* translators: url */
 		echo '<p>' . sprintf( __( 'To connect to Flickr, you\'ll need to <a href="%s">create an application at Flickr.com</a>. If this is a personal website then you can use a non-commercial key (which will be approved automatically).', 'keyring' ), 'http://www.flickr.com/services/apps/create/apply/?' ) . '</p>';
 		echo '<p>' . __( "Once you've created your app, enter the API <strong>Key</strong> and <strong>Secret</strong> below (App ID is not required for Flickr apps).", 'keyring' ) . '</p>';
 	}
@@ -48,13 +49,13 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 				)
 			)
 		);
-		$url = 'https://api.flickr.com/services/rest/?';
+		$url    = 'https://api.flickr.com/services/rest/?';
 		$params = array(
 			'method'  => 'flickr.people.getInfo',
 			'api_key' => $this->key,
 			'user_id' => $token['user_nsid'],
 		);
-		$url .= http_build_query( $params );
+		$url   .= http_build_query( $params );
 
 		$response = $this->request( $url, array( 'method' => 'GET' ) );
 		if ( Keyring_Util::is_error( $response ) ) {
@@ -73,10 +74,10 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 
 	function get_display( Keyring_Access_Token $token ) {
 		$return = '';
-		$meta = $token->get_meta();
+		$meta   = $token->get_meta();
 		if ( ! empty( $meta['name'] ) ) {
 			return $meta['name'];
-		} else if ( ! empty( $meta['username'] ) ) {
+		} elseif ( ! empty( $meta['username'] ) ) {
 			return $meta['username'];
 		}
 	}
@@ -95,7 +96,8 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 				'format'         => 'json', // Always return JSON
 				'nojsoncallback' => 1, // Don't wrap it in a callback
 			),
-			$url );
+			$url
+		);
 		return parent::request( $url, $params );
 	}
 
@@ -110,12 +112,12 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 	}
 
 	function test_connection() {
-		$url = "https://api.flickr.com/services/rest/?";
+		$url    = 'https://api.flickr.com/services/rest/?';
 		$params = array(
 			'method'  => 'flickr.test.login',
 			'api_key' => $this->key,
 		);
-		$url .= http_build_query( $params );
+		$url   .= http_build_query( $params );
 
 		$response = $this->request( $url );
 		if ( ! Keyring_Util::is_error( $response ) ) {

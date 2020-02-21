@@ -18,22 +18,23 @@ class Keyring_Service_RunKeeper extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_runkeeper_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize',    'https://runkeeper.com/apps/authorize',    'GET'  );
-		$this->set_endpoint( 'access_token', 'https://runkeeper.com/apps/token',        'POST' );
-		$this->set_endpoint( 'deauthorize',  'https://runkeeper.com/apps/de-authorize', 'POST' );
-		$this->set_endpoint( 'user',         'https://api.runkeeper.com/user',          'GET'  );
-		$this->set_endpoint( 'profile',      'https://api.runkeeper.com/profile',       'GET'  );
+		$this->set_endpoint( 'authorize', 'https://runkeeper.com/apps/authorize', 'GET' );
+		$this->set_endpoint( 'access_token', 'https://runkeeper.com/apps/token', 'POST' );
+		$this->set_endpoint( 'deauthorize', 'https://runkeeper.com/apps/de-authorize', 'POST' );
+		$this->set_endpoint( 'user', 'https://api.runkeeper.com/user', 'GET' );
+		$this->set_endpoint( 'profile', 'https://api.runkeeper.com/profile', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->app_id  = $creds['app_id'];
-		$this->key     = $creds['key'];
-		$this->secret  = $creds['secret'];
+		$creds        = $this->get_credentials();
+		$this->app_id = $creds['app_id'];
+		$this->key    = $creds['key'];
+		$this->secret = $creds['secret'];
 
 		$this->authorization_header    = 'Bearer';
 		$this->authorization_parameter = false;
 	}
 
 	function basic_ui_intro() {
+		/* translators: url */
 		echo '<p>' . sprintf( __( 'You\'ll need to <a href="%s">register a new application</a> on RunKeeper so that you can connect. Be sure to check the <strong>Read Health Information</strong> option under <strong>Permissions Requests</strong> (and explain why you want to read that data). You will also be required to set an <strong>Estimated Date of Publication</strong>.', 'keyring' ), 'http://runkeeper.com/partner/applications/register' ) . '</p>';
 		echo '<p>' . __( "Once you've registered your application, click the <strong>Application Keys and URLs</strong> next to it, and copy the <strong>Client ID</strong> into the <strong>API Key</strong> field below, and the <strong>Client Secret</strong> value into <strong>API Secret</strong>.", 'keyring' ) . '</p>';
 	}
@@ -55,7 +56,7 @@ class Keyring_Service_RunKeeper extends Keyring_Service_OAuth2 {
 
 			// Now get the rest of their profile
 			$profile = $this->request( $this->profile_url, array( 'method' => $this->profile_method ) );
-			if ( !Keyring_Util::is_error( $profile ) ) {
+			if ( ! Keyring_Util::is_error( $profile ) ) {
 				$meta['username'] = substr( $profile->profile, strrpos( $profile->profile, '/' ) + 1 );
 				$meta['name']     = $profile->name;
 				$meta['picture']  = $profile->large_picture;
@@ -67,7 +68,8 @@ class Keyring_Service_RunKeeper extends Keyring_Service_OAuth2 {
 	}
 
 	function get_display( Keyring_Access_Token $token ) {
-		return $token->get_meta( 'name' );;
+		return $token->get_meta( 'name' );
+
 	}
 
 	function test_connection() {

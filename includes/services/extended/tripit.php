@@ -20,23 +20,24 @@ class Keyring_Service_TripIt extends Keyring_Service_OAuth1 {
 		$this->authorization_header = true;
 		$this->authorization_realm  = false;
 
-		$this->set_endpoint( 'request_token', 'https://api.tripit.com/oauth/request_token',  'POST' );
-		$this->set_endpoint( 'authorize',     'https://www.tripit.com/oauth/authorize',      'GET'  );
-		$this->set_endpoint( 'access_token',  'https://api.tripit.com/oauth/access_token',   'POST' );
-		$this->set_endpoint( 'verify',        'https://api.tripit.com/v1/get/profile/id/me', 'GET'  );
+		$this->set_endpoint( 'request_token', 'https://api.tripit.com/oauth/request_token', 'POST' );
+		$this->set_endpoint( 'authorize', 'https://www.tripit.com/oauth/authorize', 'GET' );
+		$this->set_endpoint( 'access_token', 'https://api.tripit.com/oauth/access_token', 'POST' );
+		$this->set_endpoint( 'verify', 'https://api.tripit.com/v1/get/profile/id/me', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->app_id  = $creds['app_id'];
-		$this->key     = $creds['key'];
-		$this->secret  = $creds['secret'];
+		$creds        = $this->get_credentials();
+		$this->app_id = $creds['app_id'];
+		$this->key    = $creds['key'];
+		$this->secret = $creds['secret'];
 
-		$this->consumer = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
+		$this->consumer         = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
 
 		$this->requires_token( true );
 	}
 
 	function basic_ui_intro() {
+		/* translators: url */
 		echo '<p>' . sprintf( __( 'If you haven\'t created an app on TripIt yet, <a href="%s">create one now</a>. Make sure you select \'Full API Application\' and \'Web application or widget\'; other than that the settings are all up to you.', 'keyring' ), 'https://www.tripit.com/developer/create' ) . '</p>';
 		echo '<p>' . __( "Once you've created your app, you will see a yellow box at the top of the page, where you can get your <strong>API Key</strong> and <strong>API Secret</strong>, to enter below (you don't need an App ID value for TripIt).", 'keyring' ) . '</p>';
 	}
@@ -62,10 +63,10 @@ class Keyring_Service_TripIt extends Keyring_Service_OAuth1 {
 			$meta = array();
 		} else {
 			$meta = array(
-				'user_id'    => $response->Profile->{'@attributes'}->ref,
-				'username'   => $response->Profile->screen_name,
-				'name'       => $response->Profile->public_display_name,
-				'picture'    => $response->Profile->photo_url,
+				'user_id'  => $response->Profile->{'@attributes'}->ref,
+				'username' => $response->Profile->screen_name,
+				'name'     => $response->Profile->public_display_name,
+				'picture'  => $response->Profile->photo_url,
 			);
 		}
 
