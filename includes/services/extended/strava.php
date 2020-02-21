@@ -18,16 +18,16 @@ class Keyring_Service_Strava extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_strava_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize',    'https://www.strava.com/oauth/authorize',   'GET'  );
-		$this->set_endpoint( 'access_token', 'https://www.strava.com/oauth/token',       'POST' );
-		$this->set_endpoint( 'refresh',      'https://www.strava.com/oauth/token',       'POST' );
-		$this->set_endpoint( 'deauthorize',  'https://www.strava.com/oauth/deauthorize', 'POST' );
-		$this->set_endpoint( 'user',         'https://www.strava.com/api/v3/athlete',    'GET'  );
+		$this->set_endpoint( 'authorize', 'https://www.strava.com/oauth/authorize', 'GET' );
+		$this->set_endpoint( 'access_token', 'https://www.strava.com/oauth/token', 'POST' );
+		$this->set_endpoint( 'refresh', 'https://www.strava.com/oauth/token', 'POST' );
+		$this->set_endpoint( 'deauthorize', 'https://www.strava.com/oauth/deauthorize', 'POST' );
+		$this->set_endpoint( 'user', 'https://www.strava.com/api/v3/athlete', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->app_id  = $creds['app_id'];
-		$this->key     = $creds['key'];
-		$this->secret  = $creds['secret'];
+		$creds        = $this->get_credentials();
+		$this->app_id = $creds['app_id'];
+		$this->key    = $creds['key'];
+		$this->secret = $creds['secret'];
 
 		$this->authorization_header    = 'Bearer';
 		$this->authorization_parameter = false;
@@ -36,6 +36,7 @@ class Keyring_Service_Strava extends Keyring_Service_OAuth2 {
 	}
 
 	function basic_ui_intro() {
+		/* translators: url */
 		echo '<p>' . sprintf( __( 'You\'ll need to <a href="%s">create a new application</a> on Strava so that you can connect.', 'keyring' ), 'https://www.strava.com/settings/api' ) . '</p>';
 		echo '<p>' . __( "Once you've registered your application, copy the <strong>Application Name</strong> into the <strong>App ID</strong>, the <strong>Client ID</strong> and the <strong>Client Secret</strong> into the <strong>API Key</strong> and <strong>API Secret</strong> fields below,.", 'keyring' ) . '</p>';
 	}
@@ -87,10 +88,10 @@ class Keyring_Service_Strava extends Keyring_Service_OAuth2 {
 				} else {
 					$meta['name'] = $profile->username;
 				}
-				$meta['first_name']  = $profile->firstname;
-				$meta['last_name']   = $profile->lastname;
-				$meta['picture']     = $profile->profile;
-				$meta['first_date']  = $profile->created_at; // Capture the athlete's profile creation date for later use, eg: in keyring-social-importers
+				$meta['first_name'] = $profile->firstname;
+				$meta['last_name']  = $profile->lastname;
+				$meta['picture']    = $profile->profile;
+				$meta['first_date'] = $profile->created_at; // Capture the athlete's profile creation date for later use, eg: in keyring-social-importers
 			}
 
 			return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $profile, $this );
@@ -99,7 +100,8 @@ class Keyring_Service_Strava extends Keyring_Service_OAuth2 {
 	}
 
 	function get_display( Keyring_Access_Token $token ) {
-		return $token->get_meta( 'name' );;
+		return $token->get_meta( 'name' );
+
 	}
 
 	function maybe_refresh_token() {
@@ -115,21 +117,24 @@ class Keyring_Service_Strava extends Keyring_Service_OAuth2 {
 			return;
 		}
 
-		$response = wp_remote_post( $this->refresh_url, array(
-			'method' => $this->refresh_method,
-			'body'   => array(
-				'client_id'     => $this->key,
-				'client_secret' => $this->secret,
-				'refresh_token' => $meta['refresh_token'],
-				'grant_type'    => 'refresh_token',
-			),
-		) );
+		$response = wp_remote_post(
+			$this->refresh_url,
+			array(
+				'method' => $this->refresh_method,
+				'body'   => array(
+					'client_id'     => $this->key,
+					'client_secret' => $this->secret,
+					'refresh_token' => $meta['refresh_token'],
+					'grant_type'    => 'refresh_token',
+				),
+			)
+		);
 
 		if ( 200 !== wp_remote_retrieve_response_code( $response ) ) {
 			return false;
 		}
 
-		$return = json_decode( wp_remote_retrieve_body( $response ) );
+		$return          = json_decode( wp_remote_retrieve_body( $response ) );
 		$meta['expires'] = $return->expires_at;
 
 		// Build access token
@@ -142,7 +147,7 @@ class Keyring_Service_Strava extends Keyring_Service_OAuth2 {
 
 		// Store the updated access token
 		$access_token = apply_filters( 'keyring_access_token', $access_token, (array) $return );
-		$id = $this->store->update( $access_token );
+		$id           = $this->store->update( $access_token );
 
 		// And switch to using it
 		$this->set_token( $access_token );

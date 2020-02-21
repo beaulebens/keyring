@@ -21,25 +21,26 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_foursquare_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize',    'https://foursquare.com/oauth2/authenticate', 'GET' );
+		$this->set_endpoint( 'authorize', 'https://foursquare.com/oauth2/authenticate', 'GET' );
 		$this->set_endpoint( 'access_token', 'https://foursquare.com/oauth2/access_token', 'GET' );
-		$this->set_endpoint( 'self',         'https://api.foursquare.com/v2/users/self',   'GET' );
+		$this->set_endpoint( 'self', 'https://api.foursquare.com/v2/users/self', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->app_id  = $creds['app_id'];
-		$this->key     = $creds['key'];
-		$this->secret  = $creds['secret'];
+		$creds        = $this->get_credentials();
+		$this->app_id = $creds['app_id'];
+		$this->key    = $creds['key'];
+		$this->secret = $creds['secret'];
 	}
 
 	function basic_ui_intro() {
+		/* translators: url */
 		echo '<p>' . sprintf( __( 'If you haven\'t already, you\'ll need to <a href="%s">create a new app at Foursquare</a>. You should only need to worry about these settings:', 'keyring' ), 'https://foursquare.com/developers/register' ) . '</p>';
 		echo '<ol>';
 		echo '<li>' . __( "<strong>Your app name</strong>: enter whatever you like, maybe your website's name?", 'keyring' ) . '</li>';
 		/* translators: %s: the blog URL */
 		echo '<li>' . sprintf( __( "<strong>Download / welcome page url</strong>: just enter your website's URL, <code>%s</code>", 'keyring' ), get_bloginfo( 'url' ) ) . '</li>';
 		/* translators: %s: the redirect URL to verify the connection */
-		echo '<li>' . sprintf( __( "<strong>Redirect URI(s)</strong>: Copy-paste this, <code>%s</code>", 'keyring' ), Keyring_Util::admin_url( 'foursquare', array( 'action' => 'verify' ) ) ) . '</li>';
-		echo '<li>' . __( "<strong>New users can connect via the web</strong>: check the box", 'keyring' ) . '</li>';
+		echo '<li>' . sprintf( __( '<strong>Redirect URI(s)</strong>: Copy-paste this, <code>%s</code>', 'keyring' ), Keyring_Util::admin_url( 'foursquare', array( 'action' => 'verify' ) ) ) . '</li>';
+		echo '<li>' . __( '<strong>New users can connect via the web</strong>: check the box', 'keyring' ) . '</li>';
 		echo '</ol>';
 		echo '<p>' . __( "Once you've saved those changes, copy the <strong>Client id</strong> value into the <strong>API Key</strong> field, and the <strong>Client secret</strong> value into the <strong>API Secret</strong> field and click save (you don't need an App ID value for Foursquare).", 'keyring' ) . '</p>';
 	}

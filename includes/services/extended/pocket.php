@@ -13,15 +13,22 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_pocket_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'request_token', 'https://getpocket.com/v3/oauth/request',   'POST' );
-		$this->set_endpoint( 'authorize',     'https://getpocket.com/auth/authorize',     'GET'  );
-		$this->set_endpoint( 'access_token',  'https://getpocket.com/v3/oauth/authorize', 'POST' );
+		$this->set_endpoint( 'request_token', 'https://getpocket.com/v3/oauth/request', 'POST' );
+		$this->set_endpoint( 'authorize', 'https://getpocket.com/auth/authorize', 'GET' );
+		$this->set_endpoint( 'access_token', 'https://getpocket.com/v3/oauth/authorize', 'POST' );
 
 		$creds              = $this->get_credentials();
 		$this->key          = $creds['key'];
 		$kr_nonce           = wp_create_nonce( 'keyring-verify' );
 		$nonce              = wp_create_nonce( 'keyring-verify-pocket' );
-		$this->redirect_uri = Keyring_Util::admin_url( self::NAME, array( 'action' => 'verify', 'kr_nonce' => $kr_nonce, 'nonce' => $nonce, ) );
+		$this->redirect_uri = Keyring_Util::admin_url(
+			self::NAME,
+			array(
+				'action'   => 'verify',
+				'kr_nonce' => $kr_nonce,
+				'nonce'    => $nonce,
+			)
+		);
 
 		add_filter( 'keyring_request_token', array( $this, 'obtain_request_token' ), 10, 1 );
 		add_filter( 'keyring_pocket_request_token_params', array( $this, 'request_token_params' ), 10, 1 );
@@ -31,10 +38,11 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 	function basic_ui_intro() {
 		echo '<p>' . __( "If you haven't already, you'll need to set up an app on Pocket:", 'keyring' ) . '</p>';
 		echo '<ol>';
+		/* translators: url */
 		echo '<li>' . sprintf( __( "Head over to <a href='%s'>this page</a>", 'keyring' ), 'https://getpocket.com/developer/apps/new' ) . '</li>';
-		echo '<li>' . __( "Enter a name for your app (maybe the name of your website?) and a brief description.", 'keyring' ) . '</li>';
-		echo '<li>' . __( "Select <strong>Retrieve</strong> for Permissions, and <strong>Web</strong> for Platforms.", 'keyring' ) . '</li>';
-		echo '<li>' . __( "Accept Terms of Service and click <strong>CREATE APPLICATION</strong>", 'keyring' ) . '</li>';
+		echo '<li>' . __( 'Enter a name for your app (maybe the name of your website?) and a brief description.', 'keyring' ) . '</li>';
+		echo '<li>' . __( 'Select <strong>Retrieve</strong> for Permissions, and <strong>Web</strong> for Platforms.', 'keyring' ) . '</li>';
+		echo '<li>' . __( 'Accept Terms of Service and click <strong>CREATE APPLICATION</strong>', 'keyring' ) . '</li>';
 		echo '</ol>';
 		echo '<p>' . __( "Once you're done configuring your app, copy and paste your <strong>Consumer Key</strong> into API Key field. Leave the rest of the fields blank.", 'keyring' ) . '</p>';
 	}
@@ -47,9 +55,9 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 	function obtain_request_token( $token ) {
 		if ( 'pocket' === $token->name ) {
 			$this->requires_token = false;
-			$params = array(
+			$params               = array(
 				'method' => $this->request_token_method,
-				'body' => array(
+				'body'   => array(
 					'consumer_key' => $this->key,
 					'redirect_uri' => $this->callback_url,
 				),
@@ -64,11 +72,22 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 	}
 
 	function request_token_params( $params ) {
-		$token = $this->store->get_token( array( 'id' => $params['state'], 'type' => 'request' ) );
+		$token = $this->store->get_token(
+			array(
+				'id'   => $params['state'],
+				'type' => 'request',
+			)
+		);
 
 		if ( isset( $token->token ) && ! empty( $token->token ) ) {
 			$params = array(
-				'redirect_uri' => add_query_arg( array( 'state' => $params['state'], 'code' => $token->token ), $params['redirect_uri'] ),
+				'redirect_uri'  => add_query_arg(
+					array(
+						'state' => $params['state'],
+						'code'  => $token->token,
+					),
+					$params['redirect_uri']
+				),
 				'request_token' => $token->token,
 			);
 		}
@@ -79,7 +98,7 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 	function verify_token_params( $params ) {
 		return array(
 			'consumer_key' => $params['client_id'],
-			'code' => $params['code']
+			'code'         => $params['code'],
 		);
 	}
 
@@ -87,9 +106,9 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 		return array(
 			'headers' => array(
 				'Content-Type' => 'application/json; charset=UTF-8',
-				'X-Accept' => 'application/json'
+				'X-Accept'     => 'application/json',
 			),
-			'body' => $params['body']
+			'body'    => $params['body'],
 		);
 	}
 
@@ -100,12 +119,13 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 	}
 
 	function request( $url, array $params = array() ) {
-		$params['body']['consumer_key']    = $this->key;
+		$params['body']['consumer_key'] = $this->key;
 
 		$params['headers']['Content-Type'] = 'application/json; charset=UTF-8';
 		$params['headers']['X-Accept']     = 'application/json';
 
-		if ( $token = $this->get_token() ) {
+		$token = $this->get_token();
+		if ( $token ) {
 			$params['body']['access_token'] = $token->token;
 		}
 
@@ -119,8 +139,8 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 			$meta = array();
 		} else {
 			$meta = array(
-				'user_id'  => $token['username'],
-				'name'     => $token['username'],
+				'user_id' => $token['username'],
+				'name'    => $token['username'],
 			);
 		}
 
@@ -137,8 +157,8 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 			array(
 				'method' => 'POST',
 				'body'   => array(
-					'count' => 1
-				)
+					'count' => 1,
+				),
 			)
 		);
 		if ( ! Keyring_Util::is_error( $response ) ) {

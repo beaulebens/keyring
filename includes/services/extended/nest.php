@@ -18,14 +18,14 @@ class Keyring_Service_Nest extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_nest_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$this->set_endpoint( 'authorize',    'https://home.nest.com/login/oauth2',            'GET'  );
+		$this->set_endpoint( 'authorize', 'https://home.nest.com/login/oauth2', 'GET' );
 		$this->set_endpoint( 'access_token', 'https://api.home.nest.com/oauth2/access_token', 'POST' );
-		$this->set_endpoint( 'self',         'https://developer-api.nest.com/',               'GET'  );
+		$this->set_endpoint( 'self', 'https://developer-api.nest.com/', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->app_id  = $creds['app_id'];
-		$this->key     = $creds['key'];
-		$this->secret  = $creds['secret'];
+		$creds        = $this->get_credentials();
+		$this->app_id = $creds['app_id'];
+		$this->key    = $creds['key'];
+		$this->secret = $creds['secret'];
 
 		$this->authorization_header = 'Bearer';
 
@@ -41,7 +41,7 @@ class Keyring_Service_Nest extends Keyring_Service_OAuth2 {
 		if ( ! isset( $request['kr_nonce'] ) ) {
 			// First request, from Nest. Nonce it and move on.
 			$kr_nonce = wp_create_nonce( 'keyring-verify' );
-			$nonce = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
+			$nonce    = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
 			wp_safe_redirect(
 				Keyring_Util::admin_url(
 					$this->get_name(),
