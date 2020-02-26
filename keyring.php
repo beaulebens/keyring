@@ -16,6 +16,12 @@ defined( 'KEYRING__DEBUG_MODE' ) or define( 'KEYRING__DEBUG_MODE', false );
 // Optionally define this in your wp-config.php or some other global config file.
 defined( 'KEYRING__TOKEN_STORE' ) or define( 'KEYRING__TOKEN_STORE', 'Keyring_SingleStore' );
 
+// Define this as true in your wp-config.php to enable multi-site functionality.
+defined( 'KEYRING__MULTISITE' ) or define( 'KEYRING__MULTISITE', false );
+
+// When Keyring_MultiStore is in use, it will store all tokens on a particular site.
+defined( 'KEYRING__MULTI_STORE_SITE_ID' ) or define( 'KEYRING__MULTI_STORE_SITE_ID', 1 );
+
 // Keyring can be run in "headless" mode, which just avoids creating any UI, and leaves
 // that up to you. Defaults to off (provides its own basic UI).
 defined( 'KEYRING__HEADLESS_MODE' ) or define( 'KEYRING__HEADLESS_MODE', false );
