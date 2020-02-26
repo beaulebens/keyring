@@ -17,6 +17,9 @@ class Keyring_Token {
 	var $service   = false; // Will contain a Keyring_Service object
 	var $unique_id = false;
 
+	var $owner        = -1;
+	var $shared_sites = array();
+
 	/**
 	 * Create a Keyring_Token instance.
 	 * @param string  $service Shortname for the service this token is for
@@ -113,6 +116,24 @@ class Keyring_Token {
 
 		// Not expired
 		return false;
+	}
+
+	/**
+	 * Setup the owner of this token, usually the WordPress user who created it.
+	 *
+	 * @param int $user_id The owner's user ID.
+	 */
+	function set_owner( $user_id ) {
+		$this->owner = get_user_by( 'id', $user_id );
+	}
+
+	/**
+	 * In a multisite environment, setup a list of the sites this token is shared on.
+	 *
+	 * @param array $site_ids An array of Site IDs.
+	 */
+	function set_shared_sites( $site_ids ) {
+		$this->shared_sites = array_map( 'get_site', (array) $site_ids );
 	}
 }
 
