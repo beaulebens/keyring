@@ -134,9 +134,10 @@ class Keyring {
 		// If so, they are unpacked again here and merged back into the request globals.
 		if ( ! empty( $_REQUEST['state'] ) ) {
 			$unpacked_state =  unserialize( base64_decode( $_REQUEST['state'] ) );
-			
 			if ( ! empty( $unpacked_state['hash'] ) ) {
-				if ( ! $validated_parameters = Keyring_Util::get_validated_parameters( $unpacked_state ) ) {
+				$validated_parameters = Keyring_Util::get_validated_parameters( $unpacked_state );
+				
+				if ( ! $validated_parameters ) {
 					Keyring::error( __( 'Invalid data returned by the service. Please try again.', 'keyring' ) );
 					exit;
 				}
