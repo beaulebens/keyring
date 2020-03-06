@@ -44,9 +44,11 @@ class Keyring_Service_Instagram extends Keyring_Service_OAuth2 {
 	}
 
 	/**
-	 * Add scope to the outbound URL, and allow developers to modify it
+	 * Add scope to the outbound URL, and allow developers to modify it, and also 
+	 * pack all of the redirct_uri params into the state param as Instagram does strips
+	 * these before redirecting
 	 * @param  array $params Core request parameters
-	 * @return Array containing originals, plus the scope parameter
+	 * @return Array containing originals, plus the scope parameter, and a serialized state param
 	 */
 	function filter_request_token( $params ) {
 		$params['scope'] = apply_filters( 'keyring_' . $this->get_name() . '_scope', 'user_profile,user_media' );
