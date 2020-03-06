@@ -56,10 +56,10 @@ class Keyring_Service_Instagram extends Keyring_Service_OAuth2 {
 		// The Instagram API does not return redirect_uri params, so we need to pack these 
 		// into the state param
 		$url_components = parse_url( $params['redirect_uri'] );
-		parse_str($url_components['query'], $redirect_state);
+		parse_str( $url_components['query'], $redirect_state );
 		$redirect_state['state'] = $params['state'];
+		$params['state'] =  Keyring_Util::get_hashed_parameters( $redirect_state );
 		$params['redirect_uri'] = $this->redirect_uri;
-		$params['state'] = base64_encode(serialize( $redirect_state ));
 		
 		return $params;
 	}
