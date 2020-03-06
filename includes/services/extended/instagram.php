@@ -27,8 +27,39 @@ class Keyring_Service_Instagram extends Keyring_Service_OAuth2 {
 		$this->key    = $creds['key'];
 		$this->secret = $creds['secret'];
 
+		// The new Instagram API is very fussy about the redirect uri, so this strips the query params 
+		// from the default admin url
+		$admin_url = Keyring_Util::admin_url();
+		$this->redirect_uri = substr($admin_url,0,strpos($admin_url, '?'));
+
 		$this->authorization_header    = false; // Send in querystring
 		$this->authorization_parameter = 'access_token';
+		add_filter( 'keyring_instagram_request_token_params', array( $this, 'filter_request_token' ) );
+		add_filter( 'keyring_instagram_verify_token_post_params', array( $this, 'verify_token_post_params' ) );
+	}
+
+	function verify_token_post_params( $params ) {
+		$params['body']['redirect_uri'] = $this->redirect_uri;
+		return $params;
+	}
+
+	/**
+	 * Add scope to the outbound URL, and allow developers to modify it
+	 * @param  array $params Core request parameters
+	 * @return Array containing originals, plus the scope parameter
+	 */
+	function filter_request_token( $params ) {
+		$params['scope'] = apply_filters( 'keyring_' . $this->get_name() . '_scope', 'user_profile,user_media' );
+
+		// The Instagram API does not return redirect_uri params, so we need to pack these 
+		// into the state param
+		$url_components = parse_url( $params['redirect_uri'] );
+		parse_str($url_components['query'], $redirect_state);
+		$redirect_state['state'] = $params['state'];
+		$params['redirect_uri'] = $this->redirect_uri;
+		$params['state'] = base64_encode(serialize( $redirect_state ));
+		
+		return $params;
 	}
 
 	function basic_ui_intro() {

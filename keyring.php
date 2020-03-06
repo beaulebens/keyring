@@ -129,6 +129,18 @@ class Keyring {
 	 */
 	static function request_handlers() {
 		global $current_user;
+		
+		// Some services do not return the redirect_uri params, in this case these are packed into the state param.
+		// If so, they are unpacked again here and merged back into the request globals.
+		if ( ! empty( $_REQUEST['state'] ) ) {
+			$unpacked_state = unserialize( base64_decode( $_REQUEST['state'] ) );
+			if ( ! empty( $unpacked_state['action'] )) {
+				foreach ( $unpacked_state as $key => $value) {
+					$_REQUEST[ $key ] = $value;
+				}
+				$_GET['state'] = $unpacked_state['state'];
+			}
+		}
 
 		if ( defined( 'KEYRING__FORCE_USER' ) && KEYRING__FORCE_USER && in_array( $_REQUEST['action'], array( 'request', 'verify' ), true ) ) {
 			global $current_user;
