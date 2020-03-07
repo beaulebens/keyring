@@ -130,24 +130,8 @@ class Keyring {
 	static function request_handlers() {
 		global $current_user;
 		
-		// Some services do not return the redirect_uri params, in this case these are packed into the state param.
-		// If so, they are unpacked again here and merged back into the request globals.
 		if ( ! empty( $_REQUEST['state'] ) ) {
-			$unpacked_state =  unserialize( base64_decode( $_REQUEST['state'] ) );
-			if ( ! empty( $unpacked_state['hash'] ) ) {
-				$validated_parameters = Keyring_Util::get_validated_parameters( $unpacked_state );
-				
-				if ( ! $validated_parameters ) {
-					Keyring::error( __( 'Invalid data returned by the service. Please try again.', 'keyring' ) );
-					exit;
-				}
-
-				foreach ( $validated_parameters as $key => $value) {
-					$_REQUEST[ $key ] = $value;
-				}
-
-				$_GET['state'] = $validated_parameters['state'];
-			}
+			Keyring_Util::unpack_state_parameters( $_REQUEST['state'] );
 		}
 
 		if ( defined( 'KEYRING__FORCE_USER' ) && KEYRING__FORCE_USER && in_array( $_REQUEST['action'], array( 'request', 'verify' ), true ) ) {
@@ -347,12 +331,37 @@ class Keyring_Util {
 	}
 
 	/**
+	 * For some services the request params are serialised into the state param. This
+	 * method unserialises these and adds them back to the _REQUEST global
+	 *
+	 * @param string $state The serialised $_REQUEST['state'] param
+	 * @return void
+	 */
+	static function unpack_state_parameters( $state ) {
+		$unpacked_state =  unserialize( base64_decode( $state ) );
+		if ( ! empty( $unpacked_state['hash'] ) ) {
+			$validated_parameters = Keyring_Util::get_validated_parameters( $unpacked_state );
+
+			if ( ! $validated_parameters ) {
+				Keyring::error( __( 'Invalid data returned by the service. Please try again.', 'keyring' ) );
+				exit;
+			}
+
+			foreach ( $validated_parameters as $key => $value) {
+				$_REQUEST[ $key ] = $value;
+			}
+
+			$_GET['state'] = $validated_parameters['state'];
+		}
+	}
+
+	/**
 	 * Get an sha256 hash of a seialized array of parameters
 	 *
 	 * @param string $serialized_parameters A serialized string of a parameter array.
 	 * @return string An sha256 hash
 	 */
-	static function get_paramater_hash( $serialized_parameters ) {
+	static function get_parameter_hash( $serialized_parameters ) {
 		return hash_hmac( 'sha256', serialize( $serialized_parameters ), NONCE_KEY );
 	}
 
@@ -364,7 +373,7 @@ class Keyring_Util {
 	 * @return string A base64 encoded copy of the serialized paramaters
 	 */
 	static function get_hashed_parameters( $parameters ) {
-		$parameters['hash'] = self::get_paramater_hash( serialize( $parameters ) );
+		$parameters['hash'] = self::get_parameter_hash( serialize( $parameters ) );
 
 		return base64_encode( serialize( $parameters ) );
 	}
@@ -383,7 +392,7 @@ class Keyring_Util {
 		$return_hash = $parameters['hash'];
 		unset( $parameters['hash'] );
 
-		if ( $return_hash !== self::get_paramater_hash( serialize( $parameters ) ) ) {
+		if ( $return_hash !== self::get_parameter_hash( serialize( $parameters ) ) ) {
 			return false;
 		}
 
