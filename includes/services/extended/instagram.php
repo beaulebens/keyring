@@ -71,16 +71,23 @@ class Keyring_Service_Instagram extends Keyring_Service_OAuth2 {
 	}
 
 	function build_token_meta( $token ) {
-		if ( empty( $token['user'] ) ) {
-			$meta = array();
-		} else {
-			$meta = array(
-				'user_id'  => $token['user']->id,
-				'username' => $token['user']->username,
-				'name'     => $token['user']->full_name,
-				'picture'  => $token['user']->profile_picture,
-			);
-		}
+		$this->set_token(
+			new Keyring_Access_Token(
+				$this->get_name(),
+				$token['access_token'],
+				array()
+			)
+		);
+		$response = $this->request( add_query_arg( 'fields', 'id, username', $this->self_url ), array( 'method' => $this->self_method ) );
+
+		if ( Keyring_Util::is_error( $response ) ) {
+            $meta = array();
+        } else {
+            $meta = array(
+                'user_id'  => $response->id,
+                'name'     => $response->username,
+            );
+        }
 
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, null, $this );
 	}
