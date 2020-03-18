@@ -6,8 +6,8 @@
  */
 
 class Keyring_Service_Instagram_Basic_Display extends Keyring_Service_OAuth2 {
-	const NAME  = 'instagram_basic_display';
-	const LABEL = 'Instagram Basic Display';
+	const NAME  = 'instagram-basic-display';
+	const LABEL = 'Instagram Basic';
 
 	function __construct() {
 		parent::__construct();
@@ -15,7 +15,7 @@ class Keyring_Service_Instagram_Basic_Display extends Keyring_Service_OAuth2 {
 		// Enable "basic" UI for entering key/secret
 		if ( ! KEYRING__HEADLESS_MODE ) {
 			add_action( 'keyring_' . $this->get_name() . '_manage_ui', array( $this, 'basic_ui' ) );
-			add_filter( 'keyring_i' . $this->get_name() . '_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
+			add_filter( 'keyring_' . $this->get_name() . '_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
 		$this->set_endpoint( 'authorize', 'https://api.instagram.com/oauth/authorize/', 'GET' );
@@ -31,7 +31,7 @@ class Keyring_Service_Instagram_Basic_Display extends Keyring_Service_OAuth2 {
 		// The new Instagram API is very fussy about the redirect uri, so this strips the query params 
 		// from the default admin url
 		$admin_url = Keyring_Util::admin_url();
-		$this->redirect_uri = substr($admin_url,0,strpos($admin_url, '?'));
+		$this->redirect_uri = substr( $admin_url, 0, strpos( $admin_url, '?' ) );
 
 		$this->authorization_header    = false; // Send in querystring
 		$this->authorization_parameter = 'access_token';
@@ -82,13 +82,13 @@ class Keyring_Service_Instagram_Basic_Display extends Keyring_Service_OAuth2 {
 		$response = $this->request( add_query_arg( 'fields', 'id, username', $this->self_url ), array( 'method' => $this->self_method ) );
 
 		if ( Keyring_Util::is_error( $response ) ) {
-            $meta = array();
-        } else {
-            $meta = array(
-                'user_id'  => $response->id,
-                'name'     => $response->username,
-            );
-        }
+			$meta = array();
+		} else {
+			$meta = array(
+				'user_id'  => $response->id,
+				'name'     => $response->username,
+			);
+		}
 
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, null, $this );
 	}
