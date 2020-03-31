@@ -129,7 +129,7 @@ class Keyring {
 	 */
 	static function request_handlers() {
 		global $current_user;
-		
+
 		if ( ! empty( $_REQUEST['state'] ) ) {
 			Keyring_Util::unpack_state_parameters( $_REQUEST['state'] );
 		}
@@ -338,7 +338,7 @@ class Keyring_Util {
 	 * @return void
 	 */
 	static function unpack_state_parameters( $state ) {
-		$unpacked_state =  unserialize( base64_decode( $state ) );
+		$unpacked_state = unserialize( base64_decode( $state ) );
 		if ( ! empty( $unpacked_state['hash'] ) ) {
 			$validated_parameters = Keyring_Util::get_validated_parameters( $unpacked_state );
 
@@ -347,7 +347,7 @@ class Keyring_Util {
 				exit;
 			}
 
-			foreach ( $validated_parameters as $key => $value) {
+			foreach ( $validated_parameters as $key => $value ) {
 				$_REQUEST[ $key ] = $value;
 			}
 
@@ -392,7 +392,7 @@ class Keyring_Util {
 		$return_hash = $parameters['hash'];
 		unset( $parameters['hash'] );
 
-		if ( $return_hash !== self::get_parameter_hash( serialize( $parameters ) ) ) {
+		if ( self::get_parameter_hash( serialize( $parameters ) ) !== $return_hash ) {
 			return false;
 		}
 
