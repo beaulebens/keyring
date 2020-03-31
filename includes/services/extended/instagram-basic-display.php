@@ -20,6 +20,8 @@ class Keyring_Service_Instagram_Basic_Display extends Keyring_Service_OAuth2 {
 
 		$this->set_endpoint( 'authorize', 'https://api.instagram.com/oauth/authorize/', 'GET' );
 		$this->set_endpoint( 'access_token', 'https://api.instagram.com/oauth/access_token', 'POST' );
+		$this->set_endpoint( 'exchange_token', 'https://graph.instagram.com/access_token', 'GET' );
+		$this->set_endpoint( 'refresh_token', 'https://graph.instagram.com/refresh_access_token', 'GET' );
 		$this->set_endpoint( 'self', 'https://graph.instagram.com/me', 'GET' );
 
 		$creds        = $this->get_credentials();
@@ -82,12 +84,15 @@ class Keyring_Service_Instagram_Basic_Display extends Keyring_Service_OAuth2 {
 		$response = $this->request( add_query_arg( 'fields', 'id, username', $this->self_url ), array( 'method' => $this->self_method ) );
 
 		if ( Keyring_Util::is_error( $response ) ) {
-			$meta = array();
-		} else {
+    		$meta = array();
+    	} else {
 			$meta = array(
-				'user_id'  => $response->id,
+        		'user_id'  => $response->id,
 				'name'     => $response->username,
 			);
+			if ( ! empty( $token['expires_in'] ) ) {
+				$meta['expires'] = time() + $token['expires_in'];
+			}
 		}
 
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, null, $this );
@@ -105,6 +110,86 @@ class Keyring_Service_Instagram_Basic_Display extends Keyring_Service_OAuth2 {
 
 		return $response;
 	}
+
+	function parse_access_token( $token ) {
+		//Somewhat of a hack, but we need a place to exchange for a long lived token
+		$token = (array) json_decode( $token );
+		return $this->exchange_for_long_lived_token( $token );
+	}
+
+	function exchange_for_long_lived_token( $token ) {
+		$params = array(
+			'client_secret' => $this->secret,
+			'grant_type'    => 'ig_exchange_token',
+			'access_token'  => $token['access_token'],
+		);
+		$url = $this->exchange_token_url . '?' . http_build_query( $params );
+		$result = wp_remote_get( $url );
+		Keyring_Util::debug( 'Instagram Exchange Token Response' );
+		Keyring_Util::debug( $result );
+		if ( 200 == wp_remote_retrieve_response_code( $result ) ) {
+			$token = array_merge( $token, (array) json_decode( wp_remote_retrieve_body( $result ) ) );
+			return $token;
+		}
+
+		Keyring::error( __( 'There was a problem exchanging an Instagram access token for a long lived one.' ), array( 'remote_user_id' => $token['user_id'] ) );
+		//TODO: Decide if we should exit here or simply carry on with the short lived token.
+		//It seems like Keyring::error exits at this point anyway.
+		return $token;
+	}
+
+	function request( $url, array $params = array() ) {
+		$this->maybe_refresh_token();
+		return parent::request( $url, $params );
+	}
+
+	function maybe_refresh_token() {
+		$token = $this->get_token();
+		if ( empty( $token ) ) {
+			return false;
+		}
+
+		//Long lived tokens last for 60 days, but
+		//refresh them after 36 hours to give them the
+		//best chance of not expiring.
+		if ( ! $token->is_expired( 5054400 ) ) {
+			return;
+		}
+
+		$params = array(
+			'grant_type'   => 'ig_refresh_token',
+			'access_token' => (string) $token,
+		);
+
+
+		$result = wp_remote_get( $this->refresh_token_url . '?' . http_build_query( $params ) );
+
+		if ( 200 !== wp_remote_retrieve_response_code( $result ) ) {
+			return false;
+		}
+
+		$response = json_decode( wp_remote_retrieve_body( $result ) );
+		$meta = $token->get_meta();
+		$meta['expires'] = time() + $response->expires_in;
+
+
+		// Build access token
+		$access_token = new Keyring_Access_Token(
+			$this->get_name(),
+			$response->access_token,
+			$meta,
+			$this->token->unique_id
+		);
+
+		// Store the updated access token
+		$access_token = apply_filters( 'keyring_access_token', $access_token, (array) $response );
+		$this->store->update( $access_token );
+
+		// And switch to using it
+		$this->set_token( $access_token );
+	}
+
+
 }
 
 add_action( 'keyring_load_services', array( 'Keyring_Service_Instagram_Basic_Display', 'init' ) );
