@@ -69,7 +69,7 @@ abstract class Keyring_Service {
 		add_action( 'keyring_' . $this->get_name() . '_verify', array( $this, 'verify_token' ) );
 	}
 
-	static function &init() {
+	static function init() {
 		static $instance = false;
 
 		if ( ! $instance ) {
