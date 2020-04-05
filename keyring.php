@@ -63,7 +63,7 @@ class Keyring {
 		$this->admin_page = apply_filters( 'keyring_admin_page', 'keyring' );
 	}
 
-	static function &init( $force_load = false ) {
+	static function init( $force_load = false ) {
 		static $instance = false;
 
 		if ( ! $instance ) {

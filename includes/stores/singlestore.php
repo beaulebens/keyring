@@ -10,7 +10,7 @@
 class Keyring_SingleStore extends Keyring_Store {
 	var $unique_id = false;
 
-	static function &init() {
+	static function init() {
 		static $instance = false;
 
 		if ( ! $instance ) {
