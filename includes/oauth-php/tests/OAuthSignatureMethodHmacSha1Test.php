@@ -1,7 +1,7 @@
 <?php
 
-require_once 'common.php';
-require_once 'Mock_OAuthBaseStringRequest.php';
+require_once dirname(__FILE__) . '/common.php';
+require_once dirname(__FILE__) . '/Mock_OAuthBaseStringRequest.php';
 
 class OAuthSignatureMethodHmacSha1Test extends PHPUnit\Framework\TestCase {
 	private $method;

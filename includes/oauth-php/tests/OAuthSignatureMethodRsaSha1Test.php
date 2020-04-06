@@ -1,8 +1,8 @@
 <?php
 
-require_once 'common.php';
-require_once 'Mock_OAuthBaseStringRequest.php';
-require_once 'Mock_OAuthSignatureMethod_RSA_SHA1.php';
+require_once dirname(__FILE__) . '/common.php';
+require_once dirname(__FILE__) . '/Mock_OAuthBaseStringRequest.php';
+require_once dirname(__FILE__) . '/Mock_OAuthSignatureMethod_RSA_SHA1.php';
 
 class OAuthSignatureMethodRsaSha1Test extends PHPUnit\Framework\TestCase {
 	private $method;
