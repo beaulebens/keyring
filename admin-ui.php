@@ -19,7 +19,7 @@ class Keyring_Admin_UI {
 		add_filter( 'plugin_action_links_' . plugin_basename( __DIR__ ) . '/keyring.php', array( $this, 'settings_link' ) );
 	}
 
-	static function &init() {
+	static function init() {
 		static $instance = false;
 
 		if ( ! $instance ) {
