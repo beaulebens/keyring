@@ -78,7 +78,7 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 	}
 
 	function test_connection() {
-		$res = $this->request( 'https://api.twitter.com/1.1/account/verify_credentials.json' );
+		$res = $this->request( $this->verify_url, array( 'method' => $this->verify_method ) );
 		if ( ! Keyring_Util::is_error( $res ) ) {
 			return true;
 		}
@@ -93,6 +93,15 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 		}
 
 		return $res;
+	}
+
+	function fetch_profile_picture() {
+		$res = $this->request( add_query_arg( array( 'user_id' => $this->token->get_meta( 'external_id' ) ), $this->user_info_url ), array( 'method' => $this->user_info_method ) );
+		if ( Keyring_Util::is_error( $res ) ) {
+			return $res;
+		}
+
+		return empty( $res->profile_image_url_https ) ? null : esc_url_raw( str_replace( '_normal', '', $res->profile_image_url_https ) ); // large size https://dev.twitter.com/overview/general/user-profile-images-and-banners
 	}
 }
 

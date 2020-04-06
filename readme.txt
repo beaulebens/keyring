@@ -106,6 +106,7 @@ Add files to includes/services/extended/ that either implement one of the includ
 == Changelog ==
 
 =  =
+* Enhancement: `fetch_profile_picture` method added to Twitter service. Props @glendaviesnz.
 * Enhancement BREAKING: LinkedIn now uses OAuth2. Props @glendaviesnz.
 * Enhancement: Added a GitHub Service definition, props @alperakgun.
 * Enhancement: Added a Google Drive Service definition, props @scruffian.
