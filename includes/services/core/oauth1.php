@@ -381,6 +381,8 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		if ( '2' === substr( wp_remote_retrieve_response_code( $res ), 0, 1 ) ) {
 			if ( $raw_response ) {
 				return wp_remote_retrieve_body( $res );
+			} elseif ( '' === wp_remote_retrieve_body( $res ) ) {
+				return wp_remote_retrieve_headers( $res );
 			} else {
 				return $this->parse_response( wp_remote_retrieve_body( $res ) );
 			}
