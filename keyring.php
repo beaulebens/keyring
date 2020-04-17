@@ -130,6 +130,10 @@ class Keyring {
 	static function request_handlers() {
 		global $current_user;
 
+		if ( ! empty( $_REQUEST['state'] ) ) {
+			Keyring_Util::unpack_state_parameters( $_REQUEST['state'] );
+		}
+
 		if ( defined( 'KEYRING__FORCE_USER' ) && KEYRING__FORCE_USER && in_array( $_REQUEST['action'], array( 'request', 'verify' ), true ) ) {
 			global $current_user;
 			$real_user = $current_user->ID;
@@ -324,6 +328,75 @@ class Keyring_Util {
 
 	static function is_error( $obj ) {
 		return is_a( $obj, 'Keyring_Error' );
+	}
+
+	/**
+	 * For some services the request params are serialised into the state param. This
+	 * method unserialises these and adds them back to the _REQUEST global
+	 *
+	 * @param string $state The serialised $_REQUEST['state'] param
+	 * @return void
+	 */
+	static function unpack_state_parameters( $state ) {
+		$unpacked_state = unserialize( base64_decode( $state ) );
+		if ( ! empty( $unpacked_state['hash'] ) ) {
+			$validated_parameters = Keyring_Util::get_validated_parameters( $unpacked_state );
+
+			if ( ! $validated_parameters ) {
+				Keyring::error( __( 'Invalid data returned by the service. Please try again.', 'keyring' ) );
+				exit;
+			}
+
+			foreach ( $validated_parameters as $key => $value ) {
+				$_REQUEST[ $key ] = $value;
+			}
+
+			$_GET['state'] = $validated_parameters['state'];
+		}
+	}
+
+	/**
+	 * Get an sha256 hash of a seialized array of parameters
+	 *
+	 * @param string $serialized_parameters A serialized string of a parameter array.
+	 * @return string An sha256 hash
+	 */
+	static function get_parameter_hash( $serialized_parameters ) {
+		return hash_hmac( 'sha256', serialize( $serialized_parameters ), NONCE_KEY );
+	}
+
+	/**
+	 * Get a based 64 encoded serialzed representation of an array of parameters which includes
+	 * a hash of the original params so they can be verified in a service callback
+	 *
+	 * @param array $parameters An array of query parameters.
+	 * @return string A base64 encoded copy of the serialized paramaters
+	 */
+	static function get_hashed_parameters( $parameters ) {
+		$parameters['hash'] = self::get_parameter_hash( serialize( $parameters ) );
+
+		return base64_encode( serialize( $parameters ) );
+	}
+
+	/**
+	 * Validates that a hash of the parameter array matches the included hash parameter
+	 *
+	 * @param array $parameters An array of query parameters.
+	 * @return array An array of the parameters minus the hash
+	 */
+	static function get_validated_parameters( $parameters ) {
+		if ( empty( $parameters['hash'] ) ) {
+			return false;
+		}
+
+		$return_hash = $parameters['hash'];
+		unset( $parameters['hash'] );
+
+		if ( self::get_parameter_hash( serialize( $parameters ) ) !== $return_hash ) {
+			return false;
+		}
+
+		return $parameters;
 	}
 }
 
