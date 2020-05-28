@@ -32,6 +32,7 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		$this->redirect_uri = $creds['redirect_uri'];
 		$this->key          = $creds['key'];
 		$this->secret       = $creds['secret'];
+		$this->scope        = $creds['scope'];
 
 		$this->authorization_header    = 'Bearer';
 		$this->authorization_parameter = false;
@@ -73,14 +74,14 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		echo '<li>' . sprintf( __( 'In the <strong>Authorized Redirect URIs</strong> box, enter the URL <code>%s</code>.', 'keyring' ), Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify' ) ) ) . '</li>';
 		echo '<li>' . __( "Click <strong>Create</strong> when you're done.", 'keyring' ) . '</li>';
 		echo '</ol>';
-		echo '<p>' . __( "Once you've saved your details, copy the <strong>Client ID</strong> into the <strong>Client ID</strong> field below, and the <strong>Client secret</strong> value into <strong>Client Secret</strong>. The Redirect URI box should fill itself out for you.", 'keyring' ) . '</p>';
+		echo '<p>' . __( "Once you've saved your details, copy the <strong>Client ID</strong> into the <strong>Client ID</strong> field below, and the <strong>Client secret</strong> value into <strong>Client Secret</strong>. The Redirect URI box should fill itself out for you. The scope should fill itself with a default value, you can edit it if you need different permissions.", 'keyring' ) . '</p>';
 
 	}
 
 	function request_token_params( $params ) {
 		$class                 = get_called_class();
 		$params['prompt']      = 'consent'; // Always prompt, and get a refresh token for offline access
-		$params['scope']       = $class::SCOPE;
+		$params['scope']       = $this->scope;
 		$params['access_type'] = $class::ACCESS_TYPE;
 		return $params;
 	}
@@ -209,6 +210,7 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 					'key'          => stripslashes( trim( $_POST['api_key'] ) ),
 					'secret'       => stripslashes( trim( $_POST['api_secret'] ) ),
 					'redirect_uri' => stripslashes( $_POST['redirect_uri'] ),
+					'scope'        => stripslashes( $_POST['scope'] ),
 				)
 			);
 			echo '<div class="updated"><p>' . __( 'Credentials saved.', 'keyring' ) . '</p></div>';
@@ -217,18 +219,25 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		$api_key      = '';
 		$api_secret   = '';
 		$redirect_uri = '';
+		$scope        = '';
 
 		$creds = $this->get_credentials();
 		if ( $creds ) {
 			$api_key      = $creds['key'];
 			$api_secret   = $creds['secret'];
 			$redirect_uri = $creds['redirect_uri'];
+			$scope        = $creds['scope'];
 		}
 
 		echo apply_filters( 'keyring_' . $this->get_name() . '_basic_ui_intro', '' );
 
 		if ( ! $redirect_uri ) {
 			$redirect_uri = Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify' ) );
+		}
+
+		if ( ! $scope ) {
+			$class = get_called_class();
+			$scope = $class::SCOPE;
 		}
 
 		// Output basic form for collecting key/secret
@@ -244,6 +253,8 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		echo '<td><input type="text" name="api_secret" value="' . esc_attr( $api_secret ) . '" id="api_secret" class="regular-text"></td></tr>';
 		echo '<tr><th scope="row">' . __( 'Redirect URI', 'keyring' ) . '</th>';
 		echo '<td><input type="text" name="redirect_uri" value="' . esc_attr( $redirect_uri ) . '" id="redirect_uri" class="regular-text"></td></tr>';
+		echo '<tr><th scope="row">' . __( 'Scope', 'keyring' ) . '</th>';
+		echo '<td><input type="text" name="scope" value="' . esc_attr( $scope ) . '" id="scope" class="regular-text"></td></tr>';
 		echo '</table>';
 		echo '<p class="submitbox">';
 		echo '<input type="submit" name="submit" value="' . __( 'Save Changes', 'keyring' ) . '" id="submit" class="button-primary">';

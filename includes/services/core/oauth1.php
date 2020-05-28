@@ -26,6 +26,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 	var $key                  = null;
 	var $secret               = null;
 	var $token                = null;
+	var $scope                = null;
 	var $authorization_header = false;
 	var $authorization_realm  = '';
 
