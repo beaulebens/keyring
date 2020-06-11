@@ -362,7 +362,7 @@ class Keyring_Util {
 	 * @return string An sha256 hash
 	 */
 	static function get_parameter_hash( $encoded_parameters ) {
-		return hash_hmac( 'sha256', json_encode( $encoded_parameters ), NONCE_KEY );
+		return hash_hmac( 'sha256', $encoded_parameters, NONCE_KEY );
 	}
 
 	/**
@@ -373,9 +373,9 @@ class Keyring_Util {
 	 * @return string A base64 encoded copy of the JSON encoded paramaters
 	 */
 	static function get_hashed_parameters( $parameters ) {
-		$parameters['hash'] = self::get_parameter_hash( json_encode( $parameters ) );
+		$parameters['hash'] = self::get_parameter_hash( wp_json_encode( $parameters ) );
 
-		return base64_encode( json_encode( $parameters ) );
+		return base64_encode( wp_json_encode( $parameters ) );
 	}
 
 	/**
@@ -392,7 +392,8 @@ class Keyring_Util {
 		$return_hash = $parameters['hash'];
 		unset( $parameters['hash'] );
 
-		if ( self::get_parameter_hash( json_encode( $parameters ) ) !== $return_hash ) {
+		$hash = self::get_parameter_hash( wp_json_encode( $parameters ) );
+		if ( ! hash_equals( $hash, $return_hash ) ) {
 			return false;
 		}
 
