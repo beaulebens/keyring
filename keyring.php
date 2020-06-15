@@ -331,14 +331,14 @@ class Keyring_Util {
 	}
 
 	/**
-	 * For some services the request params are serialised into the state param. This
-	 * method unserialises these and adds them back to the _REQUEST global
+	 * For some services the request params are JSON encoded into the state param. This
+	 * method JSON decodes these and adds them back to the _REQUEST global
 	 *
-	 * @param string $state The serialised $_REQUEST['state'] param
+	 * @param string $state The JSON encoded $_REQUEST['state'] param
 	 * @return void
 	 */
 	static function unpack_state_parameters( $state ) {
-		$unpacked_state = unserialize( base64_decode( $state ) );
+		$unpacked_state = json_decode( base64_decode( $state ), true );
 		if ( ! empty( $unpacked_state['hash'] ) ) {
 			$validated_parameters = Keyring_Util::get_validated_parameters( $unpacked_state );
 
@@ -356,26 +356,26 @@ class Keyring_Util {
 	}
 
 	/**
-	 * Get an sha256 hash of a seialized array of parameters
+	 * Get an sha256 hash of a JSON encoded array of parameters
 	 *
-	 * @param string $serialized_parameters A serialized string of a parameter array.
+	 * @param string $encoded_parameters A JSON encoded string of a parameter array.
 	 * @return string An sha256 hash
 	 */
-	static function get_parameter_hash( $serialized_parameters ) {
-		return hash_hmac( 'sha256', serialize( $serialized_parameters ), NONCE_KEY );
+	static function get_parameter_hash( $encoded_parameters ) {
+		return hash_hmac( 'sha256', $encoded_parameters, NONCE_KEY );
 	}
 
 	/**
-	 * Get a based 64 encoded serialzed representation of an array of parameters which includes
+	 * Get a based 64 and JSON encoded representation of an array of parameters which includes
 	 * a hash of the original params so they can be verified in a service callback
 	 *
 	 * @param array $parameters An array of query parameters.
-	 * @return string A base64 encoded copy of the serialized paramaters
+	 * @return string A base64 encoded copy of the JSON encoded paramaters
 	 */
 	static function get_hashed_parameters( $parameters ) {
-		$parameters['hash'] = self::get_parameter_hash( serialize( $parameters ) );
+		$parameters['hash'] = self::get_parameter_hash( wp_json_encode( $parameters ) );
 
-		return base64_encode( serialize( $parameters ) );
+		return base64_encode( wp_json_encode( $parameters ) );
 	}
 
 	/**
@@ -392,7 +392,8 @@ class Keyring_Util {
 		$return_hash = $parameters['hash'];
 		unset( $parameters['hash'] );
 
-		if ( self::get_parameter_hash( serialize( $parameters ) ) !== $return_hash ) {
+		$hash = self::get_parameter_hash( wp_json_encode( $parameters ) );
+		if ( ! hash_equals( $hash, $return_hash ) ) {
 			return false;
 		}
 
