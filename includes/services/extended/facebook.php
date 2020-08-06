@@ -53,7 +53,7 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 		/* translators: url */
 		echo '<li>' . sprintf( __( 'Click <strong>Settings</strong> on the left and then <strong>Advanced</strong> at the top of that page. Under <strong>Valid OAuth redirect URIs</strong>, enter your domain name. That value is probably <code>%s</code>', 'keyring' ), $_SERVER['HTTP_HOST'] ) . '</li>';
 		/* translators: url */
-		echo '<li>' . sprintf( __( "(OAuth redirect is <code>%s</code>)", 'keyring' ), $this->redirect_uri ) . '</li>';
+		echo '<li>' . sprintf( __( '(OAuth redirect is <code>%s</code>)', 'keyring' ), $this->redirect_uri ) . '</li>';
 		echo '<li>' . sprintf( __( 'Click the <strong>Website with Facebook Login</strong> box and enter the URL to your website, which is probably <code>%s</code>', 'keyring' ), get_bloginfo( 'url' ) ) . '</li>';
 		echo '<li>' . __( 'Click <strong>Save Changes</strong>', 'keyring' ) . '</li>';
 		echo '</ol>';
