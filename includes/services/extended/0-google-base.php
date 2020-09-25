@@ -131,7 +131,7 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 			$meta['picture'] = $response->picture;
 		}
 
-		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, array(), $this );
+		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $response, $this );
 	}
 
 	function get_display( Keyring_Access_Token $token ) {
