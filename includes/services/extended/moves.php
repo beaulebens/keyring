@@ -106,7 +106,7 @@ class Keyring_Service_Moves extends Keyring_Service_OAuth2 {
 			$meta['first_date'] = $response->profile->firstDate;
 		}
 
-		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, array(), $this );
+		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $response, $this );
 	}
 
 	function get_display( Keyring_Access_Token $token ) {
