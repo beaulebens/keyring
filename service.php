@@ -172,11 +172,7 @@ abstract class Keyring_Service {
 		$api_secret = '';
 
 		$creds = $this->get_credentials();
-		if ( $creds ) {
-			$app_id     = $creds['app_id'];
-			$api_key    = $creds['key'];
-			$api_secret = $creds['secret'];
-		}
+		$this->init_credentials( $creds );
 
 		echo apply_filters( 'keyring_' . $this->get_name() . '_basic_ui_intro', '' );
 
@@ -261,6 +257,20 @@ abstract class Keyring_Service {
 		}
 
 		return apply_filters( 'keyring_service_credentials', $creds, $this->get_name() );
+	}
+
+		/**
+	 * Set the basic credential properties based
+	 * on an Array of credentials
+	 *
+	 * @param Mixed $credentials
+	 */
+	function init_credentials( $credentials ) {
+		if ( ! empty( $credentials ) && is_array( $credentials ) ) {
+			$this->app_id = $credentials['app_id'] ? $credentials['app_id'] : null;
+			$this->key    = $credentials['key'] ? $credentials['key'] : null;
+			$this->secret = $credentials['secret'] ? $credentials['secret'] : null;
+		}
 	}
 
 	/**

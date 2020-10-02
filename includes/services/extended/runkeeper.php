@@ -24,12 +24,8 @@ class Keyring_Service_RunKeeper extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'user', 'https://api.runkeeper.com/user', 'GET' );
 		$this->set_endpoint( 'profile', 'https://api.runkeeper.com/profile', 'GET' );
 
-		$creds        = $this->get_credentials();
-		if ( ! empty( $creds ) ) {
-			$this->app_id = $creds['app_id'];
-			$this->key    = $creds['key'];
-			$this->secret = $creds['secret'];
-		}
+		$creds = $this->get_credentials();
+		$this->init_credentials( $creds );
 
 		$this->authorization_header    = 'Bearer';
 		$this->authorization_parameter = false;

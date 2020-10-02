@@ -22,12 +22,8 @@ class Keyring_Service_Nest extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'access_token', 'https://api.home.nest.com/oauth2/access_token', 'POST' );
 		$this->set_endpoint( 'self', 'https://developer-api.nest.com/', 'GET' );
 
-		$creds        = $this->get_credentials();
-		if ( ! empty( $creds ) ) {
-			$this->app_id = $creds['app_id'];
-			$this->key    = $creds['key'];
-			$this->secret = $creds['secret'];
-		}
+		$creds = $this->get_credentials();
+		$this->init_credentials( $creds );
 
 		$this->authorization_header = 'Bearer';
 

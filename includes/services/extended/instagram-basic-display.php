@@ -26,11 +26,8 @@ class Keyring_Service_Instagram_Basic_Display extends Keyring_Service_OAuth2 {
 
 		$creds = $this->get_credentials();
 
-		if ( ! empty( $creds ) ) {
-			$this->app_id = $creds['app_id'];
-			$this->key    = $creds['key'];
-			$this->secret = $creds['secret'];
-		}
+		$this->init_credentials( $creds );
+		
 		// The new Instagram API is very fussy about the redirect uri, so this strips the query params
 		// from the default admin url
 		$admin_url          = Keyring_Util::admin_url();
