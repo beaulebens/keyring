@@ -24,9 +24,11 @@ class Keyring_Service_Jetpack extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'self', 'https://public-api.wordpress.com/rest/v1/me/', 'GET' );
 
 		$creds        = $this->get_credentials();
-		$this->app_id = $creds['app_id'];
-		$this->key    = $creds['key'];
-		$this->secret = $creds['secret'];
+		if ( ! empty( $creds ) ) {
+			$this->app_id = $creds['app_id'];
+			$this->key    = $creds['key'];
+			$this->secret = $creds['secret'];
+		}
 
 		$this->authorization_header = 'Bearer';
 

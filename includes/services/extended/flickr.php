@@ -22,9 +22,11 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 		$this->set_endpoint( 'access_token', 'https://www.flickr.com/services/oauth/access_token', 'GET' );
 
 		$creds        = $this->get_credentials();
-		$this->app_id = $creds['app_id'];
-		$this->key    = $creds['key'];
-		$this->secret = $creds['secret'];
+		if ( ! empty( $creds ) ) {
+			$this->app_id = $creds['app_id'];
+			$this->key    = $creds['key'];
+			$this->secret = $creds['secret'];
+		}
 
 		$this->consumer         = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;

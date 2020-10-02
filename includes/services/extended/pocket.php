@@ -18,7 +18,9 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'access_token', 'https://getpocket.com/v3/oauth/authorize', 'POST' );
 
 		$creds              = $this->get_credentials();
-		$this->key          = $creds['key'];
+		if ( ! empty( $creds ) ) {
+			$this->key    = $creds['key'];
+		}
 		$kr_nonce           = wp_create_nonce( 'keyring-verify' );
 		$nonce              = wp_create_nonce( 'keyring-verify-pocket' );
 		$this->redirect_uri = Keyring_Util::admin_url(

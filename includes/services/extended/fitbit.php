@@ -25,9 +25,11 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'profile', 'https://api.fitbit.com/1/user/-/profile.json', 'GET' );
 
 		$creds        = $this->get_credentials();
-		$this->app_id = $creds['app_id'];
-		$this->key    = $creds['key'];
-		$this->secret = $creds['secret'];
+		if ( ! empty( $creds ) ) {
+			$this->app_id = $creds['app_id'];
+			$this->key    = $creds['key'];
+			$this->secret = $creds['secret'];
+		}
 
 		// Fitbit requires an exact match on Redirect URI, which means we can't send any nonces
 		$this->callback_url = remove_query_arg( array( 'nonce', 'kr_nonce' ), $this->callback_url );

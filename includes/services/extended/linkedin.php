@@ -25,9 +25,11 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'profile_pic', 'https://api.linkedin.com/v2/me/picture-urls::(original)/', 'GET' );
 
 		$creds        = $this->get_credentials();
-		$this->app_id = $creds['app_id'];
-		$this->key    = $creds['key'];
-		$this->secret = $creds['secret'];
+		if ( ! empty( $creds ) ) {
+			$this->app_id = $creds['app_id'];
+			$this->key    = $creds['key'];
+			$this->secret = $creds['secret'];
+		}
 
 		$this->consumer             = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method     = new OAuthSignatureMethod_HMAC_SHA1;
