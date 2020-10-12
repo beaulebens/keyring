@@ -272,6 +272,7 @@ abstract class Keyring_Service {
 			$this->app_id = $credentials['app_id'] ? $credentials['app_id'] : null;
 			$this->key    = $credentials['key'] ? $credentials['key'] : null;
 			$this->secret = $credentials['secret'] ? $credentials['secret'] : null;
+			$this->redirect_uri = $credentials['redirect_uri'] ? $credentials['redirect_uri'] : null;
 		}
 		return $credentials;
 	}
