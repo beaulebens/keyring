@@ -40,8 +40,7 @@ class Keyring_Service_Moves extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'verify_token', 'https://api.moves-app.com/oauth/v1/tokeninfo', 'GET' );
 		$this->set_endpoint( 'profile', 'https://api.moves-app.com/api/1.1/user/profile', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->init_credentials( $creds );
+		$this->init_credentials();
 
 		// Moves requires an exact match on Redirect URI, which means we can't send any nonces
 		$this->callback_url = remove_query_arg( array( 'nonce', 'kr_nonce' ), $this->callback_url );

@@ -25,8 +25,7 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'access_token', 'https://foursquare.com/oauth2/access_token', 'GET' );
 		$this->set_endpoint( 'self', 'https://api.foursquare.com/v2/users/self', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->init_credentials( $creds );
+		$this->init_credentials();
 	}
 
 	function basic_ui_intro() {

@@ -23,10 +23,7 @@ class Keyring_Service_Github extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'access_token', 'https://github.com/login/oauth/access_token', 'POST' );
 		$this->set_endpoint( 'self', 'https://api.github.com/user', 'GET' );
 
-		$creds = $this->get_credentials();
-
-		$creds = $this->get_credentials();
-		$this->init_credentials( $creds );
+		$this->init_credentials();
 
 		$this->consumer         = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;

@@ -25,8 +25,7 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 		$this->set_endpoint( 'access_token', 'https://twitter.com/oauth/access_token', 'POST' );
 		$this->set_endpoint( 'verify', 'https://api.twitter.com/1.1/account/verify_credentials.json', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->init_credentials( $creds );
+		$this->init_credentials();
 
 		$this->consumer         = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;

@@ -24,8 +24,7 @@ class Keyring_Service_Eventbrite extends Keyring_Service_OAuth2 {
 			add_filter( 'keyring_eventbrite_basic_ui_intro', array( $this, 'basic_ui_intro' ) );
 		}
 
-		$creds = $this->get_credentials();
-		$this->init_credentials( $creds );
+		$this->init_credentials();
 		$this->authorization_header    = 'Bearer';
 		$this->authorization_parameter = false;
 	}

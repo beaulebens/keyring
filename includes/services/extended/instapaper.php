@@ -23,8 +23,7 @@ class Keyring_Service_Instapaper extends Keyring_Service_OAuth1 {
 		$this->set_endpoint( 'access_token', 'https://www.instapaper.com/api/1/oauth/access_token', 'POST' );
 		$this->set_endpoint( 'verify', 'https://www.instapaper.com/api/1/account/verify_credentials', 'POST' );
 
-		$creds = $this->get_credentials();
-		$this->init_credentials( $creds );
+		$this->init_credentials();
 
 		$this->consumer         = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;

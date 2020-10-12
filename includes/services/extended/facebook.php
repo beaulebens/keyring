@@ -22,8 +22,7 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'self', 'https://graph.facebook.com/v2.9/me', 'GET' );
 		$this->set_endpoint( 'profile_pic', 'https://graph.facebook.com/v2.9/me/picture/?redirect=false&width=150&height=150', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->init_credentials( $creds );
+		$this->init_credentials();
 
 		$kr_nonce           = wp_create_nonce( 'keyring-verify' );
 		$nonce              = wp_create_nonce( 'keyring-verify-facebook' );

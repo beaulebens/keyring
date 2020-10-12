@@ -171,8 +171,7 @@ abstract class Keyring_Service {
 		$api_key    = '';
 		$api_secret = '';
 
-		$creds = $this->get_credentials();
-		$this->init_credentials( $creds );
+		$this->init_credentials( );
 
 		echo apply_filters( 'keyring_' . $this->get_name() . '_basic_ui_intro', '' );
 
@@ -265,12 +264,16 @@ abstract class Keyring_Service {
 	 *
 	 * @param Mixed $credentials
 	 */
-	function init_credentials( $credentials ) {
-		if ( ! empty( $credentials ) && is_array( $credentials ) ) {
+	function init_credentials( $credentials = null ) {
+		if( ! isset ( $credentials ) ) {
+			$credentials = $this->get_credentials();
+		}
+		if ( is_array( $credentials ) ) {
 			$this->app_id = $credentials['app_id'] ? $credentials['app_id'] : null;
 			$this->key    = $credentials['key'] ? $credentials['key'] : null;
 			$this->secret = $credentials['secret'] ? $credentials['secret'] : null;
 		}
+		return $credentials;
 	}
 
 	/**

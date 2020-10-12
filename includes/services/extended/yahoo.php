@@ -21,8 +21,7 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 		$this->set_endpoint( 'authorize', 'https://api.login.yahoo.com/oauth/v2/request_auth', 'GET' );
 		$this->set_endpoint( 'access_token', 'https://api.login.yahoo.com/oauth/v2/get_token', 'POST' );
 
-		$creds = $this->get_credentials();
-		$this->init_credentials( $creds );
+		$this->init_credentials();
 
 		$this->consumer         = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;

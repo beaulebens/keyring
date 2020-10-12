@@ -24,8 +24,7 @@ class Keyring_Service_Strava extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'deauthorize', 'https://www.strava.com/oauth/deauthorize', 'POST' );
 		$this->set_endpoint( 'user', 'https://www.strava.com/api/v3/athlete', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->init_credentials( $creds );
+		$this->init_credentials();
 
 		$this->authorization_header    = 'Bearer';
 		$this->authorization_parameter = false;

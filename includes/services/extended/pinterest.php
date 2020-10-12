@@ -23,8 +23,7 @@ class Keyring_Service_Pinterest extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'access_token', 'https://api.pinterest.com/v1/oauth/token', 'POST' );
 		$this->set_endpoint( 'self', 'https://api.pinterest.com/v1/me/?fields=first_name,last_name,username,image', 'GET' ); // undocumented, but required to get the `image` in a single request
 
-		$creds = $this->get_credentials();
-		$this->init_credentials( $creds );
+		$this->init_credentials();
 
 		// Send auth token in query string
 		$this->authorization_header    = false;

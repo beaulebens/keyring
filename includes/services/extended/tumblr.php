@@ -22,8 +22,7 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 		$this->set_endpoint( 'access_token', 'https://www.tumblr.com/oauth/access_token', 'POST' );
 		$this->set_endpoint( 'self', 'https://api.tumblr.com/v2/user/info', 'GET' );
 
-		$creds = $this->get_credentials();
-		$this->init_credentials( $creds );
+		$this->init_credentials();
 
 		$this->consumer         = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
 		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
