@@ -269,10 +269,10 @@ abstract class Keyring_Service {
 			$credentials = $this->get_credentials();
 		}
 		if ( is_array( $credentials ) ) {
-			$this->app_id = $credentials['app_id'] ? $credentials['app_id'] : null;
-			$this->key    = $credentials['key'] ? $credentials['key'] : null;
-			$this->secret = $credentials['secret'] ? $credentials['secret'] : null;
-			$this->redirect_uri = $credentials['redirect_uri'] ? $credentials['redirect_uri'] : null;
+			$this->app_id = ! empty( $credentials['app_id'] ) ? $credentials['app_id'] : null;
+			$this->key    = ! empty( $credentials['key'] ) ? $credentials['key'] : null;
+			$this->secret = ! empty( $credentials['secret'] ) ? $credentials['secret'] : null;
+			$this->redirect_uri = ! empty( $credentials['redirect_uri'] ) ? $credentials['redirect_uri'] : null;
 		}
 		return $credentials;
 	}
