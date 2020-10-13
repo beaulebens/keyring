@@ -6,6 +6,8 @@
  * which is where the user/pass will be tested against (for a 401 response).
  *
  * @package Keyring
+ *
+ * @deprecated No longer used by the plugin itself.
  */
 class Keyring_Service_HTTP_Basic extends Keyring_Service {
 	protected $username      = null;
