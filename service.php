@@ -265,7 +265,7 @@ abstract class Keyring_Service {
 	 * @param Mixed $credentials
 	 */
 	function init_credentials( $credentials = null ) {
-		if( ! isset ( $credentials ) ) {
+		if( empty( $credentials ) ) {
 			$credentials = $this->get_credentials();
 		}
 		if ( is_array( $credentials ) ) {
