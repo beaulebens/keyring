@@ -173,11 +173,8 @@ class Keyring {
 	}
 
 	static function register_service( Keyring_Service $service ) {
-		if ( Keyring_Util::is_service( $service ) ) {
-			Keyring::init()->registered_services[ $service->get_name() ] = $service;
-			return true;
-		}
-		return false;
+		Keyring::init()->registered_services[ $service->get_name() ] = $service;
+		return true;
 	}
 
 	static function get_registered_services() {
@@ -263,6 +260,10 @@ class Keyring_Util {
 		error_log( "Keyring: $str" );
 	}
 
+	/**
+	 * @deprecated
+	 * @return boolean
+	 */
 	static function is_service( $service ) {
 		if ( is_object( $service ) && is_subclass_of( $service, 'Keyring_Service' ) ) {
 			return true;
