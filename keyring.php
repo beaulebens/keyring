@@ -261,7 +261,7 @@ class Keyring_Util {
 	}
 
 	/**
-	 * @deprecated
+	 * @deprecated No longer used internally.
 	 * @return boolean
 	 */
 	static function is_service( $service ) {
