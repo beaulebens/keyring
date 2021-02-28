@@ -106,6 +106,7 @@ Add files to includes/services/extended/ that either implement one of the includ
 == Changelog ==
 
 =  =
+* CHANGE: Default branch has been renamed to `trunk` to match WordPress projects. [Update your refs](https://docs.github.com/en/github/administering-a-repository/renaming-a-branch).
 * Enhancement: BREAKING: Removed delicious service (they have shut down completely). Props @sanmai.
 * Enhancement: BREAKING: LinkedIn now uses OAuth2. Props @glendaviesnz.
 * Enhancement: `fetch_profile_picture` method added to Twitter service. Props @glendaviesnz.
