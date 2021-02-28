@@ -351,7 +351,7 @@ class Keyring_Connections_List_Table extends WP_List_Table {
 		$kr_test_nonce = wp_create_nonce( 'keyring-test' );
 		$test_nonce    = wp_create_nonce( 'keyring-test-' . $row->get_service()->get_name() . '-' . $row->get_uniq_id() );
 
-		echo '<span class="row-actions">';
+		echo '<span class="row-actions visible">';
 		echo '<span class="trash"><a href="' . Keyring_Util::admin_url(
 			false,
 			array(

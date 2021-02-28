@@ -106,7 +106,8 @@ Add files to includes/services/extended/ that either implement one of the includ
 == Changelog ==
 
 =  =
-* Enhancement BREAKING: LinkedIn now uses OAuth2. Props @glendaviesnz.
+* Enhancement: BREAKING: Removed delicious service (they have shut down completely). Props @sanmai.
+* Enhancement: BREAKING: LinkedIn now uses OAuth2. Props @glendaviesnz.
 * Enhancement: `fetch_profile_picture` method added to Twitter service. Props @glendaviesnz.
 * Enhancement: Added a GitHub Service definition, props @alperakgun.
 * Enhancement: Added a Google Drive Service definition, props @scruffian.
@@ -126,6 +127,8 @@ Add files to includes/services/extended/ that either implement one of the includ
 * Bugfix: Ensure that `PUT` requests have a `Content-Length` header set. Props @glendaviesnz.
 * Bugfix: Compatibility with more recent versions of PHP7, and PHP8.
 * Bugfix: Apply keyring_access_token filter properly in Instapaper.
+* Bugfix: Remove redunant `is_service` check (enforced via method call signature). Props @sanmai.
+* Bugfix: Remove hover event on action links in Service listing UI.
 
 = 2.0 =
 * Bugfix BREAKING: Remove invalid reference to $this in error handler. Changes number of params passed to keyring_error action.
