@@ -129,6 +129,10 @@ class Keyring {
 	 */
 	static function request_handlers() {
 		global $current_user;
+		Keyring_Util::debug( "request_handers" );
+
+		$_REQUEST = Keyring_Util::cleanup_request_parameters( $_REQUEST );
+		Keyring_Util::debug( $_REQUEST );
 
 		if ( ! empty( $_REQUEST['state'] ) ) {
 			Keyring_Util::unpack_state_parameters( $_REQUEST['state'] );
@@ -150,6 +154,7 @@ class Keyring {
 				in_array( $_REQUEST['service'], array_keys( Keyring::get_registered_services() ), true )
 		) {
 			// We have an action here to allow us to do things pre-authorization, just in case
+			Keyring_Util::debug( "pre_keyring_{$_REQUEST['service']}_{$_REQUEST['action']}", $_REQUEST );
 			do_action( "pre_keyring_{$_REQUEST['service']}_{$_REQUEST['action']}", $_REQUEST );
 
 			// Core nonce check required for everything. "keyring-ACTION" is the kr_nonce format
@@ -398,6 +403,21 @@ class Keyring_Util {
 		}
 
 		return $parameters;
+	}
+
+	static function cleanup_request_parameters( $params ) {
+		Keyring_Util::debug( "cleanup_request_parameters" );
+		Keyring_Util::debug( $params );
+		if ( is_array( $params ) ) {
+			foreach ( $params as $key => $val ) {
+				// Some services double-encode things (Strava), so we need to clean up parameter names before using
+				if ( substr( $key, 0, 4 ) == 'amp;' ) {
+					$params[ substr( $key, 4 ) ] = $val;
+					unset( $params[ $key ] );
+				}
+			}
+		}
+		return $params;
 	}
 }
 

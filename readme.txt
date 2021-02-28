@@ -3,7 +3,7 @@
 Contributors: beaulebens, mdawaffe, jshreve, jkudish, automattic
 Tags: authentication, security, oauth, http basic, authorization, facebook, foursquare, instagram, twitter, google
 Requires at least: 4.0
-Tested up to: 5.2.1
+Tested up to: 5.6.2
 Stable Tag: 2.0
 
 An authentication framework that handles authorization/communication with most popular web services.
@@ -106,16 +106,17 @@ Add files to includes/services/extended/ that either implement one of the includ
 == Changelog ==
 
 =  =
-* Enhancement: `fetch_profile_picture` method added to Twitter service. Props @glendaviesnz.
 * Enhancement BREAKING: LinkedIn now uses OAuth2. Props @glendaviesnz.
+* Enhancement: `fetch_profile_picture` method added to Twitter service. Props @glendaviesnz.
 * Enhancement: Added a GitHub Service definition, props @alperakgun.
 * Enhancement: Added a Google Drive Service definition, props @scruffian.
 * Enhancement: Trim spaces off API keys etc to avoid mistakes when copy/pasting. Props @kbrown9.
 * Enhancement: Allow all 2xx response codes to be considered "Success" for all requests, for all protocols. Props @bgrgicak for the proposal.
 * Enhancement: Add translator comments. Props @scruffian.
-* Enhancement: Define the `self` endpoint for Tumbler, and add helper methods to retrieve user info. Props @glendaviesnz.
+* Enhancement: Define the `self` endpoint for Tumblr, and add helper methods to retrieve user info. Props @glendaviesnz.
 * Enhancement: Add a `keyring_{service}_request_scope` filter for OAuth2 services, matching the existing filter for OAuth1 services. Props @glendaviesnz.
 * Enhancement: Add a `'full_response'` param to `Keyring_Service_OAuth2::request()`, which will cause the method to return the full HTTP response object. Props @glendaviesnz.
+* Enhancement: Some services (looking at you, Strava) seem to double-encode redirect URIs, resulting in "corrupted" parameter names. Added a method to clean that up.
 * Bugfix: Make the Google services always request a refresh token for offline access. Props @kbrown9 and @atrniv for input.
 * Bugfix: Update Strava to use refresh tokens and offline access, per their new API requirements. Props @mdrovdahl for pointing it out.
 * Bugfix: Update use of add_submenu_page() to comply with WP 5.3. Props @jhwwp (wp.org) for the fix.
@@ -123,6 +124,8 @@ Add files to includes/services/extended/ that either implement one of the includ
 * Bugfix: Use static "Cancel" URIs in UIs. Props @pgl.
 * Bugfix: Remove some WordPress.com-specific code from Eventbrite.
 * Bugfix: Ensure that `PUT` requests have a `Content-Length` header set. Props @glendaviesnz.
+* Bugfix: Compatibility with more recent versions of PHP7, and PHP8.
+* Bugfix: Apply keyring_access_token filter properly in Instapaper.
 
 = 2.0 =
 * Bugfix BREAKING: Remove invalid reference to $this in error handler. Changes number of params passed to keyring_error action.
