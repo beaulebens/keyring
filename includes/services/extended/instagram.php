@@ -22,10 +22,12 @@ class Keyring_Service_Instagram extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'access_token', 'https://api.instagram.com/oauth/access_token', 'POST' );
 		$this->set_endpoint( 'self', 'https://api.instagram.com/v1/users/self/', 'GET' );
 
-		$creds        = $this->get_credentials();
-		$this->app_id = $creds['app_id'];
-		$this->key    = $creds['key'];
-		$this->secret = $creds['secret'];
+		$creds = $this->get_credentials();
+		if ( is_array( $creds ) ) {
+			$this->app_id = $creds['app_id'];
+			$this->key    = $creds['key'];
+			$this->secret = $creds['secret'];
+		}
 
 		$this->authorization_header    = false; // Send in querystring
 		$this->authorization_parameter = 'access_token';

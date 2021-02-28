@@ -28,10 +28,12 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		$this->set_endpoint( 'refresh', 'https://www.googleapis.com/oauth2/v4/token', 'POST' );
 		$this->set_endpoint( 'userinfo', 'https://www.googleapis.com/oauth2/v3/userinfo', 'GET' );
 
-		$creds              = $this->get_credentials();
-		$this->redirect_uri = $creds['redirect_uri'];
-		$this->key          = $creds['key'];
-		$this->secret       = $creds['secret'];
+		$creds = $this->get_credentials();
+		if ( is_array( $creds ) ) {
+			$this->redirect_uri = $creds['redirect_uri'];
+			$this->key          = $creds['key'];
+			$this->secret       = $creds['secret'];
+		}
 
 		$this->authorization_header    = 'Bearer';
 		$this->authorization_parameter = false;
