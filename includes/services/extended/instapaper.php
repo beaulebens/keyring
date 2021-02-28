@@ -200,7 +200,7 @@ class Keyring_Service_Instapaper extends Keyring_Service_OAuth1 {
 			new OAuthToken( $token['oauth_token'], $token['oauth_token_secret'] ),
 			$meta
 		);
-		$access_token = apply_filters( 'keyring_access_token', $access_token );
+		$access_token = apply_filters( 'keyring_access_token', $access_token, array() );
 
 		// If we didn't get a 401, then we'll assume it's OK
 		$id = $this->store_token( $access_token );
