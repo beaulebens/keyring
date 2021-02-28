@@ -3,7 +3,7 @@ This is a WordPress plugin, hosted primarily on GitHub. To ship a release to the
 1. Make sure the changelog in `readme.txt` is fully up to date (review commit history since last release if needed, there's a link on GitHub's releases page to do that, next to each release; https://github.com/beaulebens/keyring/releases)
 2. Update version numbers;
     - `readme.txt` (`Stable Tag:`, Chanegelog latest entry)
-    - `keyring.php` (`Version:`, `KEYRING__VERSION`)
+    - `keyring.php` (`Version:` header, `KEYRING__VERSION` constant)
 3. Update the `Tested up to:` header in `readme.txt` to the latest version of WordPress.
 4. Stage, commit, push everything up to GitHub.
 5. Create a new release at https://github.com/beaulebens/keyring/releases/new

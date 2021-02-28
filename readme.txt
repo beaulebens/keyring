@@ -105,6 +105,9 @@ Add files to includes/services/extended/ that either implement one of the includ
 
 == Changelog ==
 
+=  =
+*
+
 = 3.0 =
 * CHANGE: Default branch has been renamed to `trunk` to match WordPress projects. [Update your refs](https://docs.github.com/en/github/administering-a-repository/renaming-a-branch).
 * Enhancement: BREAKING: Removed delicious service (they have shut down completely). Props @sanmai.
