@@ -4,7 +4,7 @@ Contributors: beaulebens, mdawaffe, jshreve, jkudish, automattic
 Tags: authentication, security, oauth, http basic, authorization, facebook, foursquare, instagram, twitter, google
 Requires at least: 4.0
 Tested up to: 5.6.2
-Stable Tag: 2.0
+Stable Tag: 3.0
 
 An authentication framework that handles authorization/communication with most popular web services.
 
@@ -105,7 +105,7 @@ Add files to includes/services/extended/ that either implement one of the includ
 
 == Changelog ==
 
-=  =
+= 3.0 =
 * CHANGE: Default branch has been renamed to `trunk` to match WordPress projects. [Update your refs](https://docs.github.com/en/github/administering-a-repository/renaming-a-branch).
 * Enhancement: BREAKING: Removed delicious service (they have shut down completely). Props @sanmai.
 * Enhancement: BREAKING: LinkedIn now uses OAuth2. Props @glendaviesnz.

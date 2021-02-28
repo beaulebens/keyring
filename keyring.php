@@ -26,7 +26,7 @@ define( 'KEYRING__DEBUG_WARN', 2 );
 define( 'KEYRING__DEBUG_ERROR', 3 );
 
 // Indicates Keyring is installed/active so that other plugins can detect it
-define( 'KEYRING__VERSION', '2.0' );
+define( 'KEYRING__VERSION', '3.0' );
 
 /**
  * Core Keyring class that handles UI and the general flow of requesting access tokens etc
