@@ -388,7 +388,7 @@ class Keyring_Util {
 	 * Validates that a hash of the parameter array matches the included hash parameter
 	 *
 	 * @param array $parameters An array of query parameters.
-	 * @return array An array of the parameters minus the hash
+	 * @return array|false An array of the parameters minus the hash, false if they don't match.
 	 */
 	static function get_validated_parameters( $parameters ) {
 		if ( empty( $parameters['hash'] ) ) {
