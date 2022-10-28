@@ -36,7 +36,6 @@ And includes ready-to-use definitions for:
 * [Instapaper](https://instapaper.com/)
 * [Jetpack](https://jetpack.com/)/[WordPress.com](https://wordpress.com/)
 * [LinkedIn](https://linkedin.com/)
-* [Moves](https://moves-app.com/)
 * [Nest](https://nest.com/)
 * [Pinterest](https://pinterest.com/)
 * [RunKeeper](https://runkeeper.com/)
