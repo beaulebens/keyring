@@ -62,7 +62,7 @@ class Keyring_Service_Nest extends Keyring_Service_OAuth2 {
 
 	function basic_ui_intro() {
 		/* translators: %$1s: Nest developers URL, %2s: the redirect URL to verify the connection */
-		echo '<p>' . sprintf( __( 'You will need to create a Developer account, and <a href="%1$s">set up a Nest Product</a> (that is what they call apps). The most important setting is the <strong>Redirect URI</strong>, which should be set to <code>%2$s</code>. Make sure you select appropriate permissions as well.', 'keyring' ), 'https://developers.nest.com/products/new', Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify' ) ) ) . '</p>';
+		echo '<p>' . sprintf( __( 'NOTICE: Nest is no longer provisioning new apps on their legacy platform. If you have an existing app, you can continue to use it. The most important setting is the <strong>Redirect URI</strong>, which should be set to <code>%2$s</code>. Make sure you select appropriate permissions as well.', 'keyring' ), Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify' ) ) ) . '</p>';
 		echo '<p>' . __( "Once you've set that up, copy your <strong>Product ID</strong> value into the <strong>API Key</strong> field, and the <strong>Product Secret</strong> value into the <strong>API Secret</strong> field and click save (you don't need an App ID value for Nest).", 'keyring' ) . '</p>';
 	}
 
