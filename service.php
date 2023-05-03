@@ -45,7 +45,7 @@ abstract class Keyring_Service {
 	/**
 	 * Get a displayable string for the passed token, for this service
 	 *
-	 * @param obj $token Keyring_Access_Token object
+	 * @param Keyring_Access_Token $token Keyring_Access_Token object
 	 * @return String for display, describing $token
 	 */
 	abstract function get_display( Keyring_Access_Token $token );
@@ -90,9 +90,9 @@ abstract class Keyring_Service {
 	 * Get/set whether this Service requires a token before making requests.
 	 *
 	 * @param boolean $does_it
-	 * @return True if token is required, false if not. If called with no
-	 *         param, then just returns true/false. If called with a bool,
-	 *         then set requirement to true/false as specified.
+	 * @return bool   True if token is required, false if not. If called with no
+	 *                param, then just returns true/false. If called with a bool,
+	 *                then set requirement to true/false as specified.
 	 */
 	function requires_token( $does_it = null ) {
 		if ( is_null( $does_it ) ) {
@@ -268,6 +268,7 @@ abstract class Keyring_Service {
 	 * store it in a serialized array, keyed off the name of the service.
 	 *
 	 * @param array $credentials
+	 * @return bool
 	 */
 	function update_credentials( array $credentials ) {
 		$all                      = apply_filters( 'keyring_credentials', get_option( 'keyring_credentials' ) );
@@ -328,7 +329,8 @@ abstract class Keyring_Service {
 
 	/**
 	 * Just returns the currently-set token for this service
-	 * @return [type] [description]
+	 *
+	 * @return Keyring_Access_Token|false An access token if the value is set, false otherwise.
 	 */
 	function get_token() {
 		return $this->token;

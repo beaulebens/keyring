@@ -23,7 +23,6 @@ Out of the box, Keyring currently comes with base Service definitions for:
 And includes ready-to-use definitions for:
 
 * [500px](https://500px.com/)
-* [Delicious](https://delicious.com/)
 * [Eventbrite](https://eventbrite.com/)
 * [Facebook](https://facebook.com/)
 * [Fitbit](https://fitbit.com/)
@@ -36,7 +35,6 @@ And includes ready-to-use definitions for:
 * [Instapaper](https://instapaper.com/)
 * [Jetpack](https://jetpack.com/)/[WordPress.com](https://wordpress.com/)
 * [LinkedIn](https://linkedin.com/)
-* [Moves](https://moves-app.com/)
 * [Nest](https://nest.com/)
 * [Pinterest](https://pinterest.com/)
 * [RunKeeper](https://runkeeper.com/)
