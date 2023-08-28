@@ -68,7 +68,6 @@ class Keyring_Service_Nextdoor extends Keyring_Service_OAuth2 {
 	}
 
 	function fix_access_token_meta( $access_token, $token ) {
-		error_log('testing fix access token meta');
 		if ( 'nextdoor' !== $access_token->get_name() ) {
 			return $access_token;
 		}
@@ -85,13 +84,18 @@ class Keyring_Service_Nextdoor extends Keyring_Service_OAuth2 {
 	}
 
 	function build_token_meta( $token ) {
-		$decoded_id_token = json_decode(base64_decode(explode('.', $token['id_token'])[1]));
-		error_log('testing build_token_meta id token' . print_r($decoded_id_token->sub, true));
-		$meta = array(
-			'account_id'      => $decoded_id_token->sub,
-			'expires'       => time() + $token['expires_in'],
-		);
-
+		$split_token = explode('.', $token['id_token']);
+		if ($token['id_token'] && count($split_token) > 2) {
+			$decoded_id_token = json_decode(base64_decode(explode('.', $token['id_token'])[1]));
+			$meta = array(
+				'user_id'      => $decoded_id_token->sub,
+				'name'      =>    'Nextdoor Neighbor',
+				'expires'       => time() + $token['expires_in'],
+			);
+		}
+		else {
+			$meta = array();
+		}
 		$this->set_token(
 			new Keyring_Access_Token(
 				$this->get_name(),
@@ -99,9 +103,6 @@ class Keyring_Service_Nextdoor extends Keyring_Service_OAuth2 {
 				$meta
 			)
 		);
-		error_log('testing build_token_meta meta' . print_r($meta, true));
-
-
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $this );
 	}
 
