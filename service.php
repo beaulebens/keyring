@@ -70,17 +70,13 @@ abstract class Keyring_Service {
 	}
 
 	static function init() {
-		static $instance = false;
-
-		if ( ! $instance ) {
-			$class    = get_called_class();
-			$services = Keyring::get_registered_services();
-			if ( in_array( $class::NAME, array_keys( $services ), true ) ) {
-				$instance = $services[ $class::NAME ];
-			} else {
-				$instance = new $class;
-				Keyring::register_service( $instance );
-			}
+		$class    = get_called_class();
+		$services = Keyring::get_registered_services();
+		if ( in_array( $class::NAME, array_keys( $services ), true ) ) {
+			$instance = $services[ $class::NAME ];
+		} else {
+			$instance = new $class;
+			Keyring::register_service( $instance );
 		}
 
 		return $instance;
