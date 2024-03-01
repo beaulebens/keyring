@@ -46,6 +46,7 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		}
 
 		add_filter( 'keyring_' . $this->get_name() . '_request_token_params', array( $this, 'request_token_params' ) );
+		add_filter( 'keyring_handle_error_' . $this->get_name(), array( $this, 'get_error_messages' ), 10, 2 );
 		add_action( 'pre_keyring_' . $this->get_name() . '_verify', array( $this, 'redirect_incoming_verify' ) );
 	}
 
@@ -94,7 +95,17 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 	}
 
 	function redirect_incoming_verify( $request ) {
-		if ( ! isset( $request['kr_nonce'] ) ) {
+		if ( ! empty( $_REQUEST['error'] ) ) {
+			$params           = $_REQUEST;
+			$params['action'] = 'services';
+			wp_safe_redirect(
+				Keyring_Util::admin_url(
+					$this->get_name(),
+					$params
+				)
+			);
+			exit;
+		} elseif ( ! isset( $request['kr_nonce'] ) ) {
 			$kr_nonce = wp_create_nonce( 'keyring-verify' );
 			$nonce    = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
 			wp_safe_redirect(
@@ -262,5 +273,15 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		}
 
 		return $res;
+	}
+
+	function get_error_messages( $value, $params ) {
+		$error_codes = array(
+			'1004' => __( 'Cancelled by user', 'keyring' ),
+			'1006' => __( 'Authorization Error', 'keyring' ),
+		);
+
+		// Return error if known, else return humanized error message.
+		return isset( $error_codes[ $params['state'] ] ) ? $error_codes[ $params['state'] ] : implode( ' ', array_map( 'ucfirst', explode( '_', $value ) ) );
 	}
 }
