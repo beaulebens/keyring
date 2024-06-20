@@ -332,7 +332,7 @@ abstract class Keyring_Service {
 		return $this->token;
 	}
 
-	function get_tokens( $id = false ) {
+	function get_tokens() {
 		$c = get_called_class();
 		return $this->store->get_tokens(
 			array(
