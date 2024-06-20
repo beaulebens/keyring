@@ -53,6 +53,15 @@ class Keyring_Admin_UI {
 	function admin_page_load() {
 		$this->keyring = Keyring::init();
 		add_action( 'admin_head', array( $this, 'inline_css' ) );
+
+		// Disables the default behavior. Keyring will handle the error parameter by displaying a readable text to user.
+		add_filter(
+			'removable_query_args',
+			function ( $args ) {
+				array_splice( $args, array_search( 'error', $args ), 1 );
+				return $args;
+			}
+		);
 	}
 
 	function admin_page_header( $screen = false ) {
@@ -145,6 +154,13 @@ class Keyring_Admin_UI {
 			} else {
 				Keyring::message( __( 'This service does not currently support connection testing.', 'keyring' ) );
 			}
+		}
+
+		// Handle errors.
+		if ( isset( $_REQUEST['error'] ) ) {
+			$service = $_REQUEST['service'];
+			$error   = apply_filters( "keyring_handle_error_{$service}", $_REQUEST['error'], $_REQUEST );
+			Keyring::error( $error, true, false );
 		}
 
 		// Set up our defaults
