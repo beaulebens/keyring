@@ -53,26 +53,22 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		$class = get_called_class();
 
 		/* translators: url */
-		echo '<p>' . sprintf( __( "Google controls access to all of their APIs through their API Console. <a href='%s'>Go to the Library page in the console</a> and click the <strong>Select a project</strong> dropdown next to the logo in the upper left of the screen. Click the <strong>plus icon</strong> to create a new project. Enter a name and then click <strong>Create</strong>.", 'keyring' ), 'https://console.developers.google.com/apis/library' ) . '</p>';
+		echo '<p>' . sprintf( __( "Google controls access to all of their APIs through their API Console. <a href='%s'>Go to the Library page in the console</a> and click the <strong>Select a project</strong> dropdown next to the logo in the upper left of the screen. Click on <strong>New project</strong> to create a new project. Enter a name and then click <strong>Create</strong>.", 'keyring' ), 'https://console.developers.google.com/apis/library' ) . '</p>';
 		/* translators: %s: The name of the service being connected */
-		echo '<p>' . sprintf( __( 'Now you need to enable the %s and setup your OAuth credentials.', 'keyring' ), $class::LABEL ) . '</p>';
+		echo '<p>' . sprintf( __( 'Now you need to enable the %s API and setup your OAuth credentials.', 'keyring' ), $class::LABEL ) . '</p>';
 		echo '<ol>';
 		echo '<li>' . __( 'Select your project from the project dropdown.', 'keyring' ) . '</li>';
-		echo '<li>' . __( 'Click <strong>Library</strong> in the menu on the left.', 'keyring' ) . '</li>';
 		/* translators: %s: The name of the service being connected */
-		echo '<li>' . sprintf( __( 'Find and click <strong>%s</strong>.', 'keyring' ), $class::LABEL ) . '</li>';
+		echo '<li>' . sprintf( __( 'Search for and click on <strong>%s</strong>.', 'keyring' ), $class::LABEL ) . '</li>';
 		echo '<li>' . __( 'Next to the heading, click <strong>Enable</strong>.', 'keyring' ) . '</li>';
 		echo '<li>' . __( 'Click the blue button labelled <strong>Create credentials</strong>.', 'keyring' ) . '</li>';
-		echo '<li>' . __( 'Click <strong>Credential</strong> in the menu on the left.', 'keyring' ) . '</li>';
-		echo '<li>' . __( 'Click the <strong>OAuth consent screen</strong> menu item.', 'keyring' ) . '</li>';
-		echo '<li>' . __( 'You must enter a <strong>Product name</strong>, but you can skip the logo and home page URL.', 'keyring' ) . '</li>';
-		echo '<li>' . __( 'Click Save.', 'keyring' ) . '</li>';
-		echo '<li>' . __( 'Click the <strong>Create credentials</strong> button and select <strong>OAuth client ID</strong>.', 'keyring' ) . '</li>';
-		echo '<li>' . __( 'Select <strong>Web application</strong> and enter a relevant name or just use the default.', 'keyring' ) . '</li>';
+		echo '<li>' . __( 'Select <strong>User data</strong> as the data to access to create an OAuth client and click <strong>Next.</strong>', 'keyring' ) . '</li>';
+		echo '<li>' . __( 'Select the scopes and permissions to request (optional) and click <strong>Save and Continue.</strong>', 'keyring' ) . '</li>';
+		echo '<li>' . __( 'For the OAuth client, select <strong>Web application</strong> as the application type and enter a relevant name or just use the default.', 'keyring' ) . '</li>';
 		/* translators: %s: The user's domain name */
 		echo '<li>' . sprintf( __( 'For the <strong>Authorized JavaScript Origins</strong>, enter the URL of your domain, e.g. <code>%s</code>.', 'keyring' ), ( is_ssl() ? 'https' : 'http' ) . '://' . $_SERVER['HTTP_HOST'] ) . '</li>';
 		/* translators: %s: The redirect URL to verify the connection */
-		echo '<li>' . sprintf( __( 'In the <strong>Authorized Redirect URIs</strong> box, enter the URL <code>%s</code>.', 'keyring' ), Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify' ) ) ) . '</li>';
+		echo '<li>' . sprintf( __( 'For the <strong>Authorized Redirect URIs</strong>, enter the URL <code>%s</code>.', 'keyring' ), Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify' ) ) ) . '</li>';
 		echo '<li>' . __( "Click <strong>Create</strong> when you're done.", 'keyring' ) . '</li>';
 		echo '</ol>';
 		echo '<p>' . __( "Once you've saved your details, copy the <strong>Client ID</strong> into the <strong>Client ID</strong> field below, and the <strong>Client secret</strong> value into <strong>Client Secret</strong>. The Redirect URI box should fill itself out for you.", 'keyring' ) . '</p>';

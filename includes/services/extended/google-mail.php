@@ -10,7 +10,7 @@
 
 class Keyring_Service_GoogleMail extends Keyring_Service_GoogleBase {
 	const NAME        = 'google-mail';
-	const LABEL       = 'Google Mail';
+	const LABEL       = 'Gmail';
 	const SCOPE       = 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/userinfo.profile'; // See https://developers.google.com/identity/protocols/googlescopes
 	const ACCESS_TYPE = 'offline';
 
