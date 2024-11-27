@@ -98,7 +98,7 @@ class Keyring_Service_Twitter extends Keyring_Service_OAuth1 {
 	}
 
 	function fetch_profile_picture() {
-		$res = $this->request( add_query_arg( array( 'user_id' => $this->token->get_meta( 'external_id' ) ), $this->user_info_url ), array( 'method' => $this->user_info_method ) );
+		$res = $this->request( $this->verify_url, array( 'method' => $this->verify_method ) );
 		if ( Keyring_Util::is_error( $res ) ) {
 			return $res;
 		}
