@@ -14,6 +14,15 @@ abstract class Keyring_Service {
 	protected $requires_token = true;
 	protected $store          = false;
 
+	/**
+	 * Stores custom endpoint types that are not declared as class properties.
+	 * Populated by set_endpoint() for types such as 'self', 'profile', etc.
+	 * Access via $this->self_url / $this->self_method (handled by __get()).
+	 *
+	 * @var array<string, array{url: string, method: string}>
+	 */
+	protected $endpoints = array();
+
 	private $request_response_code = '';
 
 	/**
@@ -120,9 +129,44 @@ abstract class Keyring_Service {
 		return $label;
 	}
 
+	/**
+	 * Reads a custom endpoint property stored in $endpoints.
+	 * Called automatically when accessing $this->self_url, $this->self_method, etc.
+	 * for endpoint types that are not declared as explicit class properties.
+	 *
+	 * @param string $name Property name, e.g. 'self_url' or 'self_method'.
+	 * @return string Empty string if the endpoint/property is not set.
+	 */
+	public function __get( $name ) {
+		if ( '_url' === substr( $name, -4 ) ) {
+			$type = substr( $name, 0, -4 );
+			return isset( $this->endpoints[ $type ] ) ? $this->endpoints[ $type ]['url'] : '';
+		}
+
+		if ( '_method' === substr( $name, -7 ) ) {
+			$type = substr( $name, 0, -7 );
+			return isset( $this->endpoints[ $type ] ) ? $this->endpoints[ $type ]['method'] : 'GET';
+		}
+
+		return null;
+	}
+
 	public function set_endpoint( $type, $url, $method = 'GET' ) {
-		$this->{$type . '_url'}    = $url;
-		$this->{$type . '_method'} = strtoupper( $method );
+		if ( property_exists( $this, $type . '_url' ) ) {
+			// Declared property (e.g. authorize_url, access_token_url in Keyring_Service_OAuth1).
+			// Write directly to avoid triggering __get/__set on a property that already exists.
+			$this->{$type . '_url'}    = $url;
+			$this->{$type . '_method'} = strtoupper( $method );
+		} else {
+			// Custom endpoint type (e.g. 'self', 'profile', 'notifications').
+			// Store in the $endpoints array to prevent dynamic property creation,
+			// which is deprecated in PHP 8.2 and will be fatal in PHP 9.
+			$this->endpoints[ $type ] = array(
+				'url'    => $url,
+				'method' => strtoupper( $method ),
+			);
+		}
+
 		return true;
 	}
 
