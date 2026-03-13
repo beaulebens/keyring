@@ -8,7 +8,7 @@ class Keyring_Service_500px extends Keyring_Service_OAuth1 {
 	const NAME  = '500px';
 	const LABEL = '500px';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
@@ -39,17 +39,17 @@ class Keyring_Service_500px extends Keyring_Service_OAuth1 {
 		$this->requires_token( true );
 	}
 
-	function basic_ui_intro() {
+	public function basic_ui_intro() {
 		/* translators: url */
 		echo '<p>' . sprintf( __( 'To connect to 500px, you\'ll need to <a href="%s">create an application at 500px.com</a>.', 'keyring' ), 'https://500px.com/settings/applications' ) . '</p>';
 		echo '<p>' . __( "Once you've created your app, enter the <strong>Consumer Key</strong> and <strong>Consumer Secret</strong> below.", 'keyring' ) . '</p>';
 	}
 
-	function parse_response( $response ) {
+	public function parse_response( $response ) {
 		return json_decode( $response );
 	}
 
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		// Set the token so that we can make requests using it
 		$this->set_token(
 			new Keyring_Access_Token(
@@ -77,11 +77,11 @@ class Keyring_Service_500px extends Keyring_Service_OAuth1 {
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $response, $this );
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'username' );
 	}
 
-	function test_connection() {
+	public function test_connection() {
 		$response = $this->request( $this->users_url, array( 'method' => $this->users_method ) );
 		if ( ! Keyring_Util::is_error( $response ) ) {
 			return true;

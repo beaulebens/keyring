@@ -10,7 +10,7 @@ class Keyring_Service_Github extends Keyring_Service_OAuth2 {
 	const LABEL = 'GitHub';
 	const SCOPE = '';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
@@ -46,25 +46,25 @@ class Keyring_Service_Github extends Keyring_Service_OAuth2 {
 		$this->callback_url = remove_query_arg( array( 'nonce', 'kr_nonce' ), $this->callback_url );
 	}
 
-	function verify_token_post_params( $params ) {
+	public function verify_token_post_params( $params ) {
 		$params['headers'] = array(
 			'Accept' => 'application/json',
 		);
 		return $params;
 	}
 
-	function basic_ui_intro() {
+	public function basic_ui_intro() {
 		/* translators: url */
 		echo '<p>' . sprintf( __( 'To get started, <a href="%1$s">register an OAuth client on GitHub</a>. The most important setting is the <strong>OAuth redirect_uri</strong>, which should be set to <code>%2$s</code>. You can set the other values to whatever you like.', 'keyring' ), 'https://developer.github.com/apps/building-oauth-apps/creating-an-oauth-app/', Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify' ) ) ) . '</p>';
 		echo '<p>' . __( "Once you've saved those changes, copy the <strong>CLIENT ID</strong> value into the <strong>API Key</strong> field, and the <strong>CLIENT SECRET</strong> value into the <strong>API Secret</strong> field and click save (you don't need an App ID value for GitHub).", 'keyring' ) . '</p>';
 	}
 
-	function request_token_params( $params ) {
+	public function request_token_params( $params ) {
 		$params['scope'] = apply_filters( 'keyring_' . $this->get_name() . '_scope', self::SCOPE );
 		return $params;
 	}
 
-	function redirect_incoming_verify( $request ) {
+	public function redirect_incoming_verify( $request ) {
 		if ( ! isset( $request['kr_nonce'] ) ) {
 			// First request, from GitHub. Nonce it and move on.
 			$kr_nonce = wp_create_nonce( 'keyring-verify' );
@@ -85,7 +85,7 @@ class Keyring_Service_Github extends Keyring_Service_OAuth2 {
 		}
 	}
 
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		$this->set_token(
 			new Keyring_Access_Token(
 				$this->get_name(),
@@ -109,11 +109,11 @@ class Keyring_Service_Github extends Keyring_Service_OAuth2 {
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $response, $this );
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
 	}
 
-	function test_connection() {
+	public function test_connection() {
 		$response = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
 		if ( ! Keyring_Util::is_error( $response ) ) {
 			return true;

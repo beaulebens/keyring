@@ -8,7 +8,7 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 	const NAME  = 'facebook';
 	const LABEL = 'Facebook';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
@@ -45,7 +45,7 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 		add_filter( 'keyring_facebook_request_token_params', array( $this, 'filter_request_token' ) );
 	}
 
-	function basic_ui_intro() {
+	public function basic_ui_intro() {
 		echo '<p>' . __( "If you haven't already, you'll need to set up an app on Facebook:", 'keyring' ) . '</p>';
 		echo '<ol>';
 		/* translators: url */
@@ -61,7 +61,7 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 		echo '<p>' . __( "Once you're done configuring your app, copy and paste your <strong>App ID</strong> and <strong>App Secret</strong> (in the top section of your app's Basic details) into the appropriate fields below. Leave the App Key field blank.", 'keyring' ) . '</p>';
 	}
 
-	function _get_credentials() {
+	public function _get_credentials() {
 		if (
 			defined( 'KEYRING__FACEBOOK_ID' )
 		&&
@@ -85,7 +85,7 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 		}
 	}
 
-	function is_configured() {
+	public function is_configured() {
 		$credentials = $this->get_credentials();
 		return ! empty( $credentials['app_id'] ) && ! empty( $credentials['secret'] );
 	}
@@ -95,7 +95,7 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 	 * @param  array $params Core request parameters
 	 * @return Array containing originals, plus the scope parameter
 	 */
-	function filter_request_token( $params ) {
+	public function filter_request_token( $params ) {
 		$scope = implode( ',', apply_filters( 'keyring_facebook_scope', array() ) );
 		if ( $scope ) {
 			$params['scope'] = $scope;
@@ -103,7 +103,7 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 		return $params;
 	}
 
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		$this->set_token(
 			new Keyring_Access_Token(
 				$this->get_name(),
@@ -125,11 +125,11 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $response, $this );
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
 	}
 
-	function test_connection() {
+	public function test_connection() {
 		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
 		if ( ! Keyring_Util::is_error( $res ) ) {
 			return true;
@@ -143,7 +143,7 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 	 * @param  Keyring_Token $connection A connection to FB.
 	 * @return Array containing the raw results for each page, or empty if none.
 	 */
-	function get_fb_pages( $connection = false ) {
+	public function get_fb_pages( $connection = false ) {
 		if ( $connection ) {
 			$this->set_token( $connection );
 		}
@@ -192,11 +192,11 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 		return $additional_external_users;
 	}
 
-	function fetch_additional_external_users() {
+	public function fetch_additional_external_users() {
 		return $this->get_fb_pages();
 	}
 
-	function fetch_profile_picture() {
+	public function fetch_profile_picture() {
 		$res = $this->request( $this->profile_pic_url, array( 'method' => $this->profile_pic_method ) );
 		return empty( $res->data->url ) ? null : esc_url_raw( $res->data->url );
 	}

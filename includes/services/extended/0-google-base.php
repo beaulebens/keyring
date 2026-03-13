@@ -12,9 +12,9 @@
  */
 
 class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
-	var $api_label = '';
+	public $api_label = '';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
@@ -49,7 +49,7 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		add_action( 'pre_keyring_' . $this->get_name() . '_verify', array( $this, 'redirect_incoming_verify' ) );
 	}
 
-	function basic_ui_intro() {
+	public function basic_ui_intro() {
 		$class = get_called_class();
 
 		/* translators: url */
@@ -78,7 +78,7 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		echo '<p>' . __( "Once you've saved your details, copy the <strong>Client ID</strong> into the <strong>Client ID</strong> field below, and the <strong>Client secret</strong> value into <strong>Client Secret</strong>. The Redirect URI box should fill itself out for you.", 'keyring' ) . '</p>';
 	}
 
-	function request_token_params( $params ) {
+	public function request_token_params( $params ) {
 		$class                 = get_called_class();
 		$params['prompt']      = 'consent'; // Always prompt, and get a refresh token for offline access
 		$params['scope']       = $class::SCOPE;
@@ -87,12 +87,12 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 	}
 
 	// Need to potentially refresh token before each request
-	function request( $url, array $params = array() ) {
+	public function request( $url, array $params = array() ) {
 		$this->maybe_refresh_token();
 		return parent::request( $url, $params );
 	}
 
-	function redirect_incoming_verify( $request ) {
+	public function redirect_incoming_verify( $request ) {
 		if ( ! isset( $request['kr_nonce'] ) ) {
 			$kr_nonce = wp_create_nonce( 'keyring-verify' );
 			$nonce    = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
@@ -112,7 +112,7 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		}
 	}
 
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		$meta = array(
 			'refresh_token' => $token['refresh_token'],
 			'expires'       => time() + $token['expires_in'],
@@ -135,11 +135,11 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $response, $this );
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
 	}
 
-	function maybe_refresh_token() {
+	public function maybe_refresh_token() {
 		// Request a new token, using the refresh_token
 		$token = $this->get_token();
 		$meta  = $token->get_meta();
@@ -189,7 +189,7 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 	}
 
 	// Minor modifications from Keyring_Service::basic_ui
-	function basic_ui() {
+	public function basic_ui() {
 		if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( $_REQUEST['nonce'], 'keyring-manage-' . $this->get_name() ) ) {
 			Keyring::error( __( 'Invalid/missing management nonce.', 'keyring' ) );
 			exit;
@@ -254,7 +254,7 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		echo '</div>';
 	}
 
-	function test_connection() {
+	public function test_connection() {
 		$res = $this->request( $this->userinfo_url, array( 'method' => $this->userinfo_method ) );
 		if ( ! Keyring_Util::is_error( $res ) ) {
 			return true;

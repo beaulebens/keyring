@@ -8,7 +8,7 @@ class Keyring_Service_Instapaper extends Keyring_Service_OAuth1 {
 	const NAME  = 'instapaper';
 	const LABEL = 'Instapaper';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret, and the request UI for user/pass
@@ -36,7 +36,7 @@ class Keyring_Service_Instapaper extends Keyring_Service_OAuth1 {
 		$this->requires_token( true );
 	}
 
-	function basic_ui_intro() {
+	public function basic_ui_intro() {
 		/* translators: url */
 		echo '<p>' . sprintf( __( 'To use the Instapaper API, you need to get manually approved. <a href="%s">Apply here</a>, then wait for a reply email.', 'keyring' ), 'http://www.instapaper.com/main/request_oauth_consumer_token' ) . '</p>';
 		echo '<p>' . __( "Once you get approved, you'll get an email back with your details. Copy the <strong>OAuth consumer key</strong> value into the <strong>API Key</strong> field, and the <strong>OAuth consumer secret</strong> value into the <strong>API Secret</strong> field and click save (you don't need an App ID value for Instapaper).", 'keyring' ) . '</p>';
@@ -45,7 +45,7 @@ class Keyring_Service_Instapaper extends Keyring_Service_OAuth1 {
 	/**
 	 * Mostly duplicated from HTTP Basic
 	 */
-	function request_ui() {
+	public function request_ui() {
 		// Common Header
 		echo '<div class="wrap">';
 		echo '<h2>' . __( 'Account Details', 'keyring' ) . '</h2>';
@@ -113,9 +113,9 @@ class Keyring_Service_Instapaper extends Keyring_Service_OAuth1 {
 		<?php
 	}
 
-	function request_token() { }
+	public function request_token() { }
 
-	function verify_token() {
+	public function verify_token() {
 		if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( $_REQUEST['nonce'], 'keyring-verify-' . $this->get_name() ) ) {
 			Keyring::error( __( 'Invalid/missing verification nonce.', 'keyring' ) );
 			exit;
@@ -207,11 +207,11 @@ class Keyring_Service_Instapaper extends Keyring_Service_OAuth1 {
 		$this->verified( $id, $keyring_request_token );
 	}
 
-	function parse_response( $response ) {
+	public function parse_response( $response ) {
 		return json_decode( $response );
 	}
 
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		// Set the token so that we can make requests using it
 		$this->set_token(
 			new Keyring_Access_Token(
@@ -237,11 +237,11 @@ class Keyring_Service_Instapaper extends Keyring_Service_OAuth1 {
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $response, $this );
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'username' );
 	}
 
-	function test_connection() {
+	public function test_connection() {
 		$response = $this->request( $this->verify_url, array( 'method' => $this->verify_method ) );
 		if ( ! Keyring_Util::is_error( $response ) ) {
 			return true;

@@ -11,11 +11,11 @@
  * @package Keyring
  */
 class Keyring_Token {
-	var $name      = false;
-	var $token     = false;
-	var $meta      = array();
-	var $service   = false; // Will contain a Keyring_Service object
-	var $unique_id = false;
+	public $name      = false;
+	public $token     = false;
+	public $meta      = array();
+	public $service   = false; // Will contain a Keyring_Service object
+	public $unique_id = false;
 
 	/**
 	 * Create a Keyring_Token instance.
@@ -24,7 +24,7 @@ class Keyring_Token {
 	 * @param array   $meta Additional information related to this token
 	 * @param mixed $uniq A unique identifier for this token (if available)
 	 */
-	function __construct( $service, $token, $meta = array(), $uniq = false ) {
+	public function __construct( $service, $token, $meta = array(), $uniq = false ) {
 		$this->name      = strtolower( $service ); // Name of the service this token is for
 		$this->token     = $token;
 		$this->unique_id = $uniq;
@@ -32,18 +32,18 @@ class Keyring_Token {
 		$this->get_service();
 	}
 
-	function __toString() {
+	public function __toString() {
 		return (string) $this->token;
 	}
 
-	function get_uniq_id() {
+	public function get_uniq_id() {
 		if ( isset( $this->unique_id ) ) {
 			return $this->unique_id;
 		}
 		return null;
 	}
 
-	function get_display() {
+	public function get_display() {
 		$service = $this->get_service();
 		if ( $service ) {
 			return $service->get_display( $this );
@@ -51,7 +51,7 @@ class Keyring_Token {
 		return $this->name;
 	}
 
-	function get_service() {
+	public function get_service() {
 		if ( ! $this->service ) {
 			$class = $this->get_meta( '_classname', true );
 			if ( $class && class_exists( $class ) ) {
@@ -63,7 +63,7 @@ class Keyring_Token {
 		return $this->service;
 	}
 
-	function get_name() {
+	public function get_name() {
 		return $this->name;
 	}
 
@@ -74,7 +74,7 @@ class Keyring_Token {
 	 * @param bool $allow_hidden Allow access to "hidden" meta (prefixed with "_")
 	 * @return Mixed meta value, array of meta values, or null
 	 */
-	function get_meta( $name = false, $allow_hidden = false ) {
+	public function get_meta( $name = false, $allow_hidden = false ) {
 		$return = null;
 		if ( $name ) {
 			if ( '_' !== substr( $name, 0, 1 ) || $allow_hidden ) {
@@ -96,14 +96,13 @@ class Keyring_Token {
 	/**
 	 * Check if a token has expired, or will expire in the next $window seconds
 	 */
-	function is_expired( $window = 0 ) {
+	public function is_expired( $window = 0 ) {
 		$expires = $this->get_meta( 'expires' );
 		if ( ! $expires ) {
 			return false; // No expires value, assume it's a permanent token
 		}
 
-		// phpcs:ignore WordPress.PHP.StrictComparisons
-		if ( '0000-00-00 00:00:00' == $expires ) {
+		if ( '0000-00-00 00:00:00' === $expires ) {
 			return false; // Doesn't expire
 		}
 
@@ -123,12 +122,12 @@ class Keyring_Token {
  * we get back to finish the auth flow.
  */
 class Keyring_Request_Token extends Keyring_Token {
-	function __construct( $service, $token, $meta = array(), $uniq = false ) {
+	public function __construct( $service, $token, $meta = array(), $uniq = false ) {
 		$meta['type'] = 'request';
 		return parent::__construct( $service, $token, $meta, $uniq );
 	}
 
-	function type() {
+	public function type() {
 		return 'request';
 	}
 }
@@ -138,12 +137,12 @@ class Keyring_Request_Token extends Keyring_Token {
  * to make secure connections/requests on behalf of the user of a remote service.
  */
 class Keyring_Access_Token extends Keyring_Token {
-	function __construct( $service, $token, $meta = array(), $uniq = false ) {
+	public function __construct( $service, $token, $meta = array(), $uniq = false ) {
 		$meta['type'] = 'access';
 		return parent::__construct( $service, $token, $meta, $uniq );
 	}
 
-	function type() {
+	public function type() {
 		return 'access';
 	}
 }

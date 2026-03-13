@@ -9,7 +9,7 @@ class Keyring_Service_RunKeeper extends Keyring_Service_OAuth2 {
 	const NAME  = 'runkeeper';
 	const LABEL = 'RunKeeper';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
@@ -35,13 +35,13 @@ class Keyring_Service_RunKeeper extends Keyring_Service_OAuth2 {
 		$this->authorization_parameter = false;
 	}
 
-	function basic_ui_intro() {
+	public function basic_ui_intro() {
 		/* translators: url */
 		echo '<p>' . sprintf( __( 'You\'ll need to <a href="%s">register a new application</a> on RunKeeper so that you can connect. Be sure to check the <strong>Read Health Information</strong> option under <strong>Permissions Requests</strong> (and explain why you want to read that data). You will also be required to set an <strong>Estimated Date of Publication</strong>.', 'keyring' ), 'http://runkeeper.com/partner/applications/register' ) . '</p>';
 		echo '<p>' . __( "Once you've registered your application, click the <strong>Application Keys and URLs</strong> next to it, and copy the <strong>Client ID</strong> into the <strong>API Key</strong> field below, and the <strong>Client Secret</strong> value into <strong>API Secret</strong>.", 'keyring' ) . '</p>';
 	}
 
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		$this->set_token(
 			new Keyring_Access_Token(
 				$this->get_name(),
@@ -69,11 +69,11 @@ class Keyring_Service_RunKeeper extends Keyring_Service_OAuth2 {
 		return array();
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
 	}
 
-	function test_connection() {
+	public function test_connection() {
 		$response = $this->request( $this->user_url, array( 'method' => $this->user_method ) );
 		if ( ! Keyring_Util::is_error( $response ) ) {
 			return true;

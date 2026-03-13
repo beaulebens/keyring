@@ -10,7 +10,7 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 	const LABEL = 'Fitbit';
 	const SCOPE = 'profile activity heartrate location nutrition sleep weight'; // Everything interesting; https://dev.fitbit.com/docs/oauth2/#scope
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
@@ -45,30 +45,30 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 		add_filter( 'keyring_access_token', array( $this, 'fix_access_token_meta' ), 10, 2 );
 	}
 
-	function basic_ui_intro() {
+	public function basic_ui_intro() {
 		/* translators: url */
 		echo '<p>' . sprintf( __( 'Go to Fitbit and <a href="%s">create a new application</a>, which allows Keyring to talk to Fitbit.', 'keyring' ), 'https://dev.fitbit.com/apps/new' ) . '</p>';
 		/* translators: %s: the redirect URL to verify the connection */
 		echo '<p>' . sprintf( __( 'You can use anything for the name/description details etc. Make sure you set the <strong>OAuth 2.0 Application Type</strong> to <strong>Personal</strong> (grants you some extra access) and set your <strong>Callback URL</strong> to <code>%s</code>. You only need Read-Only access if you are syncing data, but Read &amp; Write will let you update details as well.', 'keyring' ), Keyring_Util::admin_url( self::NAME, array( 'action' => 'verify' ) ) ) . '</p>';
 	}
 
-	function request_token_params( $params ) {
+	public function request_token_params( $params ) {
 		$params['scope'] = apply_filters( 'keyring_fitbit_scope', self::SCOPE );
 		return $params;
 	}
 
-	function verify_token_params( $params ) {
+	public function verify_token_params( $params ) {
 		unset( $params['client_id'] );
 		unset( $params['client_secret'] );
 		return $params;
 	}
 
-	function verify_token_post_params( $params ) {
+	public function verify_token_post_params( $params ) {
 		$params['headers'] = $this->get_basic_auth();
 		return $params;
 	}
 
-	function fix_access_token_meta( $access_token, $token ) {
+	public function fix_access_token_meta( $access_token, $token ) {
 		if ( 'fitbit' !== $access_token->get_name() ) {
 			return $access_token;
 		}
@@ -80,11 +80,11 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 		);
 	}
 
-	function get_basic_auth() {
+	public function get_basic_auth() {
 		return array( 'Authorization' => 'Basic ' . base64_encode( $this->key . ':' . $this->secret ) );
 	}
 
-	function redirect_incoming_verify( $request ) {
+	public function redirect_incoming_verify( $request ) {
 		if ( ! isset( $request['kr_nonce'] ) ) {
 			$kr_nonce = wp_create_nonce( 'keyring-verify' );
 			$nonce    = wp_create_nonce( 'keyring-verify-' . $this->get_name() );
@@ -104,7 +104,7 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 		}
 	}
 
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		$meta = array(
 			'user_id'       => $token['user_id'],
 			'expires'       => time() + $token['expires_in'],
@@ -129,11 +129,11 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $response, $this );
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
 	}
 
-	function refresh_token() {
+	public function refresh_token() {
 		Keyring_Util::debug( 'FitBit::refresh_token()' );
 		// Request a new token, using the refresh_token
 		$token = $this->get_token();
@@ -181,12 +181,12 @@ class Keyring_Service_Fitbit extends Keyring_Service_OAuth2 {
 	}
 
 	// Need to potentially refresh token before each request
-	function request( $url, array $params = array() ) {
+	public function request( $url, array $params = array() ) {
 		$this->refresh_token();
 		return parent::request( $url, $params );
 	}
 
-	function test_connection() {
+	public function test_connection() {
 		Keyring_Util::debug( 'FitBit::test_connection()' );
 		$response = $this->request( $this->profile_url, array( 'method' => $this->profile_method ) );
 		if ( ! Keyring_Util::is_error( $response ) ) {

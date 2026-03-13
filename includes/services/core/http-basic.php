@@ -16,7 +16,7 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 	protected $verify_method = null;
 	protected $token         = null;
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		if ( ! KEYRING__HEADLESS_MODE ) {
@@ -24,12 +24,12 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		}
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		$meta = $token->get_meta();
 		return $meta['username'];
 	}
 
-	function request_ui() {
+	public function request_ui() {
 		// Common Header
 		echo '<div class="wrap">';
 		echo '<h2>' . __( 'Account Details', 'keyring' ) . '</h2>';
@@ -97,11 +97,11 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		<?php
 	}
 
-	function request_token() {
+	public function request_token() {
 		return;
 	}
 
-	function verify_token() {
+	public function verify_token() {
 		if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( $_REQUEST['nonce'], 'keyring-verify-' . $this->get_name() ) ) {
 			Keyring::error( __( 'Invalid/missing verification nonce.', 'keyring' ) );
 			exit;
@@ -187,7 +187,7 @@ class Keyring_Service_HTTP_Basic extends Keyring_Service {
 		$this->verified( $id, $keyring_request_token );
 	}
 
-	function request( $url, array $params = array() ) {
+	public function request( $url, array $params = array() ) {
 		if ( $this->requires_token() && empty( $this->token ) ) {
 			return new Keyring_Error( 'keyring-request-error', __( 'No token', 'keyring' ) );
 		}

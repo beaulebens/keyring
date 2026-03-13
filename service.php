@@ -20,7 +20,7 @@ abstract class Keyring_Service {
 	 * Handle the first part of getting a Token for this Service. In some cases
 	 * this may involve UI, in others it might just be a redirect.
 	 */
-	abstract function request_token();
+	abstract public function request_token();
 
 	/**
 	 * Second step/verification of a Token. This is where you can make a
@@ -30,7 +30,7 @@ abstract class Keyring_Service {
 	 * @return void
 	 * @author Beau Lebens
 	 */
-	abstract function verify_token();
+	abstract public function verify_token();
 
 	/**
 	 * Make an outbound request against this Service, using the current Token
@@ -40,7 +40,7 @@ abstract class Keyring_Service {
 	 * @param array $params Additional parameters for the request (a la WP_HTTP)
 	 * @return String containing the body of the response on success, or Keyring_Error on any non-200 response
 	 */
-	abstract function request( $url, array $params );
+	abstract public function request( $url, array $params );
 
 	/**
 	 * Get a displayable string for the passed token, for this service
@@ -48,7 +48,7 @@ abstract class Keyring_Service {
 	 * @param Keyring_Access_Token $token Keyring_Access_Token object
 	 * @return String for display, describing $token
 	 */
-	abstract function get_display( Keyring_Access_Token $token );
+	abstract public function get_display( Keyring_Access_Token $token );
 
 	/**
 	 * Get an array of meta data to store with this token, based on parsing the access token
@@ -57,11 +57,11 @@ abstract class Keyring_Service {
 	 * @param Mixed $token
 	 * @return Array containing keyed values to store along with this token
 	 */
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		return apply_filters( 'keyring_access_token_meta', array(), $this->get_name(), $token, null, $this );
 	}
 
-	function __construct() {
+	public function __construct() {
 		$this->store = Keyring::get_token_store();
 
 		// Default methods for handling actions, should always be defined (thus abstract, see above)
@@ -69,7 +69,7 @@ abstract class Keyring_Service {
 		add_action( 'keyring_' . $this->get_name() . '_verify', array( $this, 'verify_token' ) );
 	}
 
-	static function init() {
+	public static function init() {
 		$class    = get_called_class();
 		$services = Keyring::get_registered_services();
 		if ( in_array( $class::NAME, array_keys( $services ), true ) ) {
@@ -90,7 +90,7 @@ abstract class Keyring_Service {
 	 *                param, then just returns true/false. If called with a bool,
 	 *                then set requirement to true/false as specified.
 	 */
-	function requires_token( $does_it = null ) {
+	public function requires_token( $does_it = null ) {
 		if ( is_null( $does_it ) ) {
 			return $this->requires_token;
 		}
@@ -100,7 +100,7 @@ abstract class Keyring_Service {
 		return $requires;
 	}
 
-	function get_name() {
+	public function get_name() {
 		$c = get_called_class();
 		if ( '' !== $c::NAME ) {
 			$name = $c::NAME;
@@ -110,7 +110,7 @@ abstract class Keyring_Service {
 		return $name;
 	}
 
-	function get_label() {
+	public function get_label() {
 		$c = get_called_class();
 		if ( '' !== $c::LABEL ) {
 			$label = $c::LABEL;
@@ -120,21 +120,21 @@ abstract class Keyring_Service {
 		return $label;
 	}
 
-	function set_endpoint( $type, $url, $method = 'GET' ) {
+	public function set_endpoint( $type, $url, $method = 'GET' ) {
 		$this->{$type . '_url'}    = $url;
 		$this->{$type . '_method'} = strtoupper( $method );
 		return true;
 	}
 
-	function get_request_response_code() {
+	public function get_request_response_code() {
 		return $this->request_response_code;
 	}
 
-	function set_request_response_code( $code ) {
+	public function set_request_response_code( $code ) {
 		$this->request_response_code = $code;
 	}
 
-	function basic_ui() {
+	public function basic_ui() {
 		if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( $_REQUEST['nonce'], 'keyring-manage-' . $this->get_name() ) ) {
 			Keyring::error( __( 'Invalid/missing management nonce.', 'keyring' ) );
 			exit;
@@ -219,7 +219,7 @@ abstract class Keyring_Service {
 	 *
 	 * @return Array containing credentials or false if none
 	 */
-	function get_credentials() {
+	public function get_credentials() {
 		// First attempt custom credentials for this service
 		// Return null from _get_credentials() to allow falling through to the other checks below
 		// Return false if the service requires no configuration
@@ -266,7 +266,7 @@ abstract class Keyring_Service {
 	 * @param array $credentials
 	 * @return bool
 	 */
-	function update_credentials( array $credentials ) {
+	public function update_credentials( array $credentials ) {
 		$all                      = apply_filters( 'keyring_credentials', get_option( 'keyring_credentials' ) );
 		$all[ $this->get_name() ] = $credentials;
 		return update_option( 'keyring_credentials', $all );
@@ -279,11 +279,11 @@ abstract class Keyring_Service {
 	 * Return a boolean. Default just returns true, meaning "this service is configured correctly and OK to use".
 	 * @return Boolean true if service is configured correctly, false otherwise.
 	 */
-	function is_configured() {
+	public function is_configured() {
 		return true;
 	}
 
-	function verified( $id, $request_token = null ) {
+	public function verified( $id, $request_token = null ) {
 		$c = get_called_class();
 
 		// If something else needs to be done, do it
@@ -308,18 +308,18 @@ abstract class Keyring_Service {
 		exit;
 	}
 
-	function is_connected() {
+	public function is_connected() {
 		$c = get_called_class();
 		return Keyring::get_token_store()->count( array( 'service' => $c::NAME ) );
 	}
 
-	function store_token( $token ) {
+	public function store_token( $token ) {
 		$token->meta['_classname'] = get_called_class();
 		$id                        = $this->store->insert( $token );
 		return $id;
 	}
 
-	function set_token( Keyring_Access_Token $token ) {
+	public function set_token( Keyring_Access_Token $token ) {
 		$this->token = $token;
 	}
 
@@ -328,11 +328,11 @@ abstract class Keyring_Service {
 	 *
 	 * @return Keyring_Access_Token|false An access token if the value is set, false otherwise.
 	 */
-	function get_token() {
+	public function get_token() {
 		return $this->token;
 	}
 
-	function get_tokens( $id = false ) {
+	public function get_tokens( $id = false ) {
 		$c = get_called_class();
 		return $this->store->get_tokens(
 			array(
@@ -342,7 +342,7 @@ abstract class Keyring_Service {
 		);
 	}
 
-	function token_select_box( $name, $create = false ) {
+	public function token_select_box( $name, $create = false ) {
 		$tokens = $this->get_tokens();
 		return Keyring_Util::token_select_box( $tokens, $name, $create );
 	}

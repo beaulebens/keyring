@@ -4,7 +4,7 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 	const NAME  = 'pocket';
 	const LABEL = 'Pocket';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
@@ -35,7 +35,7 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 		add_filter( 'keyring_pocket_verify_token_params', array( $this, 'verify_token_params' ), 10, 1 );
 	}
 
-	function basic_ui_intro() {
+	public function basic_ui_intro() {
 		echo '<p>' . __( "If you haven't already, you'll need to set up an app on Pocket:", 'keyring' ) . '</p>';
 		echo '<ol>';
 		/* translators: url */
@@ -47,12 +47,12 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 		echo '<p>' . __( "Once you're done configuring your app, copy and paste your <strong>Consumer Key</strong> into API Key field. Leave the rest of the fields blank.", 'keyring' ) . '</p>';
 	}
 
-	function is_configured() {
+	public function is_configured() {
 		$credentials = $this->get_credentials();
 		return ! empty( $credentials['key'] );
 	}
 
-	function obtain_request_token( $token ) {
+	public function obtain_request_token( $token ) {
 		if ( 'pocket' === $token->name ) {
 			$this->requires_token = false;
 			$params               = array(
@@ -71,7 +71,7 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 		return $token;
 	}
 
-	function request_token_params( $params ) {
+	public function request_token_params( $params ) {
 		$token = $this->store->get_token(
 			array(
 				'id'   => $params['state'],
@@ -95,14 +95,14 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 		return $params;
 	}
 
-	function verify_token_params( $params ) {
+	public function verify_token_params( $params ) {
 		return array(
 			'consumer_key' => $params['client_id'],
 			'code'         => $params['code'],
 		);
 	}
 
-	function verify_token_post_params( $params ) {
+	public function verify_token_post_params( $params ) {
 		return array(
 			'headers' => array(
 				'Content-Type' => 'application/json; charset=UTF-8',
@@ -113,12 +113,12 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 	}
 
 	// Pocket always returns urlencoded access tokens for some reason
-	function parse_access_token( $token ) {
+	public function parse_access_token( $token ) {
 		parse_str( $token, $vars );
 		return $vars;
 	}
 
-	function request( $url, array $params = array() ) {
+	public function request( $url, array $params = array() ) {
 		$params['body']['consumer_key'] = $this->key;
 
 		$params['headers']['Content-Type'] = 'application/json; charset=UTF-8';
@@ -134,7 +134,7 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 		return parent::request( $url, $params );
 	}
 
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		if ( ! isset( $token['username'] ) || empty( $token['username'] ) ) {
 			$meta = array();
 		} else {
@@ -147,11 +147,11 @@ class Keyring_Service_Pocket extends Keyring_Service_OAuth2 {
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, null, $this );
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
 	}
 
-	function test_connection() {
+	public function test_connection() {
 		$response = $this->request(
 			'https://getpocket.com/v3/get',
 			array(

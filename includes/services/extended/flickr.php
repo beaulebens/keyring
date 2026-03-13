@@ -8,7 +8,7 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 	const NAME  = 'flickr';
 	const LABEL = 'Flickr';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
@@ -34,13 +34,13 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 		$this->requires_token( true );
 	}
 
-	function basic_ui_intro() {
+	public function basic_ui_intro() {
 		/* translators: url */
 		echo '<p>' . sprintf( __( 'To connect to Flickr, you\'ll need to <a href="%s">create an application at Flickr.com</a>. If this is a personal website then you can use a non-commercial key (which will be approved automatically).', 'keyring' ), 'http://www.flickr.com/services/apps/create/apply/?' ) . '</p>';
 		echo '<p>' . __( "Once you've created your app, enter the API <strong>Key</strong> and <strong>Secret</strong> below (App ID is not required for Flickr apps).", 'keyring' ) . '</p>';
 	}
 
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		// Need to make a request to get full information
 		$this->set_token(
 			new Keyring_Access_Token(
@@ -74,7 +74,7 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $response, $this );
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		$return = '';
 		$meta   = $token->get_meta();
 		if ( ! empty( $meta['name'] ) ) {
@@ -91,7 +91,7 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 	 * @param  array  $params Any additional parameters requried for this reqeust
 	 * @return Mixed with either a Keyring_Error, or a decoded JSON response object
 	 */
-	function request( $url, array $params = array() ) {
+	public function request( $url, array $params = array() ) {
 		// http://www.flickr.com/services/api/response.json.html
 		$url = add_query_arg(
 			array(
@@ -109,11 +109,11 @@ class Keyring_Service_Flickr extends Keyring_Service_OAuth1 {
 	 * @param  string $response Full content of the response
 	 * @return JSON object representation of the response
 	 */
-	function parse_response( $response ) {
+	public function parse_response( $response ) {
 		return json_decode( $response );
 	}
 
-	function test_connection() {
+	public function test_connection() {
 		$url    = 'https://api.flickr.com/services/rest/?';
 		$params = array(
 			'method'  => 'flickr.test.login',
