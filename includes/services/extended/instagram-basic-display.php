@@ -9,7 +9,7 @@ class Keyring_Service_Instagram_Basic_Display extends Keyring_Service_OAuth2 {
 	const NAME  = 'instagram-basic-display';
 	const LABEL = 'Instagram Basic';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
@@ -42,7 +42,7 @@ class Keyring_Service_Instagram_Basic_Display extends Keyring_Service_OAuth2 {
 		add_filter( 'keyring_' . $this->get_name() . '_verify_token_post_params', array( $this, 'verify_token_post_params' ) );
 	}
 
-	function verify_token_post_params( $params ) {
+	public function verify_token_post_params( $params ) {
 		$params['body']['redirect_uri'] = $this->redirect_uri;
 		return $params;
 	}
@@ -54,7 +54,7 @@ class Keyring_Service_Instagram_Basic_Display extends Keyring_Service_OAuth2 {
 	 * @param  array $params Core request parameters
 	 * @return Array containing originals, plus the scope parameter, and a serialized state param
 	 */
-	function filter_request_token( $params ) {
+	public function filter_request_token( $params ) {
 		$params['scope'] = apply_filters( 'keyring_' . $this->get_name() . '_scope', 'user_profile,user_media' );
 
 		// The Instagram API does not return redirect_uri params, so we need to pack these
@@ -68,13 +68,13 @@ class Keyring_Service_Instagram_Basic_Display extends Keyring_Service_OAuth2 {
 		return $params;
 	}
 
-	function basic_ui_intro() {
+	public function basic_ui_intro() {
 		/* translators: url */
 		echo '<p>' . sprintf( __( 'To get started, <a href="%1$s">register an OAuth client on Instagram</a>. The most important setting is the <strong>OAuth redirect_uri</strong>, which should be set to <code>%2$s</code>. You can set the other values to whatever you like.', 'keyring' ), 'http://instagram.com/developer/clients/register/', Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify' ) ) ) . '</p>';
 		echo '<p>' . __( "Once you've saved those changes, copy the <strong>CLIENT ID</strong> value into the <strong>API Key</strong> field, and the <strong>CLIENT SECRET</strong> value into the <strong>API Secret</strong> field and click save (you don't need an App ID value for Instagram).", 'keyring' ) . '</p>';
 	}
 
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		$this->set_token(
 			new Keyring_Access_Token(
 				$this->get_name(),
@@ -99,11 +99,11 @@ class Keyring_Service_Instagram_Basic_Display extends Keyring_Service_OAuth2 {
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, null, $this );
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
 	}
 
-	function test_connection() {
+	public function test_connection() {
 		$response = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
 		if ( ! Keyring_Util::is_error( $response ) ) {
 			return true;
@@ -112,13 +112,13 @@ class Keyring_Service_Instagram_Basic_Display extends Keyring_Service_OAuth2 {
 		return $response;
 	}
 
-	function parse_access_token( $token ) {
+	public function parse_access_token( $token ) {
 		//Somewhat of a hack, but we need a place to exchange for a long lived token
 		$token = (array) json_decode( $token );
 		return $this->exchange_for_long_lived_token( $token );
 	}
 
-	function exchange_for_long_lived_token( $token ) {
+	public function exchange_for_long_lived_token( $token ) {
 		$params = array(
 			'client_secret' => $this->secret,
 			'grant_type'    => 'ig_exchange_token',
@@ -139,12 +139,12 @@ class Keyring_Service_Instagram_Basic_Display extends Keyring_Service_OAuth2 {
 		return $token;
 	}
 
-	function request( $url, array $params = array() ) {
+	public function request( $url, array $params = array() ) {
 		$this->maybe_refresh_token();
 		return parent::request( $url, $params );
 	}
 
-	function maybe_refresh_token() {
+	public function maybe_refresh_token() {
 		$token = $this->get_token();
 		if ( empty( $token ) ) {
 			return false;
@@ -187,8 +187,6 @@ class Keyring_Service_Instagram_Basic_Display extends Keyring_Service_OAuth2 {
 		// And switch to using it
 		$this->set_token( $access_token );
 	}
-
-
 }
 
 add_action( 'keyring_load_services', array( 'Keyring_Service_Instagram_Basic_Display', 'init' ) );

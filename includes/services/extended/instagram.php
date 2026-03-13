@@ -9,7 +9,7 @@ class Keyring_Service_Instagram extends Keyring_Service_OAuth2 {
 	const NAME  = 'instagram';
 	const LABEL = 'Instagram';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
@@ -33,13 +33,13 @@ class Keyring_Service_Instagram extends Keyring_Service_OAuth2 {
 		$this->authorization_parameter = 'access_token';
 	}
 
-	function basic_ui_intro() {
+	public function basic_ui_intro() {
 		/* translators: url */
 		echo '<p>' . sprintf( __( 'To get started, <a href="%1$s">register an OAuth client on Instagram</a>. The most important setting is the <strong>OAuth redirect_uri</strong>, which should be set to <code>%2$s</code>. You can set the other values to whatever you like.', 'keyring' ), 'http://instagram.com/developer/clients/register/', Keyring_Util::admin_url( $this->get_name(), array( 'action' => 'verify' ) ) ) . '</p>';
 		echo '<p>' . __( "Once you've saved those changes, copy the <strong>CLIENT ID</strong> value into the <strong>API Key</strong> field, and the <strong>CLIENT SECRET</strong> value into the <strong>API Secret</strong> field and click save (you don't need an App ID value for Instagram).", 'keyring' ) . '</p>';
 	}
 
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		if ( empty( $token['user'] ) ) {
 			$meta = array();
 		} else {
@@ -54,11 +54,11 @@ class Keyring_Service_Instagram extends Keyring_Service_OAuth2 {
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, null, $this );
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
 	}
 
-	function test_connection() {
+	public function test_connection() {
 		$response = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
 		if ( ! Keyring_Util::is_error( $response ) ) {
 			return true;

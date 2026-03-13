@@ -9,7 +9,7 @@ class Keyring_Service_Strava extends Keyring_Service_OAuth2 {
 	const NAME  = 'strava';
 	const LABEL = 'Strava';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
@@ -37,24 +37,24 @@ class Keyring_Service_Strava extends Keyring_Service_OAuth2 {
 		add_filter( 'keyring_' . $this->get_name() . '_request_token_params', array( $this, 'request_token_params' ) );
 	}
 
-	function basic_ui_intro() {
+	public function basic_ui_intro() {
 		/* translators: url */
 		echo '<p>' . sprintf( __( 'You\'ll need to <a href="%s">create a new application</a> on Strava so that you can connect.', 'keyring' ), 'https://www.strava.com/settings/api' ) . '</p>';
 		echo '<p>' . __( "Once you've registered your application, copy the <strong>Application Name</strong> into the <strong>App ID</strong>, the <strong>Client ID</strong> and the <strong>Client Secret</strong> into the <strong>API Key</strong> and <strong>API Secret</strong> fields below,.", 'keyring' ) . '</p>';
 	}
 
-	function request_token_params( $params ) {
+	public function request_token_params( $params ) {
 		$params['scope'] = apply_filters( 'keyring_' . $this->get_name() . '_scope', 'read,activity:read_all' );
 		return $params;
 	}
 
 	// Need to potentially refresh token before each request
-	function request( $url, array $params = array() ) {
+	public function request( $url, array $params = array() ) {
 		$this->maybe_refresh_token();
 		return parent::request( $url, $params );
 	}
 
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		$meta = array(
 			'refresh_token' => $token['refresh_token'],
 			'expires'       => $token['expires_at'],
@@ -101,11 +101,11 @@ class Keyring_Service_Strava extends Keyring_Service_OAuth2 {
 		return array();
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
 	}
 
-	function maybe_refresh_token() {
+	public function maybe_refresh_token() {
 		// Request a new token, using the refresh_token
 		$token = $this->get_token();
 		$meta  = $token->get_meta();
@@ -154,7 +154,7 @@ class Keyring_Service_Strava extends Keyring_Service_OAuth2 {
 		$this->set_token( $access_token );
 	}
 
-	function test_connection() {
+	public function test_connection() {
 		$response = $this->request( $this->user_url, array( 'method' => $this->user_method ) );
 		if ( ! Keyring_Util::is_error( $response ) ) {
 			return true;

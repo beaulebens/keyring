@@ -22,14 +22,14 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 	protected $signature_method = null;
 	protected $callback_url     = null;
 
-	var $app_id               = null;
-	var $key                  = null;
-	var $secret               = null;
-	var $token                = null;
-	var $authorization_header = false;
-	var $authorization_realm  = '';
+	public $app_id               = null;
+	public $key                  = null;
+	public $secret               = null;
+	public $token                = null;
+	public $authorization_header = false;
+	public $authorization_realm  = '';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		// Nonces for the callback URL, which is used during the verify step
@@ -45,19 +45,19 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		);
 
 		if ( ! class_exists( 'OAuthRequest' ) ) {
-			require dirname( dirname( dirname( __FILE__ ) ) ) . '/oauth-php/OAuth.php';
+			require dirname( __DIR__, 2 ) . '/oauth-php/OAuth.php';
 		}
 	}
 
 	/**
 	 * OAuth services always require a key and a secret
 	 */
-	function is_configured() {
+	public function is_configured() {
 		$creds = $this->get_credentials();
 		return ! empty( $creds['key'] ) && ! empty( $creds['secret'] );
 	}
 
-	function request_token() {
+	public function request_token() {
 		Keyring_Util::debug( 'Keyring_Service_OAuth1::request_token()' );
 		if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( $_REQUEST['nonce'], 'keyring-request-' . $this->get_name() ) ) {
 			Keyring::error( __( 'Invalid/missing request nonce.', 'keyring' ) );
@@ -204,7 +204,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		exit;
 	}
 
-	function verify_token() {
+	public function verify_token() {
 		Keyring_Util::debug( 'Keyring_Service_OAuth1::verify_token()' );
 		if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( $_REQUEST['nonce'], 'keyring-verify-' . $this->get_name() ) ) {
 			Keyring::error( __( 'Invalid/missing verification nonce.', 'keyring' ) );
@@ -283,7 +283,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		}
 	}
 
-	function request( $url, array $params = array() ) {
+	public function request( $url, array $params = array() ) {
 		if ( $this->requires_token() && empty( $this->token ) ) {
 			return new Keyring_Error( 'keyring-request-error', __( 'No token', 'keyring' ) );
 		}
@@ -391,7 +391,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		}
 	}
 
-	function prepare_request( $token, $method, $url, $sign_vars = false ) {
+	public function prepare_request( $token, $method, $url, $sign_vars = false ) {
 		$req = OAuthRequest::from_consumer_and_token(
 			$this->consumer,
 			$token,
@@ -407,7 +407,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		return $req;
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		return (string) $token->token->key;
 	}
 
@@ -416,7 +416,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 	 * but we provide an extendable method here just in case, and to
 	 * remain consistent with OAuth2.
 	 */
-	function parse_access_token( $token ) {
+	public function parse_access_token( $token ) {
 		parse_str( $token, $token );
 		return $token;
 	}
@@ -432,7 +432,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 	 * @param string $response
 	 * @return Mixed data that is easier to work with, based on each Service
 	 */
-	function parse_response( $response ) {
+	public function parse_response( $response ) {
 		return $response;
 	}
 }

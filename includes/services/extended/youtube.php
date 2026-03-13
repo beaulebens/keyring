@@ -14,11 +14,11 @@ class Keyring_Service_YouTube extends Keyring_Service_GoogleBase {
 	const SCOPE       = 'https://www.googleapis.com/auth/youtube https://www.googleapis.com/auth/userinfo.profile'; // See https://developers.google.com/youtube/v3/guides/auth/server-side-web-apps#identify-access-scopes
 	const ACCESS_TYPE = 'offline';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 	}
 
-	function _get_credentials() {
+	public function _get_credentials() {
 		if (
 			defined( 'KEYRING__YOUTUBE_KEY' )
 		&&
@@ -34,7 +34,7 @@ class Keyring_Service_YouTube extends Keyring_Service_GoogleBase {
 		}
 	}
 
-	function request_token_params( $params ) {
+	public function request_token_params( $params ) {
 		$params['scope']       = self::SCOPE;
 		$params['access_type'] = self::ACCESS_TYPE;
 		$params['prompt']      = 'consent'; // Required to get a refresh token

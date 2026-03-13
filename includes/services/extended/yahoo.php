@@ -8,7 +8,7 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 	const NAME  = 'yahoo';
 	const LABEL = 'Yahoo! Updates';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
@@ -29,20 +29,20 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 		}
 
 		$this->consumer         = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
-		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
+		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1();
 	}
 
-	function basic_ui_intro() {
+	public function basic_ui_intro() {
 		/* translators: url */
 		echo '<p>' . sprintf( __( 'To connect to Yahoo!, you need to <a href="%1$s">Create a new project</a>. Make sure you set the <strong>Access Scope</strong> to <strong>This app requires access to private user data</strong>. When you select that, you will be asked for an <strong>Application Domain</strong>, which should probably be set to <code>http://%2$s</code>. Which APIs you request access for will depend on how Keyring will be used on this site. Common ones will be <strong>Contacts</strong>, <strong>Social Directory</strong>, <strong>Status</strong>, and <strong>Updates</strong>.', 'keyring' ), 'https://developer.apps.yahoo.com/dashboard/createKey.html', $_SERVER['HTTP_HOST'] ) . '</p>';
 		echo '<p>' . __( "Once you've created your project, copy and paste your <strong>Consumer key</strong> and <strong>Consumer secret</strong> (from under the <strong>Authentication Information: OAuth</strong> section of your app's details) into the boxes below. You don't need an App ID for Yahoo!.", 'keyring' ) . '</p>';
 	}
 
-	function parse_response( $response ) {
+	public function parse_response( $response ) {
 		return json_decode( $response );
 	}
 
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		$expires = isset( $token['oauth_expires_in'] ) ? gmdate( 'Y-m-d H:i:s', time() + $token['oauth_expires_in'] ) : 0;
 
 		$this->set_token(
@@ -72,11 +72,11 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $response, $this );
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
 	}
 
-	function test_connection() {
+	public function test_connection() {
 		$this->maybe_refresh_token();
 
 		$guid = $this->token->get_meta( 'external_id' );
@@ -89,7 +89,7 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 		return $res;
 	}
 
-	function maybe_refresh_token() {
+	public function maybe_refresh_token() {
 		global $wpdb;
 
 		if ( empty( $this->token->token ) || empty( $this->token->token->tokenExpires ) ) {

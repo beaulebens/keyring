@@ -15,11 +15,11 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_GoogleBase {
 	const API_VERSION = '3.0';
 	const ACCESS_TYPE = 'offline';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 	}
 
-	function _get_credentials() {
+	public function _get_credentials() {
 		if (
 			defined( 'KEYRING__GOOGLECONTACTS_KEY' )
 		&&
@@ -35,7 +35,7 @@ class Keyring_Service_GoogleContacts extends Keyring_Service_GoogleBase {
 		}
 	}
 
-	function request( $url, array $params = array() ) {
+	public function request( $url, array $params = array() ) {
 		// add header (version), required for all requests
 		$params['headers']['GData-Version'] = self::API_VERSION;
 		return parent::request( $url, $params );

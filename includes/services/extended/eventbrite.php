@@ -11,7 +11,7 @@ class Keyring_Service_Eventbrite extends Keyring_Service_OAuth2 {
 	const API_BASE   = 'https://www.eventbriteapi.com/v3/';
 	const OAUTH_BASE = 'https://www.eventbrite.com/oauth/';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		$this->set_endpoint( 'authorize', self::OAUTH_BASE . 'authorize', 'GET' );
@@ -35,13 +35,13 @@ class Keyring_Service_Eventbrite extends Keyring_Service_OAuth2 {
 		$this->authorization_parameter = false;
 	}
 
-	function basic_ui_intro() {
+	public function basic_ui_intro() {
 		/* translators: url */
 		echo '<p>' . sprintf( __( "To get started, <a href='https://www.eventbrite.com/myaccount/apps/'>register an OAuth client on Eventbrite</a>. The most important setting is the <strong>OAuth redirect_uri</strong>, which should be set to <code>%s</code>. You can set the other values to whatever you like.", 'keyring' ), esc_url( Keyring_Util::admin_url( 'eventbrite', array( 'action' => 'verify' ) ) ) ) . '</p>';
 		echo '<p>' . __( "Once you've saved those changes, copy the <strong>APPLICATION KEY</strong> value into the <strong>API Key</strong> field, then click the 'Show' link next to the <strong>OAuth client secret</strong>, copy the value into the <strong>API Secret</strong> field and click save (you don't need an App ID value for Eventbrite).", 'keyring' ) . '</p>';
 	}
 
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		$this->set_token(
 			new Keyring_Access_Token(
 				$this->get_name(),
@@ -68,15 +68,15 @@ class Keyring_Service_Eventbrite extends Keyring_Service_OAuth2 {
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, null, $this );
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
 	}
 
-	function parse_response( $response ) {
+	public function parse_response( $response ) {
 		return json_decode( $response );
 	}
 
-	function test_connection() {
+	public function test_connection() {
 		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
 		if ( ! Keyring_Util::is_error( $res ) ) {
 			return true;

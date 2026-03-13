@@ -14,11 +14,11 @@ class Keyring_Service_GoogleMail extends Keyring_Service_GoogleBase {
 	const SCOPE       = 'https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/userinfo.profile'; // See https://developers.google.com/identity/protocols/googlescopes
 	const ACCESS_TYPE = 'offline';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 	}
 
-	function _get_credentials() {
+	public function _get_credentials() {
 		if (
 			defined( 'KEYRING__GOOGLEMAIL_KEY' )
 		&&

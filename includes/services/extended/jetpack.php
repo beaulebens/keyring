@@ -10,7 +10,7 @@ class Keyring_Service_Jetpack extends Keyring_Service_OAuth2 {
 	const LABEL = 'Jetpack';
 	const SCOPE = 'global';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
@@ -46,19 +46,19 @@ class Keyring_Service_Jetpack extends Keyring_Service_OAuth2 {
 		add_filter( 'keyring_jetpack_request_token_params', array( $this, 'scope' ) );
 	}
 
-	function basic_ui_intro() {
+	public function basic_ui_intro() {
 		/* translators: %1$s: the signup URL on WordPress.com, %2$s: The redirect URL to verify the connection */
 		echo '<p>' . sprintf( __( 'To get started, <a href="%1$s">register an app on WordPress.com</a>. The most important thing is to include a valid <strong>Redirect URL</strong>, which should be set to <code>%2$s</code>. You can set most other values to whatever you like.', 'keyring' ), 'https://developer.wordpress.com/apps/new/', Keyring_Util::admin_url( self::NAME, array( 'action' => 'verify' ) ) ) . '</p>';
 		echo '<p>' . __( "Once you've saved those changes, copy the <strong>Client ID</strong> value into the <strong>API Key</strong> field, and the <strong>Client Secret</strong> value into the <strong>API Secret</strong> field and click save. You do not need an App ID.", 'keyring' ) . '</p>';
 	}
 
 	// Get access to all blogs
-	function scope( $permissions = '' ) {
+	public function scope( $permissions = '' ) {
 		$permissions['scope'] = self::SCOPE;
 		return $permissions;
 	}
 
-	function redirect_incoming_verify( $request ) {
+	public function redirect_incoming_verify( $request ) {
 		if ( ! isset( $request['kr_nonce'] ) ) {
 			// First request, from WP.com. Nonce it and move on.
 			$kr_nonce = wp_create_nonce( 'keyring-verify' );
@@ -79,7 +79,7 @@ class Keyring_Service_Jetpack extends Keyring_Service_OAuth2 {
 		}
 	}
 
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		$token = new Keyring_Access_Token( $this->get_name(), $token['access_token'], array() );
 		$this->set_token( $token );
 		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
@@ -97,11 +97,11 @@ class Keyring_Service_Jetpack extends Keyring_Service_OAuth2 {
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $res, $this );
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' ) . ' (@' . $token->get_meta( 'username' ) . ')';
 	}
 
-	function test_connection() {
+	public function test_connection() {
 		$response = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
 		if ( ! Keyring_Util::is_error( $response ) ) {
 			return true;

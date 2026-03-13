@@ -15,7 +15,14 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 	 * Tokens should be passed in the authorization header if the service supports it
 	 * and only fallback to the query string if neccessary. Set to false to use ?oauth_token=
 	 */
-	var $authorization_header = 'OAuth';
+	public $authorization_header = 'OAuth';
+
+	/**
+	 * The URI to redirect to after OAuth2 authorization. Set in service constructors.
+	 *
+	 * @var string
+	 */
+	protected $redirect_uri = '';
 
 	/**
 	 * If you're not sending the authorization in the header, some services will accept
@@ -23,9 +30,9 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 	 * want it called something else... like 'access_token'
 	 * @var string
 	 */
-	var $authorization_parameter = 'oauth_token';
+	public $authorization_parameter = 'oauth_token';
 
-	function request_token() {
+	public function request_token() {
 		Keyring_Util::debug( 'Keyring_Service_OAuth2::request_token()' );
 		if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( $_REQUEST['nonce'], 'keyring-request-' . $this->get_name() ) ) {
 			Keyring::error( __( 'Invalid/missing request nonce.', 'keyring' ) );
@@ -71,7 +78,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 		exit;
 	}
 
-	function verify_token() {
+	public function verify_token() {
 		Keyring_Util::debug( 'Keyring_Service_OAuth2::verify_token()' );
 		if ( ! isset( $_REQUEST['nonce'] ) || ! wp_verify_nonce( $_REQUEST['nonce'], 'keyring-verify-' . $this->get_name() ) ) {
 			Keyring::error( __( 'Invalid/missing verification nonce.', 'keyring' ) );
@@ -183,11 +190,11 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 	 * @param string $token The response from the access_token request
 	 * @return Array containing key/value pairs from the token response
 	 */
-	function parse_access_token( $token ) {
+	public function parse_access_token( $token ) {
 		return (array) json_decode( $token );
 	}
 
-	function request( $url, array $params = array() ) {
+	public function request( $url, array $params = array() ) {
 		Keyring_Util::debug( $url );
 
 		if ( $this->requires_token() && empty( $this->token ) ) {
@@ -281,7 +288,7 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 	 * OAuth2 implementations generally use JSON. You can still override this
 	 * per service if you like, but by default we'll assume JSON.
 	 */
-	function parse_response( $response ) {
+	public function parse_response( $response ) {
 		return json_decode( $response );
 	}
 }

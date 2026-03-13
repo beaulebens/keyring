@@ -8,9 +8,9 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth2 {
 	const NAME  = 'linkedin';
 	const LABEL = 'LinkedIn';
 
-	var $person = array();
+	public $person = array();
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
@@ -32,13 +32,13 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth2 {
 		}
 
 		$this->consumer             = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
-		$this->signature_method     = new OAuthSignatureMethod_HMAC_SHA1;
+		$this->signature_method     = new OAuthSignatureMethod_HMAC_SHA1();
 		$this->authorization_header = 'Bearer';
 
 		add_filter( 'keyring_' . self::NAME . '_request_scope', array( $this, 'member_permissions' ) );
 	}
 
-	function basic_ui_intro() {
+	public function basic_ui_intro() {
 		/* translators: url */
 		echo '<p>' . sprintf( __( "To connect to LinkedIn, you'll first need to <a href='%s'>create an app</a>. A lot of the details are required, but they're not actually important to the operation of your app, since Keyring will override any important settings.", 'keyring' ), 'https://www.linkedin.com/secure/developer?newapp=' ) . '</p>';
 		echo '<p>' . __( "Once you've created your app, go down to the <strong>Auth</strong> section and copy the <strong>Client ID</strong> value into the <strong>API Key</strong> field below, and the <strong>Client Secret</strong> value into the <strong>API Secret</strong> field", 'keyring' ) . '</p>';
@@ -55,7 +55,7 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth2 {
 	 * @param string $scope
 	 * @return string
 	 */
-	function member_permissions( $scope ) {
+	public function member_permissions( $scope ) {
 		$scope = 'r_liteprofile w_member_social';
 		return $scope;
 	}
@@ -69,7 +69,7 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth2 {
 	 * @param array $params
 	 * @return array|Keyring_Error|mixed|object|string
 	 */
-	function request( $url, array $params = array() ) {
+	public function request( $url, array $params = array() ) {
 		$params['headers']['x-li-format'] = 'json';
 		return parent::request( $url, $params );
 	}
@@ -80,7 +80,7 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth2 {
 	 * @param mixed $token
 	 * @return false|int|mixed
 	 */
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		$this->set_token(
 			new Keyring_Access_Token(
 				$this->get_name(),
@@ -116,7 +116,7 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth2 {
 		return apply_filters( 'keyring_access_token_meta', $meta, self::NAME, $token, $response, $this );
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
 	}
 
@@ -125,7 +125,7 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth2 {
 	 *
 	 * @return string|mixed
 	 */
-	function fetch_profile_picture() {
+	public function fetch_profile_picture() {
 		$response = $this->request(
 			$this->self_url . '?projection=(profilePicture(displayImage~:playableStreams))',
 			array( 'method' => $this->self_method )
@@ -144,7 +144,7 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth2 {
 	 *
 	 * @return array|bool|Keyring_Error|mixed|object|string
 	 */
-	function test_connection() {
+	public function test_connection() {
 		$res = $this->request(
 			$this->self_url,
 			array( 'method' => $this->self_method )

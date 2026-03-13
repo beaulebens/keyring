@@ -8,9 +8,9 @@
  * @package Keyring
  */
 class Keyring_SingleStore extends Keyring_Store {
-	var $unique_id = false;
+	public $unique_id = false;
 
-	static function init() {
+	public static function init() {
 		static $instance = false;
 
 		if ( ! $instance ) {
@@ -32,13 +32,13 @@ class Keyring_SingleStore extends Keyring_Store {
 				)
 			);
 
-			$instance = new Keyring_SingleStore;
+			$instance = new Keyring_SingleStore();
 		}
 
 		return $instance;
 	}
 
-	function insert( $token ) {
+	public function insert( $token ) {
 		// Avoid duplicates by checking to see if this exists already
 		$found = get_posts(
 			array(
@@ -77,7 +77,7 @@ class Keyring_SingleStore extends Keyring_Store {
 		return false;
 	}
 
-	function update( $token ) {
+	public function update( $token ) {
 		if ( ! $token->unique_id ) {
 			return false;
 		}
@@ -98,14 +98,14 @@ class Keyring_SingleStore extends Keyring_Store {
 		return $id;
 	}
 
-	function delete( $args = array() ) {
+	public function delete( $args = array() ) {
 		if ( ! $args['id'] ) {
 			return false;
 		}
 		return wp_delete_post( $args['id'] );
 	}
 
-	function get_tokens( $args = array() ) {
+	public function get_tokens( $args = array() ) {
 		$defaults = array(
 			'type'    => 'access',
 			'service' => false,
@@ -152,7 +152,7 @@ class Keyring_SingleStore extends Keyring_Store {
 		return $tokens;
 	}
 
-	function get_token( $args = array() ) {
+	public function get_token( $args = array() ) {
 		$defaults = array(
 			'id'      => false,
 			'type'    => 'access',
@@ -188,7 +188,7 @@ class Keyring_SingleStore extends Keyring_Store {
 		return false;
 	}
 
-	function count( $args = array() ) {
+	public function count( $args = array() ) {
 		return count( $this->get_tokens( $args ) );
 	}
 }

@@ -12,7 +12,7 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 
 	const API_VERSION = '20120701';
 
-	function __construct() {
+	public function __construct() {
 		parent::__construct();
 
 		// Enable "basic" UI for entering key/secret
@@ -33,7 +33,7 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 		}
 	}
 
-	function basic_ui_intro() {
+	public function basic_ui_intro() {
 		/* translators: url */
 		echo '<p>' . sprintf( __( 'If you haven\'t already, you\'ll need to <a href="%s">create a new app at Foursquare</a>. You should only need to worry about these settings:', 'keyring' ), 'https://foursquare.com/developers/register' ) . '</p>';
 		echo '<ol>';
@@ -47,7 +47,7 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 		echo '<p>' . __( "Once you've saved those changes, copy the <strong>Client id</strong> value into the <strong>API Key</strong> field, and the <strong>Client secret</strong> value into the <strong>API Secret</strong> field and click save (you don't need an App ID value for Foursquare).", 'keyring' ) . '</p>';
 	}
 
-	function build_token_meta( $token ) {
+	public function build_token_meta( $token ) {
 		$token = new Keyring_Access_Token( $this->get_name(), $token['access_token'], array() );
 		$this->set_token( $token );
 		$res = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
@@ -65,17 +65,17 @@ class Keyring_Service_Foursquare extends Keyring_Service_OAuth2 {
 		return apply_filters( 'keyring_access_token_meta', $meta, $this->get_name(), $token, $res, $this );
 	}
 
-	function get_display( Keyring_Access_Token $token ) {
+	public function get_display( Keyring_Access_Token $token ) {
 		$meta = $token->get_meta();
 		return trim( $meta['first_name'] . ' ' . $meta['last_name'] );
 	}
 
-	function request( $url, array $params = array() ) {
+	public function request( $url, array $params = array() ) {
 		$url = add_query_arg( array( 'v' => self::API_VERSION ), $url );
 		return parent::request( $url, $params );
 	}
 
-	function test_connection() {
+	public function test_connection() {
 		$response = $this->request( $this->self_url, array( 'method' => $this->self_method ) );
 		if ( ! Keyring_Util::is_error( $response ) ) {
 			return true;

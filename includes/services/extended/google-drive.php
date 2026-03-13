@@ -14,7 +14,7 @@ class Keyring_Service_Google_Drive extends Keyring_Service_GoogleBase {
 	const SCOPE       = 'profile https://www.googleapis.com/auth/drive.file'; // See https://developers.google.com/identity/protocols/googlescopes#sheetsv4
 	const ACCESS_TYPE = 'offline';
 
-	function _get_credentials() {
+	public function _get_credentials() {
 		if (
 			defined( 'KEYRING__GOOGLEDRIVE_KEY' ) &&
 			defined( 'KEYRING__GOOGLEDRIVE_SECRET' )
@@ -35,7 +35,7 @@ class Keyring_Service_Google_Drive extends Keyring_Service_GoogleBase {
 	 *
 	 * @return mixed null on failure, or URL on success
 	 */
-	function fetch_profile_picture() {
+	public function fetch_profile_picture() {
 		$image = false;
 		$res   = $this->request( $this->userinfo_url, array( 'method' => $this->self_method ) );
 
@@ -45,8 +45,6 @@ class Keyring_Service_Google_Drive extends Keyring_Service_GoogleBase {
 
 		return empty( $image ) ? null : esc_url_raw( $image );
 	}
-
 }
 
 add_action( 'keyring_load_services', array( 'Keyring_Service_Google_Drive', 'init' ) );
-
