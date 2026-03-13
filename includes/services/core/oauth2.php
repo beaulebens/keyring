@@ -18,6 +18,13 @@ class Keyring_Service_OAuth2 extends Keyring_Service_OAuth1 {
 	public $authorization_header = 'OAuth';
 
 	/**
+	 * The URI to redirect to after OAuth2 authorization. Set in service constructors.
+	 *
+	 * @var string
+	 */
+	protected $redirect_uri = '';
+
+	/**
 	 * If you're not sending the authorization in the header, some services will accept
 	 * it as a querystring parameter. The spec says to send it as oauth_token, but some services
 	 * want it called something else... like 'access_token'
