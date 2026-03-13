@@ -115,34 +115,5 @@ class Keyring_Token {
 	}
 }
 
-/**
- * During the first phase of the auth flow, we normally want to (or are required to)
- * store some details before sending the user off to a remote service to grant access.
- * Use a request token to store those details locally, then we can retrieve them when
- * we get back to finish the auth flow.
- */
-class Keyring_Request_Token extends Keyring_Token {
-	public function __construct( $service, $token, $meta = array(), $uniq = false ) {
-		$meta['type'] = 'request';
-		return parent::__construct( $service, $token, $meta, $uniq );
-	}
-
-	public function type() {
-		return 'request';
-	}
-}
-
-/**
- * Access tokens are what are 'permanently' stored, containing the information required
- * to make secure connections/requests on behalf of the user of a remote service.
- */
-class Keyring_Access_Token extends Keyring_Token {
-	public function __construct( $service, $token, $meta = array(), $uniq = false ) {
-		$meta['type'] = 'access';
-		return parent::__construct( $service, $token, $meta, $uniq );
-	}
-
-	public function type() {
-		return 'access';
-	}
-}
+require_once __DIR__ . '/token-request.php';
+require_once __DIR__ . '/token-access.php';
