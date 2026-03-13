@@ -26,7 +26,6 @@
 	<file>.</file>
 
 	<rule ref="WordPress-Core"/>
-	<rule ref="WordPress.CodeAnalysis.EmptyStatement"/>
 
 	<!-- These rules are being set as warnings instead of errors, so we can error check the entire codebase. -->
 	<rule ref="WordPress.PHP.YodaConditions.NotYoda">
@@ -48,13 +47,15 @@
 	<!-- Set the correct textdomain for translation functions. -->
 	<rule ref="WordPress.WP.I18n">
 		<properties>
-			<property name="text_domain" type="array" value="keyring" />
+			<property name="text_domain" type="array">
+				<element value="keyring"/>
+			</property>
 		</properties>
 	</rule>
 
 	<rule ref="WordPress.NamingConventions.ValidVariableName">
 		<properties>
-			<property name="customPropertiesWhitelist" type="array">
+			<property name="allowed_custom_properties" type="array">
 				<!-- From Tripit. -->
 				<element value="Profile"/>
 				<!-- From Jetpack. -->
@@ -70,7 +71,7 @@
 	<exclude-pattern>/includes/oauth-php/*</exclude-pattern>
 
 	<!-- Assignments in while conditions are a valid method of looping over iterables. -->
-	<rule ref="WordPress.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition">
+	<rule ref="Generic.CodeAnalysis.AssignmentInCondition">
 		<exclude-pattern>*</exclude-pattern>
 	</rule>
 
