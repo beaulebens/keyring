@@ -187,8 +187,6 @@ class Keyring_Service_Instagram_Basic_Display extends Keyring_Service_OAuth2 {
 		// And switch to using it
 		$this->set_token( $access_token );
 	}
-
-
 }
 
 add_action( 'keyring_load_services', array( 'Keyring_Service_Instagram_Basic_Display', 'init' ) );

@@ -32,7 +32,7 @@ class Keyring_SingleStore extends Keyring_Store {
 				)
 			);
 
-			$instance = new Keyring_SingleStore;
+			$instance = new Keyring_SingleStore();
 		}
 
 		return $instance;

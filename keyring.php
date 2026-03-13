@@ -44,12 +44,12 @@ class Keyring {
 
 	function __construct() {
 		if ( ! KEYRING__HEADLESS_MODE ) {
-			require_once dirname( __FILE__ ) . '/admin-ui.php';
+			require_once __DIR__ . '/admin-ui.php';
 			Keyring_Admin_UI::init();
 
 			add_filter(
 				'keyring_admin_url',
-				function( $url, $params ) {
+				function ( $url, $params ) {
 					$url = admin_url( 'tools.php?page=' . Keyring::init()->admin_page );
 					return add_query_arg( $params, $url );
 				},
@@ -70,7 +70,7 @@ class Keyring {
 			if ( ! KEYRING__HEADLESS_MODE ) {
 				load_plugin_textdomain( 'keyring', false, dirname( plugin_basename( __FILE__ ) ) . '/languages/' );
 			}
-			$instance = new Keyring;
+			$instance = new Keyring();
 
 			// Keyring is being loaded 'late', so we need to do some extra set-up
 			if ( did_action( 'init' ) || $force_load ) {
@@ -89,7 +89,7 @@ class Keyring {
 
 	static function plugins_loaded() {
 		// Load stores early so we can confirm they're loaded correctly
-		require_once dirname( __FILE__ ) . '/store.php';
+		require_once __DIR__ . '/store.php';
 		do_action( 'keyring_load_token_stores' );
 		$keyring              = Keyring::init();
 		$keyring->token_store = apply_filters( 'keyring_token_store', defined( 'KEYRING__TOKEN_STORE' ) ? KEYRING__TOKEN_STORE : false );
@@ -99,8 +99,8 @@ class Keyring {
 		}
 
 		// Load base token and service definitions + core services
-		require_once dirname( __FILE__ ) . '/token.php';
-		require_once dirname( __FILE__ ) . '/service.php'; // Triggers a load of all core + extended service definitions
+		require_once __DIR__ . '/token.php';
+		require_once __DIR__ . '/service.php'; // Triggers a load of all core + extended service definitions
 
 		// Initiate Keyring
 		add_action( 'init', array( 'Keyring', 'init' ), 1 );
@@ -108,7 +108,7 @@ class Keyring {
 		// Load external Services (plugins etc should hook to this to define new ones/extensions)
 		add_action(
 			'init',
-			function() {
+			function () {
 				do_action( 'keyring_load_services' );
 			},
 			2
@@ -129,7 +129,7 @@ class Keyring {
 	 */
 	static function request_handlers() {
 		global $current_user;
-		Keyring_Util::debug( "request_handers" );
+		Keyring_Util::debug( 'request_handers' );
 
 		$_REQUEST = Keyring_Util::cleanup_request_parameters( $_REQUEST );
 		Keyring_Util::debug( $_REQUEST );
@@ -407,7 +407,7 @@ class Keyring_Util {
 	}
 
 	static function cleanup_request_parameters( $params ) {
-		Keyring_Util::debug( "cleanup_request_parameters" );
+		Keyring_Util::debug( 'cleanup_request_parameters' );
 		Keyring_Util::debug( $params );
 		if ( is_array( $params ) ) {
 			foreach ( $params as $key => $val ) {

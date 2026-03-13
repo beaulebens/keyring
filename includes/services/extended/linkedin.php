@@ -32,7 +32,7 @@ class Keyring_Service_LinkedIn extends Keyring_Service_OAuth2 {
 		}
 
 		$this->consumer             = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
-		$this->signature_method     = new OAuthSignatureMethod_HMAC_SHA1;
+		$this->signature_method     = new OAuthSignatureMethod_HMAC_SHA1();
 		$this->authorization_header = 'Bearer';
 
 		add_filter( 'keyring_' . self::NAME . '_request_scope', array( $this, 'member_permissions' ) );

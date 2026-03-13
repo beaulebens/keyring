@@ -45,7 +45,7 @@ class Keyring_Service_OAuth1 extends Keyring_Service {
 		);
 
 		if ( ! class_exists( 'OAuthRequest' ) ) {
-			require dirname( dirname( dirname( __FILE__ ) ) ) . '/oauth-php/OAuth.php';
+			require dirname( __DIR__, 2 ) . '/oauth-php/OAuth.php';
 		}
 	}
 

@@ -14,7 +14,7 @@ abstract class Keyring_Service {
 	protected $requires_token = true;
 	protected $store          = false;
 
-	private   $request_response_code = '';
+	private $request_response_code = '';
 
 	/**
 	 * Handle the first part of getting a Token for this Service. In some cases
@@ -75,7 +75,7 @@ abstract class Keyring_Service {
 		if ( in_array( $class::NAME, array_keys( $services ), true ) ) {
 			$instance = $services[ $class::NAME ];
 		} else {
-			$instance = new $class;
+			$instance = new $class();
 			Keyring::register_service( $instance );
 		}
 
@@ -350,8 +350,8 @@ abstract class Keyring_Service {
 
 // Load all packaged services in the ./includes/services/ directory by including all PHP files, first in core, then in extended
 // Remove a Service (prevent it from loading at all) by filtering on 'keyring_services'
-$keyring_services = glob( dirname( __FILE__ ) . '/includes/services/core/*.php' );
-$keyring_services = array_merge( $keyring_services, glob( dirname( __FILE__ ) . '/includes/services/extended/*.php' ) );
+$keyring_services = glob( __DIR__ . '/includes/services/core/*.php' );
+$keyring_services = array_merge( $keyring_services, glob( __DIR__ . '/includes/services/extended/*.php' ) );
 $keyring_services = apply_filters( 'keyring_services', $keyring_services );
 foreach ( $keyring_services as $keyring_service ) {
 	require_once $keyring_service;

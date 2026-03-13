@@ -71,7 +71,6 @@ class Keyring_Service_RunKeeper extends Keyring_Service_OAuth2 {
 
 	function get_display( Keyring_Access_Token $token ) {
 		return $token->get_meta( 'name' );
-
 	}
 
 	function test_connection() {

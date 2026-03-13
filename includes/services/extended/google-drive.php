@@ -45,8 +45,6 @@ class Keyring_Service_Google_Drive extends Keyring_Service_GoogleBase {
 
 		return empty( $image ) ? null : esc_url_raw( $image );
 	}
-
 }
 
 add_action( 'keyring_load_services', array( 'Keyring_Service_Google_Drive', 'init' ) );
-

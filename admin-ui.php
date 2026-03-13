@@ -23,7 +23,7 @@ class Keyring_Admin_UI {
 		static $instance = false;
 
 		if ( ! $instance ) {
-			$instance = new Keyring_Admin_UI;
+			$instance = new Keyring_Admin_UI();
 		}
 
 		return $instance;

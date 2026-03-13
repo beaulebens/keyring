@@ -76,7 +76,6 @@ class Keyring_Service_GoogleBase extends Keyring_Service_OAuth2 {
 		echo '<li>' . __( "Click <strong>Create</strong> when you're done.", 'keyring' ) . '</li>';
 		echo '</ol>';
 		echo '<p>' . __( "Once you've saved your details, copy the <strong>Client ID</strong> into the <strong>Client ID</strong> field below, and the <strong>Client secret</strong> value into <strong>Client Secret</strong>. The Redirect URI box should fill itself out for you.", 'keyring' ) . '</p>';
-
 	}
 
 	function request_token_params( $params ) {

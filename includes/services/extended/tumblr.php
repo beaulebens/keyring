@@ -30,7 +30,7 @@ class Keyring_Service_Tumblr extends Keyring_Service_OAuth1 {
 		}
 
 		$this->consumer         = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
-		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
+		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1();
 
 		$this->authorization_header = true; // Send OAuth token in the header, not querystring
 		$this->authorization_realm  = 'tumblr.com';

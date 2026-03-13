@@ -28,7 +28,7 @@ class Keyring_Service_Facebook extends Keyring_Service_OAuth2 {
 			$this->key    = $creds['key'];
 			$this->secret = $creds['secret'];
 		}
-		
+
 		$kr_nonce           = wp_create_nonce( 'keyring-verify' );
 		$nonce              = wp_create_nonce( 'keyring-verify-facebook' );
 		$this->redirect_uri = Keyring_Util::admin_url(

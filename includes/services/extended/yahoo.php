@@ -29,7 +29,7 @@ class Keyring_Service_Yahoo extends Keyring_Service_OAuth1 {
 		}
 
 		$this->consumer         = new OAuthConsumer( $this->key, $this->secret, $this->callback_url );
-		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1;
+		$this->signature_method = new OAuthSignatureMethod_HMAC_SHA1();
 	}
 
 	function basic_ui_intro() {
