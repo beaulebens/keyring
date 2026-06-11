@@ -635,7 +635,7 @@ msgid "API Secret"
 msgstr ""
 
 #. Plugin URI of the plugin/theme
-msgid "http://dentedreality.com.au/projects/wp-keyring/"
+msgid "https://beaulebens.com/projects/wp-keyring/"
 msgstr ""
 
 #. Description of the plugin/theme

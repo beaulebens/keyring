@@ -3,14 +3,14 @@
 Contributors: beaulebens, mdawaffe, jshreve, jkudish, automattic
 Tags: authentication, security, oauth, http basic, authorization, facebook, foursquare, instagram, twitter, google
 Requires at least: 4.0
-Tested up to: 5.6.2
+Tested up to: 6.2
 Stable Tag: 3.0
 
 An authentication framework that handles authorization/communication with most popular web services.
 
 == Description ==
 
-**See the [Keyring Developer's Guide](http://dentedreality.com.au/projects/wp-keyring/) for more details.**
+**See the [Keyring Developer's Guide](https://beaulebens.com/projects/wp-keyring/) for more details.**
 
 Keyring provides a very hookable, completely customizable framework for connecting your WordPress to an external service. It takes care of all the heavy lifting when making authenticated requests, so all you need to do is implement cool features and not worry about these tricky bits.
 
@@ -23,7 +23,6 @@ Out of the box, Keyring currently comes with base Service definitions for:
 And includes ready-to-use definitions for:
 
 * [500px](https://500px.com/)
-* [Delicious](https://delicious.com/)
 * [Eventbrite](https://eventbrite.com/)
 * [Facebook](https://facebook.com/)
 * [Fitbit](https://fitbit.com/)
@@ -36,7 +35,6 @@ And includes ready-to-use definitions for:
 * [Instapaper](https://instapaper.com/)
 * [Jetpack](https://jetpack.com/)/[WordPress.com](https://wordpress.com/)
 * [LinkedIn](https://linkedin.com/)
-* [Moves](https://moves-app.com/)
 * [Nest](https://nest.com/)
 * [Pinterest](https://pinterest.com/)
 * [RunKeeper](https://runkeeper.com/)
@@ -47,7 +45,7 @@ And includes ready-to-use definitions for:
 * [Yahoo! Updates](https://yahoo.com/)
 * [YouTube](https://youtube.com/)
 
-You can very easily write your own Service definitions and then use all the power of Keyring to hook into that authentication flow. See the [Keyring Developer's Guide](http://dentedreality.com.au/projects/wp-keyring/) for more details.
+You can very easily write your own Service definitions and then use all the power of Keyring to hook into that authentication flow. See the [Keyring Developer's Guide](https://beaulebens.com/projects/wp-keyring/) for more details.
 
 Contributions are welcome via [Github pull request](https://github.com/beaulebens/keyring).
 
@@ -62,7 +60,7 @@ Contributions are welcome via [Github pull request](https://github.com/beauleben
 
 = How Do I Use Keyring in my Plugin? =
 
-Check out the [Keyring Developer's Guide](http://dentedreality.com.au/projects/wp-keyring/).
+Check out the [Keyring Developer's Guide](https://beaulebens.com/projects/wp-keyring/).
 
 See [Keyring Social Importers](http://wordpress.org/plugins/keyring-social-importers/) for an example. You can also extend Keyring Service classes directly, rather than attaching the service as a property to an object (like the Importers do).
 

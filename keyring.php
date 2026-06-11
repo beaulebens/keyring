@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: Keyring
-Plugin URI: http://dentedreality.com.au/projects/wp-keyring/
+Plugin URI: https://beaulebens.com/projects/wp-keyring/
 Description: Keyring helps you manage your keys. It provides a generic, very hookable framework for connecting to remote systems and managing your access tokens, username/password combos etc for those services. On its own it doesn't do much, but it enables other plugins to do things that require authorization to act on your behalf.
 Version: 3.0
 Author: Beau Lebens
@@ -388,7 +388,7 @@ class Keyring_Util {
 	 * Validates that a hash of the parameter array matches the included hash parameter
 	 *
 	 * @param array $parameters An array of query parameters.
-	 * @return array An array of the parameters minus the hash
+	 * @return array|false An array of the parameters minus the hash, false if they don't match.
 	 */
 	static function get_validated_parameters( $parameters ) {
 		if ( empty( $parameters['hash'] ) ) {
